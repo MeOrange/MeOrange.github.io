@@ -18,14 +18,14 @@
     font-display: swap;
 }
 
-/* 供 .md 文件中手动使用的 class，用 <div class="font-song"> 包裹即可 */
+/* 供 .md 文件中手动使用的 class，用 class="font-SCSong" 即可 */
 .font-SCSong {
     font-family: 'SourceHanSerifSC', serif;
 }
-
 /*将表格填充改为全白*/
 .post-md table tr:nth-child(odd) td,
 .post-md table tr:nth-child(even) td,
 .post-md table tr td {
     background: #fff !important;
 }
+
