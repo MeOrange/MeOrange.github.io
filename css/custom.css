@@ -1,0 +1,31 @@
+.circle-pink {
+    padding: 40px 25px 50px;
+    border: solid 1px rgb(233, 137, 212);
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-content: center;
+}
+
+/* custom.css - 将 MySource 中的字体仅应用到文章内容 */
+@font-face {
+    font-family: 'SourceHanSerifSC';
+    src: url('/MySource/fonts/SourceHanSerifSC.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* 供 .md 文件中手动使用的 class，用 <div class="font-song"> 包裹即可 */
+.font-SCSong {
+    font-family: 'SourceHanSerifSC', serif;
+}
+
+/*将表格填充改为全白*/
+.post-md table tr:nth-child(odd) td,
+.post-md table tr:nth-child(even) td,
+.post-md table tr td {
+    background: #fff !important;
+}
