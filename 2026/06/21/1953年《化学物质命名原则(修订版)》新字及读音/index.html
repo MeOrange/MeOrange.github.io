@@ -189,21 +189,54 @@
                 
             
         
-        <div class=".article-gallery"><div style="text-align: center;">
+        <div class=".article-gallery"><style>
+/* 附录二中的表格样式 */
+/* ---------- 双栏 ---------- */
+.appendix-content {
+    display: flex;
+    justify-content: flex-start;
+    gap: 150px;
+    padding: 10px 0;
+}
+.col-left,
+.col-right {
+    text-align: left;
+    line-height: 2.2;
+    min-width: 200px;
+    padding-left: 0;
+    margin-left: 0;
+}
+.col-left {
+    margin-left: 100px;    /* 让双栏整体右移，视觉上居中 */
+}
+/* ---------- 单栏 ---------- */
+.appendix-entry {
+    padding-left: 100px;   /* 与双栏左列的 margin-left 保持一致 */
+    margin-left: 0;
+}
+.appendix-entry p {
+    text-align: left;
+    line-height: 2.2;
+    margin: 0;
+    padding-left: 0;
+    text-indent: 0;
+}
+</style>
+
+<body>
+<div style="text-align: center;">
 <p>字体加载需要一段时间。</p>
 <p>本文来源于1953年《化学物质命名原则(修订版)》附录一第一部分表一和与表一相关的附录二ⅢⅣ。</p>
 <p>列出了化学新字及其读音，并提供了注音对照表。</p>
 <p>其中的*似与附录二ⅢⅣ中的改音改字有关。</p>
 </div>
 
-
-<body>
 <div class="font-SCSong">
 <table style="text-align: center;">
 <p style="text-align: center; font-size: 35px; font-weight: 700">附 录 一</p>
 <p style="text-align: center;">一、化学新字的读音</p>
 <p style="text-align: center;">Ⅰ. 新字读音表</p>
-　　本表包括元素以外的化學新字。其中有六字讀音有所更改；當在其讀音的右上角註以數碼，在附註中說明其更改的理由。雜環族所造口旁的字均從字的右半部讀音，無需再予注音，故在本表中不予列出。本書未予提及、而在目前頗爲通用的新字，爲求讀音得以統一，亦予列入，並在其右上角註以[<sup>+</sup>]號，以資辨別。
+<p>　　本表包括元素以外的化學新字。其中有六字讀音有所更改；當在其讀音的右上角註以數碼，在附註中說明其更改的理由。雜環族所造口旁的字均從字的右半部讀音，無需再予注音，故在本表中不予列出。本書未予提及、而在目前頗爲通用的新字，爲求讀音得以統一，亦予列入，並在其右上角註以[<sup>+</sup>]號，以資辨別。</p>
   <thead>
     <tr>
       <th>筆畫</th>
@@ -613,6 +646,7 @@
     </tr>
   </tbody>
 </table>
+
 <div style="font-size: 15px; color: rgba(0,0,0,0.7);">
 <p style="margin: 0;">[註 1]　以往將、肼均音井，不能分辨，故將肼改音爲勁，取原音之去聲。</p>
 <p style="margin: 0;">[註 2]　泵字雖爲機器名稱，但係化工工人同志們所創造，在化學界中已廣泛應用，故將此字列之於此。</p>
@@ -622,51 +656,30 @@
 <p style="margin: 0;">[註 6]　銨以往音庵，與氨讀音沒有分別，故改音俺，使氨、銨、胺、順次取陰、上、去三聲。</p>
 <p style="margin: 0;">[註 7]　膦與鏻以往均音令（ㄌㄧㄥˋ）與磷（ㄌㄧㄣˊ）不同一音，今改將膦音吝，鳞音廪，使磷、鏻、膦順次取陽、上、去三聲。</p>
 </div>
+
 <p style="text-align: center; font-size: 35px; font-weight: 700">附 录 二</p>
 <p style="text-align: center;">Ⅲ. 修改的新字</p>
 <p style="text-align: center;">化學新字有讀音混淆或不分者，應予改正如下：</p>
-<style>
-  .dict-table {
-  border-collapse: collapse;
-  border: none;
-  margin: 0 auto !important;
-  }
-  .dict-table td {
-  white-space: nowrap;
-  text-align: left;
-  }
-  .dict-table, .dict-table tr, .dict-table td {
-  border: none !important;
-  }
-  .dict-table td {
-  text-align: left;
-    vertical-align: top;
-    padding: 5px 10px;
-    width: 50%;
-    line-height: 2.2;
-  }
-</style>
-<table class="dict-table">
-<tr>
-<td style="width: auto;">　　　 </td>
-<td style="width: auto; text-align: left;">
-      <div>腖　改音　東　ㄉㄨㄥ</div>
-      <div>醯　改音　先　ㄒㄧㄢ</div>
-      <div>氰　改音　晴　ㄑㄧㄥˊ</div>
-      <div>腈　改音　睛　ㄐㄧㄥ</div>
-    </td>
-    <td class="right-col" style="width: auto; text-align: left;">
-      <div>鎦　改　鑥　音魯　ㄌㄨˇ</div>
-      <div>矽　改　硅　音規　ㄍㄨㄟ</div>
-    </td>
-    <td style="width: auto;"></td>
-  </tr>
-</table>
+    <!-- 左右两栏内容（Flex 布局） -->
+    <div class="appendix-content">
+        <div class="col-left">
+            <div>腖　改音　東　ㄉㄨㄥ</div>
+            <div>醯　改音　先　ㄒㄧㄢ</div>
+            <div>氰　改音　晴　ㄑㄧㄥˊ</div>
+            <div>腈　改音　睛　ㄐㄧㄥ</div>
+        </div>
+        <div class="col-right">
+            <div>鎦　改　鑥　音魯　ㄌㄨˇ</div>
+            <div>矽　改　硅　音規　ㄍㄨㄟ</div>
+        </div>
+    </div>
 <p style="text-align: center;">Ⅳ. 增減的新字</p>
-<p style="text-align: left;">　　　　　 取消字，改稱爲硫屬。　　　　　</p>
-<p style="text-align: left;">　　　　　 取消泋字，改稱爲水(合)氫。　　　　　</p>
-<p style="text-align: left;">　　　　　 元素99定名爲釾，音牙，ㄧㄚ。　　　　　</p>
-<p style="text-align: left;">　　　　　 元素100定名爲鉦，音正，ㄓㄥˋ。　　　　　</p>
+    <div class="appendix-entry">
+        <p>取消字，改稱爲硫屬。</p>
+        <p>取消泋字，改稱爲水(合)氫。</p>
+        <p>元素99定名爲釾，音牙，ㄧㄚ。</p>
+        <p>元素100定名爲鉦，音正，ㄓㄥˋ。</p>
+    </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function(){

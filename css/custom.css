@@ -15,17 +15,16 @@
     src: url('/MySource/fonts/SourceHanSerifSC.woff2') format('woff2');
     font-weight: normal;
     font-style: normal;
-    font-display: swap;
+    font-display: block;
 }
 
-/* 供 .md 文件中手动使用的 class，用 class="font-SCSong" 即可 */
+/* “.”开头为类选择器，应用与 class="font-SCSong" 的标记 */
 .font-SCSong {
     font-family: 'SourceHanSerifSC', serif;
 }
-/*将表格填充改为全白*/
-.post-md table tr:nth-child(odd) td,
-.post-md table tr:nth-child(even) td,
-.post-md table tr td {
-    background: #fff !important;
+
+/* 将表格填充改为全白, 用多个后代选择器堆权重，不粗暴使用!important */
+.post-md table tr:nth-child(n) td{
+    background: #fff;
 }
 
