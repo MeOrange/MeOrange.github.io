@@ -15,7 +15,7 @@
     src: url('/MySource/fonts/SourceHanSerifSC.woff2') format('woff2');
     font-weight: normal;
     font-style: normal;
-    font-display: block;
+    font-display: swap;
 }
 
 /* “.”开头为类选择器，应用与 class="font-SCSong" 的标记 */
