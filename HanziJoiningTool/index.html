@@ -170,17 +170,21 @@
 <style>
   body { font-family: sans-serif; margin: 20px; background: #fafafa; }
   h2 { margin-top: 0; }
-  .toolbar { margin-bottom: 15px; padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: 4px; }
-  .toolbar input { padding: 5px; width: 80px; }
-  .toolbar button { padding: 5px 12px; margin-left: 5px; cursor: pointer; }
+  .toolbar { margin-bottom: 15px; padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: 4px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; position: relative; z-index: 10; }
+  .toolbar input[type="text"] { padding: 5px; width: 80px; }
+  .toolbar button { padding: 5px 12px; cursor: pointer; }
+  .toolbar label { display: inline-flex; align-items: center; font-size: 13px; cursor: pointer; }
+  .toolbar input[type="checkbox"] { vertical-align: middle; margin: 0 4px; }
   
   .main { display: flex; gap: 20px; align-items: flex-start; }
   
   .editor-wrap { 
+    position: relative;
     border: 1px solid #ccc; 
     padding: 10px;
     background: #fff;
     border-radius: 4px;
+    z-index: 1;
   }
   .editor-label { font-size: 12px; color: #666; margin-bottom: 5px; font-weight: bold; }
   
@@ -197,6 +201,9 @@
     background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
     border: 2px solid #333;
     overflow: hidden;
+  }
+  .canvas.allow-overflow {
+    overflow: hidden;  /* 裁剪超出部分，完全不可见 */
   }
   .canvas::before {
     content: '';
@@ -251,6 +258,9 @@
   .right-panel {
     flex: 1;
     min-width: 320px;
+    position: relative;
+    z-index: 10;
+    background: #fafafa;
   }
   
   .props {
@@ -321,9 +331,9 @@
   .preview-adjust input { width: 70px; }
 </style>
 </head>
-
 <body>
-<h2>汉字拼字工具</h2>
+
+<h2>汉字拼字工具 v4</h2>
 
 <div class="toolbar">
   <label>添加部件：</label>
@@ -331,7 +341,10 @@
   <button onclick="addPart()">添加</button>
   <button onclick="generateCode()">生成代码</button>
   <button onclick="clearAll()">🗑 清空</button>
-  <span class="tip">（8 个手柄可单独拉伸宽高；部件自动限制在框内）</span>
+  
+  <label><input type="checkbox" id="lockRatio" onchange="lockAspectRatio=this.checked"> 锁定长宽比</label>
+  <label><input type="checkbox" id="allowOverflow" onchange="toggleOverflow(this.checked)"> 允许超出边框</label>
+  <span class="tip" style="flex-basis:100%;">（勾选"允许超出"后部件可任意移出编辑区，超出部分被裁剪不可见）</span>
 </div>
 
 <div class="main">
@@ -399,6 +412,26 @@ let parts = [];
 let selectedId = null;
 let nextId = 1;
 let pxPerEm = 400;
+let lockAspectRatio = false;
+let allowOverflow = false;
+
+// 允许超出的范围（设为极大值，实际上无限制）
+const OVERFLOW_RANGE = 100;
+
+function toggleOverflow(val) {
+  allowOverflow = val;
+  if (allowOverflow) {
+    canvas.classList.add('allow-overflow');
+  } else {
+    canvas.classList.remove('allow-overflow');
+    // 取消勾选时，把所有部件拉回范围内
+    parts.forEach(p => {
+      p.x = clampX(p.x, p.w);
+      p.y = clampY(p.y, p.h);
+    });
+  }
+  renderAll();
+}
 
 function updateZoom() {
   pxPerEm = parseInt(document.getElementById('zoomInput').value) || 400;
@@ -530,10 +563,32 @@ function updateProps() {
   `;
 }
 
-function clampX(x, w) { return Math.max(0, Math.min(1 - w, x)); }
-function clampY(y, h) { return Math.max(0, Math.min(1 - h, y)); }
-function clampW(w, x) { return Math.max(0.05, Math.min(1 - x, w)); }
-function clampH(h, y) { return Math.max(0.05, Math.min(1 - y, h)); }
+// 边界限制函数
+function clampX(x, w) {
+  if (allowOverflow) {
+    return x;  // 完全不做限制，可以任意移出
+  }
+  return Math.max(0, Math.min(1 - w, x));
+}
+
+function clampY(y, h) {
+  if (allowOverflow) {
+    return y;  // 完全不做限制，可以任意移出
+  }
+  return Math.max(0, Math.min(1 - h, y));
+}
+
+function clampW(w, x) {
+  const minX = allowOverflow ? -OVERFLOW_RANGE : 0;
+  const maxX = allowOverflow ? 1 + OVERFLOW_RANGE : 1;
+  return Math.max(0.05, Math.min(maxX - x, w));
+}
+
+function clampH(h, y) {
+  const minY = allowOverflow ? -OVERFLOW_RANGE : 0;
+  const maxY = allowOverflow ? 1 + OVERFLOW_RANGE : 1;
+  return Math.max(0.05, Math.min(maxY - y, h));
+}
 
 function updateProp(id, key, value) {
   const p = parts.find(x => x.id === id);
@@ -592,26 +647,53 @@ document.addEventListener('mousemove', (e) => {
     let nw = dragState.origW;
     let nh = dragState.origH;
     const h = dragState.handle;
-    
+
     if (h.includes('e')) nw = dragState.origW + dx;
     if (h.includes('w')) { nx = dragState.origX + dx; nw = dragState.origW - dx; }
     if (h.includes('s')) nh = dragState.origH + dy;
     if (h.includes('n')) { ny = dragState.origY + dy; nh = dragState.origH - dy; }
-    
+
+    if (lockAspectRatio) {
+      const ratio = dragState.origH / dragState.origW;
+      if (h.includes('e') || h.includes('w')) {
+        nh = nw * ratio;
+        if (h.includes('n')) ny = dragState.origY + (dragState.origH - nh);
+      } else if (h.includes('n') || h.includes('s')) {
+        nw = nh / ratio;
+        if (h.includes('w')) nx = dragState.origX + (dragState.origW - nw);
+      } else {
+        if (Math.abs(dx) >= Math.abs(dy)) {
+          nh = nw * ratio;
+          if (h.includes('n')) ny = dragState.origY + (dragState.origH - nh);
+        } else {
+          nw = nh / ratio;
+          if (h.includes('w')) nx = dragState.origX + (dragState.origW - nw);
+        }
+      }
+    }
+
     if (nw < 0.05) {
-      if (h.includes('w')) nx = dragState.origX + dragState.origW - 0.05;
       nw = 0.05;
+      if (lockAspectRatio) nh = nw * (dragState.origH / dragState.origW);
+      if (h.includes('w')) nx = dragState.origX + dragState.origW - 0.05;
     }
     if (nh < 0.05) {
-      if (h.includes('n')) ny = dragState.origY + dragState.origH - 0.05;
       nh = 0.05;
+      if (lockAspectRatio) nw = nh / (dragState.origH / dragState.origW);
+      if (h.includes('n')) ny = dragState.origY + dragState.origH - 0.05;
     }
+
+    // 边界限制（resize 时仍做限制，防止缩放到无限大）
+    const minX = allowOverflow ? -OVERFLOW_RANGE : 0;
+    const minY = allowOverflow ? -OVERFLOW_RANGE : 0;
+    const maxX = allowOverflow ? 1 + OVERFLOW_RANGE : 1;
+    const maxY = allowOverflow ? 1 + OVERFLOW_RANGE : 1;
     
-    if (nx < 0) { nw += nx; nx = 0; }
-    if (ny < 0) { nh += ny; ny = 0; }
-    if (nx + nw > 1) nw = 1 - nx;
-    if (ny + nh > 1) nh = 1 - ny;
-    
+    if (nx < minX) { nw += (nx - minX); nx = minX; }
+    if (ny < minY) { nh += (ny - minY); ny = minY; }
+    if (nx + nw > maxX) nw = maxX - nx;
+    if (ny + nh > maxY) nh = maxY - ny;
+
     p.x = nx; p.y = ny; p.w = nw; p.h = nh;
   }
   renderAll();
@@ -629,7 +711,6 @@ canvas.addEventListener('click', (e) => {
 function updatePreview() {
   previewChar.innerHTML = generatePreviewHTML();
   
-  // 设置预览窗格的字体，使其与拼接字一致
   const selectedPart = parts.find(x => x.id === selectedId);
   if (selectedPart) {
     const ff = FONT_STACKS[selectedPart.fontFamily] || FONT_STACKS['SimSun'];
@@ -717,6 +798,7 @@ document.addEventListener('keydown', (e) => {
 
 renderAll();
 </script>
+
 </body>
 </html>
     </div>
