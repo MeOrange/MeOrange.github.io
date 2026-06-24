@@ -333,7 +333,7 @@
 </head>
 <body>
 
-<h2>汉字拼字工具 v4</h2>
+<h2>汉字拼字工具</h2>
 
 <div class="toolbar">
   <label>添加部件：</label>
@@ -344,7 +344,7 @@
   
   <label><input type="checkbox" id="lockRatio" onchange="lockAspectRatio=this.checked"> 锁定长宽比</label>
   <label><input type="checkbox" id="allowOverflow" onchange="toggleOverflow(this.checked)"> 允许超出边框</label>
-  <span class="tip" style="flex-basis:100%;">（勾选"允许超出"后部件可任意移出编辑区，超出部分被裁剪不可见）</span>
+  <span class="tip" style="flex-basis:100%;">（勾选"允许超出"后部件可任意移出编辑区）</span>
 </div>
 
 <div class="main">
@@ -378,7 +378,7 @@
     </div>
     
     <div style="margin-top:15px;">
-      <div class="editor-label">生成的 HTML 代码（不含字体，含粗细，继承环境字体）</div>
+      <div class="editor-label">生成的 HTML 代码（不含字体，含粗细）</div>
       <textarea class="code" id="codeOutput" readonly placeholder="点击"生成代码"按钮后显示..."></textarea>
       <button onclick="copyCode()" style="margin-top:5px;">复制代码</button>
     </div>
