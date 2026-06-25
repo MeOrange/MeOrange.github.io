@@ -1,640 +1,857 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>汉字拼字工具</title>
-  <style>
-    body { font-family: sans-serif; margin: 20px; background: #fafafa; }
-    h2 { margin-top: 0; }
-    .toolbar { margin-bottom: 15px; padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: 4px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; position: relative; z-index: 10; }
-    .toolbar input[type="text"] { padding: 5px; width: 80px; }
-    .toolbar button { padding: 5px 12px; cursor: pointer; }
-    .toolbar label { display: inline-flex; align-items: center; font-size: 13px; cursor: pointer; }
-    .toolbar input[type="checkbox"] { vertical-align: middle; margin: 0 4px; }
+    <meta charset="UTF-8">
+    <title>汉字拼字工具</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; background: #fafafa; }
+        h2 { margin-top: 0; }
+        .toolbar { margin-bottom: 15px; padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: 4px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; position: relative; z-index: 10; }
+        .toolbar input[type="text"] { padding: 5px; width: 80px; }
+        .toolbar button { padding: 5px 12px; cursor: pointer; }
+        .toolbar label { display: inline-flex; align-items: center; font-size: 13px; cursor: pointer; }
+        .toolbar input[type="checkbox"] { vertical-align: middle; margin: 0 4px; }
 
-    .main { display: flex; gap: 20px; align-items: flex-start; }
+        .main { display: flex; gap: 20px; align-items: flex-start; }
 
-    .editor-wrap {
-      position: relative;
-      border: 1px solid #ccc;
-      padding: 10px;
-      background: #fff;
-      border-radius: 4px;
-      z-index: 1;
-    }
-    .editor-label { font-size: 12px; color: #666; margin-bottom: 5px; font-weight: bold; }
+        .editor-wrap {
+            position: relative;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background: #fff;
+            border-radius: 4px;
+            z-index: 1;
+        }
+        .editor-label { font-size: 12px; color: #666; margin-bottom: 5px; font-weight: bold; }
 
-    .canvas {
-      position: relative;
-      width: 400px;
-      height: 400px;
-      background:
-              linear-gradient(45deg, #eee 25%, transparent 25%),
-              linear-gradient(-45deg, #eee 25%, transparent 25%),
-              linear-gradient(45deg, transparent 75%, #eee 75%),
-              linear-gradient(-45deg, transparent 75%, #eee 75%);
-      background-size: 20px 20px;
-      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-      border: 2px solid #333;
-      overflow: hidden;
-    }
-    .canvas.allow-overflow {
-      overflow: hidden;  /* 裁剪超出部分，完全不可见 */
-    }
-    .canvas::before {
-      content: '';
-      position: absolute;
-      left: 50%; top: 0; bottom: 0;
-      width: 1px; background: rgba(255,0,0,0.3);
-      pointer-events: none;
-    }
-    .canvas::after {
-      content: '';
-      position: absolute;
-      top: 50%; left: 0; right: 0;
-      height: 1px; background: rgba(255,0,0,0.3);
-      pointer-events: none;
-    }
+        .canvas {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            background:
+                    linear-gradient(45deg, #eee 25%, transparent 25%),
+                    linear-gradient(-45deg, #eee 25%, transparent 25%),
+                    linear-gradient(45deg, transparent 75%, #eee 75%),
+                    linear-gradient(-45deg, transparent 75%, #eee 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            border: 2px solid #333;
+            overflow: hidden;
+        }
+        .canvas.allow-overflow {
+            overflow: hidden;
+        }
+        .canvas::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: rgba(255, 0, 0, 0.3);
+            pointer-events: none;
+        }
+        .canvas::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(255, 0, 0, 0.3);
+            pointer-events: none;
+        }
 
-    .part {
-      position: absolute;
-      cursor: move;
-      user-select: none;
-      box-sizing: border-box;
-    }
-    .part.selected {
-      outline: 2px dashed #2196F3;
-      outline-offset: -1px;
-    }
-    .part-inner {
-      display: inline-block;
-      transform-origin: top left;
-      line-height: 1;
-      color: #000;
-    }
+        .part {
+            position: absolute;
+            cursor: move;
+            user-select: none;
+            box-sizing: border-box;
+        }
+        .part.selected {
+            outline: 2px dashed #2196F3;
+            outline-offset: -1px;
+        }
+        .part-inner {
+            display: inline-block;
+            transform-origin: top left;
+            line-height: 1;
+            color: #000;
+        }
 
-    .handle {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      background: #2196F3;
-      border: 1px solid white;
-      box-shadow: 0 0 2px rgba(0,0,0,0.5);
-      z-index: 100;
-    }
-    .handle.nw { left: -5px; top: -5px; cursor: nw-resize; }
-    .handle.n  { left: 50%; top: -5px; margin-left: -5px; cursor: n-resize; }
-    .handle.ne { right: -5px; top: -5px; cursor: ne-resize; }
-    .handle.e  { right: -5px; top: 50%; margin-top: -5px; cursor: e-resize; }
-    .handle.se { right: -5px; bottom: -5px; cursor: se-resize; }
-    .handle.s  { left: 50%; bottom: -5px; margin-left: -5px; cursor: s-resize; }
-    .handle.sw { left: -5px; bottom: -5px; cursor: sw-resize; }
-    .handle.w  { left: -5px; top: 50%; margin-top: -5px; cursor: w-resize; }
+        .handle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #2196F3;
+            border: 1px solid white;
+            box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+        }
+        .handle.nw { left: -5px; top: -5px; cursor: nw-resize; }
+        .handle.n { left: 50%; top: -5px; margin-left: -5px; cursor: n-resize; }
+        .handle.ne { right: -5px; top: -5px; cursor: ne-resize; }
+        .handle.e { right: -5px; top: 50%; margin-top: -5px; cursor: e-resize; }
+        .handle.se { right: -5px; bottom: -5px; cursor: se-resize; }
+        .handle.s { left: 50%; bottom: -5px; margin-left: -5px; cursor: s-resize; }
+        .handle.sw { left: -5px; bottom: -5px; cursor: sw-resize; }
+        .handle.w { left: -5px; top: 50%; margin-top: -5px; cursor: w-resize; }
 
-    .right-panel {
-      flex: 1;
-      min-width: 320px;
-      position: relative;
-      z-index: 10;
-      background: #fafafa;
-    }
+        .right-panel {
+            flex: 1;
+            min-width: 320px;
+            position: relative;
+            z-index: 10;
+            background: #fafafa;
+        }
 
-    .props {
-      margin-bottom: 15px;
-      padding: 10px;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-    .props > div { margin: 4px 0; }
-    .props label { display: inline-block; width: 70px; font-size: 13px; }
-    .props input, .props select { width: 140px; padding: 3px; }
+        .props {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .props>div { margin: 4px 0; }
+        .props label { display: inline-block; width: 70px; font-size: 13px; }
+        .props input,
+        .props select { width: 140px; padding: 3px; }
+        .props input[type="color"] { width: 50px; height: 32px; padding: 2px; cursor: pointer; vertical-align: middle; }
 
-    .preview {
-      padding: 15px;
-      background: white;
-      border: 1px solid #ccc;
-      font-size: 16px;
-      line-height: 1.6;
-      border-radius: 4px;
-    }
+        .preview {
+            padding: 15px;
+            background: white;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            line-height: 1.6;
+            border-radius: 4px;
+        }
 
-    .code {
-      width: 100%;
-      height: 180px;
-      font-family: monospace;
-      font-size: 12px;
-      padding: 8px;
-      box-sizing: border-box;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
+        .code {
+            width: 100%;
+            height: 180px;
+            font-family: monospace;
+            font-size: 12px;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: none;
+        }
 
-    .parts-list {
-      margin-top: 10px;
-      max-height: 180px;
-      overflow-y: auto;
-      border: 1px solid #ddd;
-      padding: 5px;
-      background: #fff;
-      border-radius: 4px;
-    }
-    .parts-list .item {
-      padding: 4px 6px;
-      cursor: pointer;
-      font-size: 14px;
-      border-bottom: 1px solid #eee;
-    }
-    .parts-list .item:last-child { border-bottom: none; }
-    .parts-list .item.selected {
-      background: #2196F3;
-      color: white;
-    }
-    .parts-list .item .del {
-      float: right;
-      color: red;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .parts-list .item.selected .del { color: #ffeb3b; }
+        .parts-list {
+            margin-top: 10px;
+            max-height: 180px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 5px;
+            background: #fff;
+            border-radius: 4px;
+        }
+        .parts-list .item {
+            padding: 4px 6px;
+            cursor: pointer;
+            font-size: 14px;
+            border-bottom: 1px solid #eee;
+        }
+        .parts-list .item:last-child { border-bottom: none; }
+        .parts-list .item.selected {
+            background: #2196F3;
+            color: white;
+        }
+        .parts-list .item .del {
+            float: right;
+            color: red;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .parts-list .item.selected .del { color: #ffeb3b; }
 
-    .zoom-control { margin-top: 8px; font-size: 12px; color: #555; }
-    .zoom-control input { width: 70px; }
+        .zoom-control { margin-top: 8px; font-size: 12px; color: #555; }
+        .zoom-control input { width: 70px; }
 
-    .tip { font-size: 11px; color: #888; margin-top: 5px; }
+        .tip { font-size: 11px; color: #888; margin-top: 5px; }
 
-    .preview-adjust { margin-top: 8px; font-size: 12px; color: #555; }
-    .preview-adjust input { width: 70px; }
-  </style>
+        .preview-adjust { margin-top: 8px; font-size: 12px; color: #555; }
+        .preview-adjust input { width: 70px; }
+
+        .code-options {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 16px;
+            margin: 6px 0 6px 0;
+            font-size: 13px;
+            color: #444;
+        }
+        .code-options label {
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            gap: 4px;
+        }
+        .code-options input[type="checkbox"] {
+            vertical-align: middle;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .copy-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 5px;
+        }
+        .copy-tip {
+            color: #2e7d32;
+            font-size: 13px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .copy-tip.show {
+            opacity: 1;
+        }
+    </style>
 </head>
 <body>
 
 <span><h2>汉字拼字工具 <a style="font-size:16px;font-weight: lighter" href="/index">首页</a></h2></span>
 
 <div class="toolbar">
-  <label>添加部件：</label>
-  <input type="text" id="partInput" placeholder="输入文字" maxlength="2">
-  <button onclick="addPart()">添加</button>
-  <button onclick="generateCode()">生成代码</button>
-  <button onclick="clearAll()">🗑 清空</button>
+    <label>添加部件：</label>
+    <input type="text" id="partInput" placeholder="输入文字" maxlength="2">
+    <button onclick="addPart()">添加</button>
+    <button onclick="generateCode()">生成代码</button>
+    <button onclick="clearAll()">清空</button>
 
-  <label><input type="checkbox" id="lockRatio" onchange="lockAspectRatio=this.checked"> 锁定长宽比</label>
-  <label><input type="checkbox" id="allowOverflow" onchange="toggleOverflow(this.checked)"> 允许超出边框</label>
-  <span class="tip" style="flex-basis:100%;">（勾选"允许超出"后部件可任意移出编辑区）</span>
+    <label><input type="checkbox" id="lockRatio" onchange="lockAspectRatio=this.checked"> 锁定长宽比</label>
+    <label><input type="checkbox" id="allowOverflow" onchange="toggleOverflow(this.checked)"> 允许超出边框</label>
+    <span class="tip" style="flex-basis:100%;">（勾选"允许超出"后部件可任意移出编辑区）</span>
 </div>
 
 <div class="main">
-  <div>
-    <div class="editor-wrap">
-      <div class="editor-label">编辑区（红色十字为中心参考线）</div>
-      <div class="canvas" id="canvas"></div>
-      <div class="zoom-control">
-        画布缩放：<input type="number" id="zoomInput" value="400" min="100" max="1200" step="50" onchange="updateZoom()"> px/em
-        <span class="tip">（数值越大，编辑越精细）</span>
-      </div>
-    </div>
-    <div style="margin-top:10px;">
-      <div class="editor-label">部件列表（点击选中，×删除）</div>
-      <div class="parts-list" id="partsList"></div>
-    </div>
-  </div>
-
-  <div class="right-panel">
-    <div class="props" id="propsPanel">
-      <div style="color:#888;">请先添加并选中一个部件</div>
+    <div>
+        <div class="editor-wrap">
+            <div class="editor-label">编辑区（红色十字为中心参考线）</div>
+            <div class="canvas" id="canvas"></div>
+            <div class="zoom-control">
+                画布缩放：<input type="number" id="zoomInput" value="400" min="100" max="1200" step="50" onchange="updateZoom()"> px/em
+                <span class="tip">（数值越大，编辑越精细）</span>
+            </div>
+        </div>
+        <div style="margin-top:10px;">
+            <div class="editor-label">部件列表（点击选中，×删除）</div>
+            <div class="parts-list" id="partsList"></div>
+        </div>
     </div>
 
-    <div class="editor-label">预览（正常文本大小，字体效果与编辑区一致）</div>
-    <div class="preview" id="preview">
-      这是预览文字 <span id="previewChar"></span> 测试效果。
-    </div>
-    <div class="preview-adjust">
-      预览基线微调：<input type="number" id="baselineInput" value="-0.2" step="0.05" onchange="updatePreview()"> em
-      <span class="tip">（调整此值让拼接字和周围文字基线对齐）</span>
-    </div>
+    <div class="right-panel">
+        <div class="props" id="propsPanel">
+            <div style="color:#888;">请先添加并选中一个部件</div>
+        </div>
 
-    <div style="margin-top:15px;">
-      <div class="editor-label">生成的 HTML 代码（不含字体，含粗细）</div>
-      <textarea class="code" id="codeOutput" readonly placeholder="点击"生成代码"按钮后显示..."></textarea>
-      <button onclick="copyCode()" style="margin-top:5px;">复制代码</button>
+        <div class="editor-label">预览（正常文本大小，字体效果与编辑区一致）</div>
+        <div class="preview" id="preview">
+            <span style="color: hsl(0, 0%, 40%);">这是预览文字</span><span id="previewChar"></span><span style="color: hsl(0, 0%, 40%);">测试效果。</span>
+        </div>
+        <div class="preview-adjust">
+            基线微调：<input type="number" id="baselineInput" value="-0.14" step="0.01" onchange="updatePreview()"> em
+            <span class="tip">（调整此值让拼接字和周围文字基线对齐）</span>
+        </div>
+
+        <div style="margin-top:15px;">
+            <div class="editor-label">生成的 HTML 代码</div>
+            <div class="code-options">
+                <label><input type="checkbox" id="includeFont"> 包含字体</label>
+                <label><input type="checkbox" id="formatCode"> 换行</label>
+            </div>
+            <textarea class="code" id="codeOutput" readonly placeholder="点击生成代码按钮"></textarea>
+            <div class="copy-area">
+                <button onclick="copyCode()">复制代码</button>
+                <span class="copy-tip" id="copyTip">已复制</span>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <script>
-  const canvas = document.getElementById('canvas');
-  const partsList = document.getElementById('partsList');
-  const propsPanel = document.getElementById('propsPanel');
-  const previewChar = document.getElementById('previewChar');
-  const preview = document.getElementById('preview');
-  const codeOutput = document.getElementById('codeOutput');
+    const canvas = document.getElementById('canvas');
+    const partsList = document.getElementById('partsList');
+    const propsPanel = document.getElementById('propsPanel');
+    const previewChar = document.getElementById('previewChar');
+    const preview = document.getElementById('preview');
+    const codeOutput = document.getElementById('codeOutput');
+    const copyTip = document.getElementById('copyTip');
 
-  const FONT_STACKS = {
-    'SimSun': '"SimSun","宋体",serif',
-    'SimHei': '"SimHei","黑体",sans-serif',
-    'KaiTi': '"KaiTi","楷体","STKaiti",serif',
-    'Microsoft YaHei': '"Microsoft YaHei","微软雅黑",sans-serif',
-    'FangSong': '"FangSong","仿宋",serif',
-    'LiSu': '"LiSu","隶书",serif',
-    'YouYuan': '"YouYuan","幼圆",sans-serif',
-    'STXingkai': '"STXingkai","华文行楷",serif',
-    'STHupo': '"STHupo","华文琥珀",sans-serif',
-    'STXihei': '"STXihei","华文细黑",sans-serif'
-  };
-
-  const FONT_NAMES = Object.keys(FONT_STACKS);
-
-  let parts = [];
-  let selectedId = null;
-  let nextId = 1;
-  let pxPerEm = 400;
-  let lockAspectRatio = false;
-  let allowOverflow = false;
-
-  // 允许超出的范围（设为极大值，实际上无限制）
-  const OVERFLOW_RANGE = 100;
-
-  function toggleOverflow(val) {
-    allowOverflow = val;
-    if (allowOverflow) {
-      canvas.classList.add('allow-overflow');
-    } else {
-      canvas.classList.remove('allow-overflow');
-      // 取消勾选时，把所有部件拉回范围内
-      parts.forEach(p => {
-        p.x = clampX(p.x, p.w);
-        p.y = clampY(p.y, p.h);
-      });
-    }
-    renderAll();
-  }
-
-  function updateZoom() {
-    pxPerEm = parseInt(document.getElementById('zoomInput').value) || 400;
-    canvas.style.width = pxPerEm + 'px';
-    canvas.style.height = pxPerEm + 'px';
-    renderAll();
-  }
-
-  function addPart() {
-    const text = document.getElementById('partInput').value.trim();
-    if (!text) { alert('请输入文字'); return; }
-    const part = {
-      id: nextId++,
-      text: text,
-      x: 0, y: 0,
-      w: 1, h: 1,
-      z: parts.length + 1,
-      fontWeight: 400,
-      fontFamily: 'SimSun'
+    // 字体映射，使用单引号包裹字体名
+    const FONT_STACKS = {
+        'SimSun': "'SimSun','宋体',serif",
+        'SimHei': "'SimHei','黑体',sans-serif",
+        'KaiTi': "'KaiTi','楷体','STKaiti',serif",
+        'Microsoft YaHei': "'Microsoft YaHei','微软雅黑',sans-serif",
+        'FangSong': "'FangSong','仿宋',serif",
+        'LiSu': "'LiSu','隶书',serif",
+        'YouYuan': "'YouYuan','幼圆',sans-serif",
+        'STXingkai': "'STXingkai','华文行楷',serif",
+        'STHupo': "'STHupo','华文琥珀',serif",
+        'STXihei': "'STXihei','华文细黑',sans-serif"
     };
-    parts.push(part);
-    document.getElementById('partInput').value = '';
-    renderAll();
-    selectPart(part.id);
-  }
 
-  function renderAll() {
-    canvas.innerHTML = '';
-    parts.sort((a, b) => a.z - b.z);
+    const FONT_NAMES = Object.keys(FONT_STACKS);
 
-    parts.forEach(p => {
-      const el = document.createElement('div');
-      el.className = 'part' + (p.id === selectedId ? ' selected' : '');
-      el.style.left = (p.x * pxPerEm) + 'px';
-      el.style.top = (p.y * pxPerEm) + 'px';
-      el.style.width = (p.w * pxPerEm) + 'px';
-      el.style.height = (p.h * pxPerEm) + 'px';
-      el.style.zIndex = (p.id === selectedId) ? 10000 : p.z;
-      el.dataset.id = p.id;
+    let parts = [];
+    let selectedId = null;
+    let nextId = 1;
+    let pxPerEm = 400;
+    let lockAspectRatio = false;
+    let allowOverflow = false;
+    const OVERFLOW_RANGE = 100;
 
-      const inner = document.createElement('span');
-      inner.className = 'part-inner';
-      inner.textContent = p.text;
-      inner.style.transform = `scale(${p.w}, ${p.h})`;
-      inner.style.width = '1em';
-      inner.style.height = '1em';
-      inner.style.fontSize = pxPerEm + 'px';
-      inner.style.fontWeight = p.fontWeight;
-      inner.style.fontFamily = FONT_STACKS[p.fontFamily] || FONT_STACKS['SimSun'];
-      el.appendChild(inner);
+    // 存储每个部件对应的DOM元素，用于增量更新
+    let partElements = new Map();
 
-      if (p.id === selectedId) {
-        ['nw','n','ne','e','se','s','sw','w'].forEach(h => {
-          const handle = document.createElement('div');
-          handle.className = 'handle ' + h;
-          handle.dataset.id = p.id;
-          handle.dataset.handle = h;
-          handle.addEventListener('mousedown', onHandleMouseDown);
-          el.appendChild(handle);
+    function toggleOverflow(val) {
+        allowOverflow = val;
+        if (allowOverflow) {
+            canvas.classList.add('allow-overflow');
+        } else {
+            canvas.classList.remove('allow-overflow');
+            parts.forEach(p => {
+                p.x = clampX(p.x, p.w);
+                p.y = clampY(p.y, p.h);
+            });
+        }
+        renderAll();
+    }
+
+    function updateZoom() {
+        pxPerEm = parseInt(document.getElementById('zoomInput').value) || 400;
+        canvas.style.width = pxPerEm + 'px';
+        canvas.style.height = pxPerEm + 'px';
+        renderAll();
+    }
+
+    function addPart() {
+        const text = document.getElementById('partInput').value.trim();
+        if (!text) { alert('请输入文字'); return; }
+        const part = {
+            id: nextId++,
+            text: text,
+            x: 0,
+            y: 0,
+            w: 1,
+            h: 1,
+            z: parts.length + 1,
+            fontWeight: 400,
+            fontFamily: 'SimSun',
+            color: '#000000'
+        };
+        parts.push(part);
+        document.getElementById('partInput').value = '';
+        renderAll();
+        selectPart(part.id);
+    }
+
+    // 全量渲染（用于添加、删除、切换选中、缩放等）
+    function renderAll() {
+        canvas.innerHTML = '';
+        partElements.clear();
+        parts.sort((a, b) => a.z - b.z);
+
+        parts.forEach(p => {
+            const el = document.createElement('div');
+            el.className = 'part' + (p.id === selectedId ? ' selected' : '');
+            el.style.left = (p.x * pxPerEm) + 'px';
+            el.style.top = (p.y * pxPerEm) + 'px';
+            el.style.width = (p.w * pxPerEm) + 'px';
+            el.style.height = (p.h * pxPerEm) + 'px';
+            el.style.zIndex = (p.id === selectedId) ? 10000 : p.z;
+            el.dataset.id = p.id;
+
+            const inner = document.createElement('span');
+            inner.className = 'part-inner';
+            inner.textContent = p.text;
+            inner.style.transform = 'scale(' + p.w + ', ' + p.h + ')';
+            inner.style.width = '1em';
+            inner.style.height = '1em';
+            inner.style.fontSize = pxPerEm + 'px';
+            inner.style.fontWeight = p.fontWeight;
+            inner.style.fontFamily = FONT_STACKS[p.fontFamily] || FONT_STACKS['SimSun'];
+            inner.style.color = p.color || '#000000';
+            el.appendChild(inner);
+
+            if (p.id === selectedId) {
+                ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'].forEach(h => {
+                    const handle = document.createElement('div');
+                    handle.className = 'handle ' + h;
+                    handle.dataset.id = p.id;
+                    handle.dataset.handle = h;
+                    handle.addEventListener('mousedown', onHandleMouseDown);
+                    el.appendChild(handle);
+                });
+            }
+
+            el.addEventListener('mousedown', onPartMouseDown);
+            canvas.appendChild(el);
+            partElements.set(p.id, { el, inner });
         });
-      }
 
-      el.addEventListener('mousedown', onPartMouseDown);
-      canvas.appendChild(el);
-    });
-
-    renderPartsList();
-    updatePreview();
-    updateProps();
-  }
-
-  function renderPartsList() {
-    partsList.innerHTML = '';
-    if (parts.length === 0) {
-      partsList.innerHTML = '<div style="color:#888;padding:5px;">暂无部件</div>';
-      return;
+        renderPartsList();
+        updatePreview();
+        updateProps();
     }
-    parts.forEach(p => {
-      const item = document.createElement('div');
-      item.className = 'item' + (p.id === selectedId ? ' selected' : '');
-      item.innerHTML = `<span>z=${p.z} "${p.text}" (${p.x.toFixed(2)},${p.y.toFixed(2)}) ${p.w.toFixed(2)}×${p.h.toFixed(2)}</span><span class="del" data-id="${p.id}">×</span>`;
-      item.addEventListener('click', (e) => {
-        if (e.target.classList.contains('del')) {
-          deletePart(p.id);
+
+    // 增量更新单个部件的样式（不重建DOM）
+    function updatePartElement(p) {
+        const entry = partElements.get(p.id);
+        if (!entry) return;
+        const { el, inner } = entry;
+        el.style.left = (p.x * pxPerEm) + 'px';
+        el.style.top = (p.y * pxPerEm) + 'px';
+        el.style.width = (p.w * pxPerEm) + 'px';
+        el.style.height = (p.h * pxPerEm) + 'px';
+        el.style.zIndex = (p.id === selectedId) ? 10000 : p.z;
+        if (p.id === selectedId) {
+            el.classList.add('selected');
         } else {
-          selectPart(p.id);
+            el.classList.remove('selected');
         }
-      });
-      partsList.appendChild(item);
+        inner.textContent = p.text;
+        inner.style.transform = 'scale(' + p.w + ', ' + p.h + ')';
+        inner.style.fontWeight = p.fontWeight;
+        inner.style.fontFamily = FONT_STACKS[p.fontFamily] || FONT_STACKS['SimSun'];
+        inner.style.color = p.color || '#000000';
+    }
+
+    function renderPartsList() {
+        partsList.innerHTML = '';
+        if (parts.length === 0) {
+            partsList.innerHTML = '<div style="color:#888;padding:5px;">暂无部件</div>';
+            return;
+        }
+        parts.forEach(p => {
+            const item = document.createElement('div');
+            item.className = 'item' + (p.id === selectedId ? ' selected' : '');
+            item.innerHTML = '<span>z=' + p.z + ' "' + p.text + '" (' + p.x.toFixed(2) + ',' + p.y.toFixed(2) +
+                ') ' + p.w.toFixed(2) + '×' + p.h.toFixed(2) + '</span><span class="del" data-id="' + p.id +
+                '">×</span>';
+            item.addEventListener('click', (e) => {
+                if (e.target.classList.contains('del')) {
+                    deletePart(p.id);
+                } else {
+                    selectPart(p.id);
+                }
+            });
+            partsList.appendChild(item);
+        });
+    }
+
+    function selectPart(id) {
+        selectedId = id;
+        renderAll();
+    }
+
+    function deletePart(id) {
+        parts = parts.filter(p => p.id !== id);
+        partElements.delete(id);
+        if (selectedId === id) selectedId = null;
+        renderAll();
+    }
+
+    // 更新属性面板（重建）
+    function updateProps() {
+        const p = parts.find(x => x.id === selectedId);
+        if (!p) {
+            propsPanel.innerHTML = '<div style="color:#888;">请先选中一个部件</div>';
+            return;
+        }
+
+        const fontOptions = FONT_NAMES.map(f =>
+            '<option value="' + f + '" ' + (p.fontFamily === f ? 'selected' : '') + '>' + f + '</option>'
+        ).join('');
+
+        const weightOptions = [100, 200, 300, 400, 500, 600, 700, 800, 900].map(w =>
+            '<option value="' + w + '" ' + (p.fontWeight == w ? 'selected' : '') + '>' + w + (w === 400 ?
+                ' (normal)' : '') + (w === 700 ? ' (bold)' : '') + '</option>'
+        ).join('');
+
+        propsPanel.innerHTML = `
+            <div><label>文字：</label><input type="text" id="prop_text_${p.id}" value="${escapeAttr(p.text)}" oninput="updateProp(${p.id}, 'text', this.value)"></div>
+            <div><label>字体：</label><select id="prop_fontFamily_${p.id}" onchange="updateProp(${p.id}, 'fontFamily', this.value)">${fontOptions}</select></div>
+            <div><label>粗细：</label><select id="prop_fontWeight_${p.id}" onchange="updateProp(${p.id}, 'fontWeight', parseInt(this.value))">${weightOptions}</select></div>
+            <div><label>颜色：</label><input type="color" id="prop_color_${p.id}" value="${p.color || '#000000'}" oninput="updateProp(${p.id}, 'color', this.value)"></div>
+            <div><label>X (em)：</label><input type="number" step="0.01" id="prop_x_${p.id}" value="${p.x.toFixed(3)}" oninput="updateProp(${p.id}, 'x', clampX(parseFloat(this.value)||0, ${p.w}))"></div>
+            <div><label>Y (em)：</label><input type="number" step="0.01" id="prop_y_${p.id}" value="${p.y.toFixed(3)}" oninput="updateProp(${p.id}, 'y', clampY(parseFloat(this.value)||0, ${p.h}))"></div>
+            <div><label>宽 (em)：</label><input type="number" step="0.01" id="prop_w_${p.id}" value="${p.w.toFixed(3)}" oninput="updateProp(${p.id}, 'w', clampW(parseFloat(this.value)||0.05, ${p.x}))"></div>
+            <div><label>高 (em)：</label><input type="number" step="0.01" id="prop_h_${p.id}" value="${p.h.toFixed(3)}" oninput="updateProp(${p.id}, 'h', clampH(parseFloat(this.value)||0.05, ${p.y}))"></div>
+            <div><label>层级 z：</label><input type="number" step="1" id="prop_z_${p.id}" value="${p.z}" oninput="updateProp(${p.id}, 'z', parseInt(this.value)||1)"></div>
+            <div style="margin-top:8px;"><button onclick="deletePart(${p.id})" style="color:red;">删除此部件</button></div>
+          `;
+    }
+
+    function clampX(x, w) {
+        if (allowOverflow) return x;
+        return Math.max(0, Math.min(1 - w, x));
+    }
+    function clampY(y, h) {
+        if (allowOverflow) return y;
+        return Math.max(0, Math.min(1 - h, y));
+    }
+    function clampW(w, x) {
+        const minX = allowOverflow ? -OVERFLOW_RANGE : 0;
+        const maxX = allowOverflow ? 1 + OVERFLOW_RANGE : 1;
+        return Math.max(0.05, Math.min(maxX - x, w));
+    }
+    function clampH(h, y) {
+        const minY = allowOverflow ? -OVERFLOW_RANGE : 0;
+        const maxY = allowOverflow ? 1 + OVERFLOW_RANGE : 1;
+        return Math.max(0.05, Math.min(maxY - y, h));
+    }
+
+    // 增量更新属性（不触发全量渲染）
+    function updateProp(id, key, value) {
+        const p = parts.find(x => x.id === id);
+        if (!p) return;
+        if (key === 'x') value = clampX(value, p.w);
+        else if (key === 'y') value = clampY(value, p.h);
+        else if (key === 'w') value = clampW(value, p.x);
+        else if (key === 'h') value = clampH(value, p.y);
+        else if (key === 'color') {
+            p[key] = value || '#000000';
+            updatePartElement(p);
+            updatePreview();
+            const colorInput = document.getElementById('prop_color_' + id);
+            if (colorInput) colorInput.value = p.color;
+            return;
+        }
+        p[key] = value;
+        updatePartElement(p);
+        updatePreview();
+        // 同步属性面板输入框
+        const inputMap = {
+            'text': 'prop_text_',
+            'x': 'prop_x_',
+            'y': 'prop_y_',
+            'w': 'prop_w_',
+            'h': 'prop_h_',
+            'z': 'prop_z_'
+        };
+        if (key in inputMap) {
+            const inputId = inputMap[key] + id;
+            const inputEl = document.getElementById(inputId);
+            if (inputEl) {
+                inputEl.value = value;
+            }
+        }
+    }
+
+    // 拖拽状态
+    let dragState = null;
+
+    function onPartMouseDown(e) {
+        if (e.target.classList.contains('handle')) return;
+        const id = parseInt(e.currentTarget.dataset.id);
+        const p = parts.find(x => x.id === id);
+        if (!p) return;
+        selectPart(id);
+        dragState = {
+            type: 'move',
+            id: id,
+            startX: e.clientX,
+            startY: e.clientY,
+            origX: p.x,
+            origY: p.y
+        };
+        e.preventDefault();
+    }
+
+    function onHandleMouseDown(e) {
+        const id = parseInt(e.target.dataset.id);
+        const handle = e.target.dataset.handle;
+        const p = parts.find(x => x.id === id);
+        if (!p) return;
+        selectPart(id);
+        dragState = {
+            type: 'resize',
+            id: id,
+            handle: handle,
+            startX: e.clientX,
+            startY: e.clientY,
+            origX: p.x,
+            origY: p.y,
+            origW: p.w,
+            origH: p.h
+        };
+        e.stopPropagation();
+        e.preventDefault();
+    }
+
+    document.addEventListener('mousemove', (e) => {
+        if (!dragState) return;
+        const p = parts.find(x => x.id === dragState.id);
+        if (!p) return;
+        const dx = (e.clientX - dragState.startX) / pxPerEm;
+        const dy = (e.clientY - dragState.startY) / pxPerEm;
+
+        if (dragState.type === 'move') {
+            p.x = clampX(dragState.origX + dx, p.w);
+            p.y = clampY(dragState.origY + dy, p.h);
+        } else if (dragState.type === 'resize') {
+            let nx = dragState.origX;
+            let ny = dragState.origY;
+            let nw = dragState.origW;
+            let nh = dragState.origH;
+            const h = dragState.handle;
+
+            if (h.includes('e')) nw = dragState.origW + dx;
+            if (h.includes('w')) { nx = dragState.origX + dx;
+                nw = dragState.origW - dx; }
+            if (h.includes('s')) nh = dragState.origH + dy;
+            if (h.includes('n')) { ny = dragState.origY + dy;
+                nh = dragState.origH - dy; }
+
+            if (lockAspectRatio) {
+                const ratio = dragState.origH / dragState.origW;
+                if (h.includes('e') || h.includes('w')) {
+                    nh = nw * ratio;
+                    if (h.includes('n')) ny = dragState.origY + (dragState.origH - nh);
+                } else if (h.includes('n') || h.includes('s')) {
+                    nw = nh / ratio;
+                    if (h.includes('w')) nx = dragState.origX + (dragState.origW - nw);
+                } else {
+                    if (Math.abs(dx) >= Math.abs(dy)) {
+                        nh = nw * ratio;
+                        if (h.includes('n')) ny = dragState.origY + (dragState.origH - nh);
+                    } else {
+                        nw = nh / ratio;
+                        if (h.includes('w')) nx = dragState.origX + (dragState.origW - nw);
+                    }
+                }
+            }
+
+            if (nw < 0.05) {
+                nw = 0.05;
+                if (lockAspectRatio) nh = nw * (dragState.origH / dragState.origW);
+                if (h.includes('w')) nx = dragState.origX + dragState.origW - 0.05;
+            }
+            if (nh < 0.05) {
+                nh = 0.05;
+                if (lockAspectRatio) nw = nh / (dragState.origH / dragState.origW);
+                if (h.includes('n')) ny = dragState.origY + dragState.origH - 0.05;
+            }
+
+            const minX = allowOverflow ? -OVERFLOW_RANGE : 0;
+            const minY = allowOverflow ? -OVERFLOW_RANGE : 0;
+            const maxX = allowOverflow ? 1 + OVERFLOW_RANGE : 1;
+            const maxY = allowOverflow ? 1 + OVERFLOW_RANGE : 1;
+
+            if (nx < minX) { nw += (nx - minX);
+                nx = minX; }
+            if (ny < minY) { nh += (ny - minY);
+                ny = minY; }
+            if (nx + nw > maxX) nw = maxX - nx;
+            if (ny + nh > maxY) nh = maxY - ny;
+
+            p.x = nx;
+            p.y = ny;
+            p.w = nw;
+            p.h = nh;
+        }
+        updatePartElement(p);
+        updatePreview();
+        if (selectedId === p.id) {
+            const id = p.id;
+            const xInput = document.getElementById('prop_x_' + id);
+            if (xInput) xInput.value = p.x.toFixed(3);
+            const yInput = document.getElementById('prop_y_' + id);
+            if (yInput) yInput.value = p.y.toFixed(3);
+            const wInput = document.getElementById('prop_w_' + id);
+            if (wInput) wInput.value = p.w.toFixed(3);
+            const hInput = document.getElementById('prop_h_' + id);
+            if (hInput) hInput.value = p.h.toFixed(3);
+        }
     });
-  }
 
-  function selectPart(id) {
-    selectedId = id;
-    renderAll();
-  }
+    document.addEventListener('mouseup', () => { dragState = null; });
 
-  function deletePart(id) {
-    parts = parts.filter(p => p.id !== id);
-    if (selectedId === id) selectedId = null;
-    renderAll();
-  }
+    canvas.addEventListener('click', (e) => {
+        if (e.target === canvas) {
+            selectedId = null;
+            renderAll();
+        }
+    });
 
-  function updateProps() {
-    const p = parts.find(x => x.id === selectedId);
-    if (!p) {
-      propsPanel.innerHTML = '<div style="color:#888;">请先选中一个部件</div>';
-      return;
-    }
-
-    const fontOptions = FONT_NAMES.map(f =>
-            `<option value="${f}" ${p.fontFamily===f?'selected':''}>${f}</option>`
-    ).join('');
-
-    const weightOptions = [100,200,300,400,500,600,700,800,900].map(w =>
-            `<option value="${w}" ${p.fontWeight==w?'selected':''}>${w}${w===400?' (normal)':''}${w===700?' (bold)':''}</option>`
-    ).join('');
-
-    propsPanel.innerHTML = `
-    <div><label>文字：</label><input type="text" value="${escapeAttr(p.text)}" onchange="updateProp(${p.id}, 'text', this.value)"></div>
-    <div><label>字体：</label><select onchange="updateProp(${p.id}, 'fontFamily', this.value)">${fontOptions}</select></div>
-    <div><label>粗细：</label><select onchange="updateProp(${p.id}, 'fontWeight', parseInt(this.value))">${weightOptions}</select></div>
-    <div><label>X (em)：</label><input type="number" step="0.01" value="${p.x.toFixed(3)}" onchange="updateProp(${p.id}, 'x', clampX(parseFloat(this.value)||0, ${p.w}))"></div>
-    <div><label>Y (em)：</label><input type="number" step="0.01" value="${p.y.toFixed(3)}" onchange="updateProp(${p.id}, 'y', clampY(parseFloat(this.value)||0, ${p.h}))"></div>
-    <div><label>宽 (em)：</label><input type="number" step="0.01" value="${p.w.toFixed(3)}" onchange="updateProp(${p.id}, 'w', clampW(parseFloat(this.value)||0.05, ${p.x}))"></div>
-    <div><label>高 (em)：</label><input type="number" step="0.01" value="${p.h.toFixed(3)}" onchange="updateProp(${p.id}, 'h', clampH(parseFloat(this.value)||0.05, ${p.y}))"></div>
-    <div><label>层级 z：</label><input type="number" step="1" value="${p.z}" onchange="updateProp(${p.id}, 'z', parseInt(this.value)||1)"></div>
-    <div style="margin-top:8px;"><button onclick="deletePart(${p.id})" style="color:red;">删除此部件</button></div>
-  `;
-  }
-
-  // 边界限制函数
-  function clampX(x, w) {
-    if (allowOverflow) {
-      return x;  // 完全不做限制，可以任意移出
-    }
-    return Math.max(0, Math.min(1 - w, x));
-  }
-
-  function clampY(y, h) {
-    if (allowOverflow) {
-      return y;  // 完全不做限制，可以任意移出
-    }
-    return Math.max(0, Math.min(1 - h, y));
-  }
-
-  function clampW(w, x) {
-    const minX = allowOverflow ? -OVERFLOW_RANGE : 0;
-    const maxX = allowOverflow ? 1 + OVERFLOW_RANGE : 1;
-    return Math.max(0.05, Math.min(maxX - x, w));
-  }
-
-  function clampH(h, y) {
-    const minY = allowOverflow ? -OVERFLOW_RANGE : 0;
-    const maxY = allowOverflow ? 1 + OVERFLOW_RANGE : 1;
-    return Math.max(0.05, Math.min(maxY - y, h));
-  }
-
-  function updateProp(id, key, value) {
-    const p = parts.find(x => x.id === id);
-    if (!p) return;
-    if (key === 'x') value = clampX(value, p.w);
-    else if (key === 'y') value = clampY(value, p.h);
-    else if (key === 'w') value = clampW(value, p.x);
-    else if (key === 'h') value = clampH(value, p.y);
-    p[key] = value;
-    renderAll();
-  }
-
-  let dragState = null;
-  function onPartMouseDown(e) {
-    if (e.target.classList.contains('handle')) return;
-    const id = parseInt(e.currentTarget.dataset.id);
-    const p = parts.find(x => x.id === id);
-    if (!p) return;
-    selectPart(id);
-    dragState = {
-      type: 'move', id: id,
-      startX: e.clientX, startY: e.clientY,
-      origX: p.x, origY: p.y
-    };
-    e.preventDefault();
-  }
-
-  function onHandleMouseDown(e) {
-    const id = parseInt(e.target.dataset.id);
-    const handle = e.target.dataset.handle;
-    const p = parts.find(x => x.id === id);
-    if (!p) return;
-    selectPart(id);
-    dragState = {
-      type: 'resize', id: id, handle: handle,
-      startX: e.clientX, startY: e.clientY,
-      origX: p.x, origY: p.y, origW: p.w, origH: p.h
-    };
-    e.stopPropagation();
-    e.preventDefault();
-  }
-
-  document.addEventListener('mousemove', (e) => {
-    if (!dragState) return;
-    const p = parts.find(x => x.id === dragState.id);
-    if (!p) return;
-    const dx = (e.clientX - dragState.startX) / pxPerEm;
-    const dy = (e.clientY - dragState.startY) / pxPerEm;
-
-    if (dragState.type === 'move') {
-      p.x = clampX(dragState.origX + dx, p.w);
-      p.y = clampY(dragState.origY + dy, p.h);
-    } else if (dragState.type === 'resize') {
-      let nx = dragState.origX;
-      let ny = dragState.origY;
-      let nw = dragState.origW;
-      let nh = dragState.origH;
-      const h = dragState.handle;
-
-      if (h.includes('e')) nw = dragState.origW + dx;
-      if (h.includes('w')) { nx = dragState.origX + dx; nw = dragState.origW - dx; }
-      if (h.includes('s')) nh = dragState.origH + dy;
-      if (h.includes('n')) { ny = dragState.origY + dy; nh = dragState.origH - dy; }
-
-      if (lockAspectRatio) {
-        const ratio = dragState.origH / dragState.origW;
-        if (h.includes('e') || h.includes('w')) {
-          nh = nw * ratio;
-          if (h.includes('n')) ny = dragState.origY + (dragState.origH - nh);
-        } else if (h.includes('n') || h.includes('s')) {
-          nw = nh / ratio;
-          if (h.includes('w')) nx = dragState.origX + (dragState.origW - nw);
+    function updatePreview() {
+        previewChar.innerHTML = generatePreviewHTML();
+        const selectedPart = parts.find(x => x.id === selectedId);
+        if (selectedPart) {
+            const ff = FONT_STACKS[selectedPart.fontFamily] || FONT_STACKS['SimSun'];
+            preview.style.fontFamily = ff;
         } else {
-          if (Math.abs(dx) >= Math.abs(dy)) {
-            nh = nw * ratio;
-            if (h.includes('n')) ny = dragState.origY + (dragState.origH - nh);
-          } else {
-            nw = nh / ratio;
-            if (h.includes('w')) nx = dragState.origX + (dragState.origW - nw);
-          }
+            preview.style.fontFamily = 'sans-serif';
         }
-      }
-
-      if (nw < 0.05) {
-        nw = 0.05;
-        if (lockAspectRatio) nh = nw * (dragState.origH / dragState.origW);
-        if (h.includes('w')) nx = dragState.origX + dragState.origW - 0.05;
-      }
-      if (nh < 0.05) {
-        nh = 0.05;
-        if (lockAspectRatio) nw = nh / (dragState.origH / dragState.origW);
-        if (h.includes('n')) ny = dragState.origY + dragState.origH - 0.05;
-      }
-
-      // 边界限制（resize 时仍做限制，防止缩放到无限大）
-      const minX = allowOverflow ? -OVERFLOW_RANGE : 0;
-      const minY = allowOverflow ? -OVERFLOW_RANGE : 0;
-      const maxX = allowOverflow ? 1 + OVERFLOW_RANGE : 1;
-      const maxY = allowOverflow ? 1 + OVERFLOW_RANGE : 1;
-
-      if (nx < minX) { nw += (nx - minX); nx = minX; }
-      if (ny < minY) { nh += (ny - minY); ny = minY; }
-      if (nx + nw > maxX) nw = maxX - nx;
-      if (ny + nh > maxY) nh = maxY - ny;
-
-      p.x = nx; p.y = ny; p.w = nw; p.h = nh;
     }
+
+    function generatePreviewHTML() {
+        if (parts.length === 0) return '';
+        const baseline = parseFloat(document.getElementById('baselineInput').value) || -0.14;
+        let inner = '';
+        const sorted = [...parts].sort((a, b) => a.z - b.z);
+        sorted.forEach(p => {
+            const ff = FONT_STACKS[p.fontFamily] || FONT_STACKS['SimSun'];
+            const col = p.color || '#000000';
+            inner += '<span style="display:inline-block;position:absolute;left:' + fmt(p.x) +
+                'em;top:' + fmt(p.y) +
+                'em;z-index:' + p.z + ';"><span style="display:inline-block;transform:scale(' + fmt(p
+                    .w) + ',' + fmt(p.h) +
+                ');transform-origin:top left;width:1em;height:1em;line-height:1;font-family:' + ff +
+                ';font-weight:' + p.fontWeight + ';color:' + col + ';">' + escapeHtml(p.text) +
+                '</span></span>';
+        });
+        return '<span style="display:inline-block;position:relative;width:1em;height:1em;line-height:1;vertical-align:' +
+            fmt(baseline) + 'em;">' + inner + '</span>';
+    }
+
+    function generateCodeHTML() {
+        if (parts.length === 0) return '';
+        const baseline = parseFloat(document.getElementById('baselineInput').value) || -0.14;
+        const includeFont = document.getElementById('includeFont').checked;
+        const formatCode = document.getElementById('formatCode').checked;
+
+        const sorted = [...parts].sort((a, b) => a.z - b.z);
+        let body = '';
+        if (formatCode) {
+            const items = sorted.map(p => {
+                const col = p.color || '#000000';
+                let style = 'display:inline-block;position:absolute;left:' + fmt(p.x) + 'em;top:' + fmt(p
+                    .y) + 'em;z-index:' + p.z + ';';
+                let innerStyle = 'display:inline-block;transform:scale(' + fmt(p.w) + ',' + fmt(p.h) +
+                    ');transform-origin:top left;width:1em;height:1em;line-height:1;font-weight:' + p
+                        .fontWeight + ';color:' + col + ';';
+                if (includeFont) {
+                    const ff = FONT_STACKS[p.fontFamily] || FONT_STACKS['SimSun'];
+                    innerStyle += 'font-family:' + ff + ';';
+                }
+                return '  <span style="' + style + '"><span style="' + innerStyle + '">' + escapeHtml(p
+                    .text) + '</span></span>';
+            });
+            body = items.join('\n');
+        } else {
+            const items = sorted.map(p => {
+                const col = p.color || '#000000';
+                let style = 'display:inline-block;position:absolute;left:' + fmt(p.x) + 'em;top:' + fmt(p
+                    .y) + 'em;z-index:' + p.z + ';';
+                let innerStyle = 'display:inline-block;transform:scale(' + fmt(p.w) + ',' + fmt(p.h) +
+                    ');transform-origin:top left;width:1em;height:1em;line-height:1;font-weight:' + p
+                        .fontWeight + ';color:' + col + ';';
+                if (includeFont) {
+                    const ff = FONT_STACKS[p.fontFamily] || FONT_STACKS['SimSun'];
+                    innerStyle += 'font-family:' + ff + ';';
+                }
+                return '<span style="' + style + '"><span style="' + innerStyle + '">' + escapeHtml(p
+                    .text) + '</span></span>';
+            });
+            body = items.join('');
+        }
+
+        return '<span style="display:inline-block;position:relative;width:1em;height:1em;line-height:1;vertical-align:' +
+            fmt(baseline) + 'em;">' + (formatCode ? '\n' : '') + body + (formatCode ? '\n' : '') +
+            '</span>';
+    }
+
+    function fmt(n) {
+        const v = parseFloat(n.toFixed(4));
+        return v === 0 ? 0 : v;
+    }
+
+    function escapeHtml(s) {
+        return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function escapeAttr(s) {
+        return s.replace(/"/g, '&quot;');
+    }
+
+    function generateCode() {
+        codeOutput.value = generateCodeHTML();
+    }
+
+    function copyCode() {
+        if (!codeOutput.value) {
+            copyTip.textContent = '请先生成代码';
+            copyTip.classList.add('show');
+            setTimeout(() => { copyTip.classList.remove('show'); }, 1500);
+            return;
+        }
+        codeOutput.select();
+        try {
+            document.execCommand('copy');
+            copyTip.textContent = '已复制';
+            copyTip.classList.add('show');
+            setTimeout(() => { copyTip.classList.remove('show'); }, 1500);
+        } catch (e) {
+            copyTip.textContent = '复制失败';
+            copyTip.classList.add('show');
+            setTimeout(() => { copyTip.classList.remove('show'); }, 1500);
+        }
+    }
+
+    function clearAll() {
+        if (parts.length === 0 || confirm('确定清空所有部件？')) {
+            parts = [];
+            selectedId = null;
+            partElements.clear();
+            renderAll();
+            codeOutput.value = '';
+        }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName ===
+            'SELECT') return;
+        const p = parts.find(x => x.id === selectedId);
+        if (!p) return;
+        const step = e.shiftKey ? 0.05 : 0.01;
+        let handled = true;
+        switch (e.key) {
+            case 'ArrowLeft':
+                p.x = clampX(p.x - step, p.w);
+                break;
+            case 'ArrowRight':
+                p.x = clampX(p.x + step, p.w);
+                break;
+            case 'ArrowUp':
+                p.y = clampY(p.y - step, p.h);
+                break;
+            case 'ArrowDown':
+                p.y = clampY(p.y + step, p.h);
+                break;
+            case 'Delete':
+            case 'Backspace':
+                deletePart(p.id);
+                return;
+            default:
+                handled = false;
+        }
+        if (handled) {
+            e.preventDefault();
+            updatePartElement(p);
+            updatePreview();
+            if (selectedId === p.id) {
+                const id = p.id;
+                const xInput = document.getElementById('prop_x_' + id);
+                if (xInput) xInput.value = p.x.toFixed(3);
+                const yInput = document.getElementById('prop_y_' + id);
+                if (yInput) yInput.value = p.y.toFixed(3);
+                const wInput = document.getElementById('prop_w_' + id);
+                if (wInput) wInput.value = p.w.toFixed(3);
+                const hInput = document.getElementById('prop_h_' + id);
+                if (hInput) hInput.value = p.h.toFixed(3);
+            }
+        }
+    });
+
     renderAll();
-  });
-
-  document.addEventListener('mouseup', () => { dragState = null; });
-
-  canvas.addEventListener('click', (e) => {
-    if (e.target === canvas) {
-      selectedId = null;
-      renderAll();
-    }
-  });
-
-  function updatePreview() {
-    previewChar.innerHTML = generatePreviewHTML();
-
-    const selectedPart = parts.find(x => x.id === selectedId);
-    if (selectedPart) {
-      const ff = FONT_STACKS[selectedPart.fontFamily] || FONT_STACKS['SimSun'];
-      preview.style.fontFamily = ff;
-    } else {
-      preview.style.fontFamily = 'sans-serif';
-    }
-  }
-
-  function generatePreviewHTML() {
-    if (parts.length === 0) return '';
-    const baseline = parseFloat(document.getElementById('baselineInput').value) || -0.2;
-    let inner = '';
-    const sorted = [...parts].sort((a, b) => a.z - b.z);
-    sorted.forEach(p => {
-      const ff = FONT_STACKS[p.fontFamily] || FONT_STACKS['SimSun'];
-      inner += `<span style="display:inline-block;position:absolute;left:${fmt(p.x)}em;top:${fmt(p.y)}em;z-index:${p.z};"><span style="display:inline-block;transform:scale(${fmt(p.w)},${fmt(p.h)});transform-origin:top left;width:1em;height:1em;line-height:1;font-family:${ff};font-weight:${p.fontWeight};">${escapeHtml(p.text)}</span></span>`;
-    });
-    return `<span style="display:inline-block;position:relative;width:1em;height:1em;line-height:1;vertical-align:${fmt(baseline)}em;">${inner}</span>`;
-  }
-
-  function generateCodeHTML() {
-    if (parts.length === 0) return '';
-    // 读取基线值，与预览保持一致
-    const baseline = parseFloat(document.getElementById('baselineInput').value) || -0.2;
-    let inner = '';
-    const sorted = [...parts].sort((a, b) => a.z - b.z);
-    sorted.forEach(p => {
-      inner += `<span style="display:inline-block;position:absolute;left:${fmt(p.x)}em;top:${fmt(p.y)}em;z-index:${p.z};"><span style="display:inline-block;transform:scale(${fmt(p.w)},${fmt(p.h)});transform-origin:top left;width:1em;height:1em;line-height:1;font-weight:${p.fontWeight};">${escapeHtml(p.text)}</span></span>`;
-    });
-    return `<span style="display:inline-block;position:relative;width:1em;height:1em;line-height:1;vertical-align:${fmt(baseline)}em;">${inner}</span>`;
-  }
-
-  function fmt(n) {
-    const v = parseFloat(n.toFixed(4));
-    return v === 0 ? 0 : v;
-  }
-
-  function escapeHtml(s) {
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  }
-  function escapeAttr(s) {
-    return s.replace(/"/g, '&quot;');
-  }
-
-  function generateCode() {
-    codeOutput.value = generateCodeHTML();
-  }
-
-  function copyCode() {
-    if (!codeOutput.value) { alert('请先生成代码'); return; }
-    codeOutput.select();
-    try {
-      document.execCommand('copy');
-      alert('已复制到剪贴板！');
-    } catch(e) {
-      alert('复制失败，请手动选择复制');
-    }
-  }
-
-  function clearAll() {
-    if (parts.length === 0 || confirm('确定清空所有部件？')) {
-      parts = [];
-      selectedId = null;
-      renderAll();
-      codeOutput.value = '';
-    }
-  }
-
-  document.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
-    const p = parts.find(x => x.id === selectedId);
-    if (!p) return;
-    const step = e.shiftKey ? 0.05 : 0.01;
-    let handled = true;
-    switch(e.key) {
-      case 'ArrowLeft':  p.x = clampX(p.x - step, p.w); break;
-      case 'ArrowRight': p.x = clampX(p.x + step, p.w); break;
-      case 'ArrowUp':    p.y = clampY(p.y - step, p.h); break;
-      case 'ArrowDown':  p.y = clampY(p.y + step, p.h); break;
-      case 'Delete':
-      case 'Backspace':  deletePart(p.id); return;
-      default: handled = false;
-    }
-    if (handled) { e.preventDefault(); renderAll(); }
-  });
-
-  renderAll();
 </script>
 
 </body>
