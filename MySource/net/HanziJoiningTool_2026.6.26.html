@@ -1,4 +1,168 @@
 <!DOCTYPE html>
+<html lang="zh-CN">
+    
+    <head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+    <meta name="description" content="" />
+    <meta name="hexo-theme-A4" content="v2.0.1" />
+    <link rel="alternate icon" type="image/webp" href="/MySource/img/avatar.jpg">
+    <title>Ammonia</title>
+
+    
+        
+<link rel="stylesheet" href="/css/highlight/style1.css">
+
+        
+<link rel="stylesheet" href="/css/reset.css">
+
+        
+<link rel="stylesheet" href="/css/markdown.css">
+
+        
+<link rel="stylesheet" href="/css/fonts.css">
+
+         <!--注意：首页既不是post也不是page-->
+        
+
+        
+<link rel="stylesheet" href="/css/ui.css">
+
+        
+<link rel="stylesheet" href="/css/style.css">
+
+
+        
+            <!--返回顶部css-->
+            
+<link rel="stylesheet" href="/css/returnToTop.css">
+
+            
+<link rel="stylesheet" href="/css/unicons.css">
+
+        
+        
+            <!--目录-->
+            
+<link rel="stylesheet" href="/css/toc.css">
+
+        
+    
+
+    
+
+    
+<link rel="stylesheet" href="/css/lightgallery-bundle.min.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/custom.css">
+
+    
+
+    
+
+    <!-- <link rel="stylesheet" href="https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkai/dist/LXGWWenKai-Regular/result.css" /> -->
+    <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/@chinese-fonts/lxgwwenkai@3.0.0/dist/LXGWWenKai-Regular/result.css' /> 
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+    
+    
+
+    
+    
+
+
+
+    
+
+    
+    
+
+
+
+
+    
+    
+
+
+    <body>
+        
+        
+            
+        
+        <div class="paper">
+
+            
+
+            
+                <div class="shadow-drop-2-bottom paper-main">
+                    
+
+
+<div class="header">
+    <div class="header-container">
+        <style>
+            .header-img {
+                width: 56px;
+                height: auto;
+                object-fit: cover; /* 保持图片比例 */
+                transition: transform 0.3s ease-in-out; 
+                border-radius: 50%; 
+            }
+            
+        </style>
+        <img 
+            alt="^-^" 
+            cache-control="max-age=86400" 
+            class="header-img" 
+            src="/MySource/img/avatar.jpg" 
+        />
+        <div class="header-content">
+            <a class="logo" href="/">Ammonia</a> 
+            <span class="description"></span> 
+        </div>
+    </div>
+    
+   
+    <ul class="nav">
+        
+            
+                <li><a href="/">首页</a></li>
+            
+        
+            
+                <li><a href="/list/">文章</a></li>
+            
+        
+            
+                <li><a href="/categories/">分类</a></li>
+            
+        
+    </ul>
+</div>
+
+                    
+                    
+
+                    
+                    
+
+                    <!--说明是文章post页面-->
+                    
+                        <div class="post-main">
+    
+
+    
+
+    
+
+    <div class="post-md">
+        
+            
+        
+        <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -49,7 +213,7 @@
         /* 非裁剪模式部件显示移动光标 */
         .part { position: absolute; cursor: move; user-select: none; box-sizing: border-box; }
         .part.selected { outline: 2px dashed #2196F3; outline-offset: -1px; }
-        .part-inner { display: inline-block; transform-origin: top left; line-height: 1; color: inherit; }
+        .part-inner { display: inline-block; transform-origin: top left; line-height: 1; color: #000; }
         .handle { position: absolute; width: 10px; height: 10px; background: #2196F3; border: 1px solid white; box-shadow: 0 0 2px rgba(0, 0, 0, 0.5); z-index: 100; }
         /* 裁剪模式下隐藏手柄 */
         .canvas.cropping .handle { display: none; }
@@ -619,7 +783,7 @@
                 z: parts.length + 1,
                 fontWeight: 400,
                 fontFamily: 'SimSun',
-                color: '',
+                color: '#000000',
                 clipPath: '', clipPathD: '',
                 crops: [], cropHistory: []
             };
@@ -784,7 +948,7 @@
             inner.style.transform = 'scale(' + p.w + ', ' + p.h + ')';
             inner.style.fontWeight = p.fontWeight;
             inner.style.fontFamily = FONT_STACKS[p.fontFamily] || FONT_STACKS['SimSun'];
-            inner.style.color = p.color || '';
+            inner.style.color = p.color || '#000000';
             if (p.clipPath) {
                 inner.style.clipPath = p.clipPath;
                 inner.style.webkitClipPath = p.clipPath;
@@ -822,7 +986,7 @@
                 inner.style.fontSize = pxPerEm + 'px';
                 inner.style.fontWeight = p.fontWeight;
                 inner.style.fontFamily = FONT_STACKS[p.fontFamily] || FONT_STACKS['SimSun'];
-                inner.style.color = p.color || '';
+                inner.style.color = p.color || '#000000';
                 if (p.clipPath) {
                     inner.style.clipPath = p.clipPath;
                     inner.style.webkitClipPath = p.clipPath;
@@ -892,7 +1056,7 @@
                 <div><label>文字：</label><input type="text" id="prop_text_${p.id}" value="${escapeAttr(p.text)}" oninput="updateProp(${p.id}, 'text', this.value)"></div>
                 <div><label>字体：</label><select id="prop_fontFamily_${p.id}" onchange="updateProp(${p.id}, 'fontFamily', this.value)">${fontOptions}</select></div>
                 <div><label>粗细：</label><select id="prop_fontWeight_${p.id}" onchange="updateProp(${p.id}, 'fontWeight', parseInt(this.value))">${weightOptions}</select></div>
-                <div><label>颜色：</label><input type="color" id="prop_color_${p.id}" value="${p.color || '#000000'}" oninput="updateProp(${p.id}, 'color', this.value)"> <button type="button" onclick="resetPartColor(${p.id})" style="font-size:12px;">继承背景色</button> <span id="colorStatus_${p.id}" style="font-size:11px;color:#888;">${p.color ? '已自定义颜色' : '当前：跟随父级 (currentColor)'}</span></div>
+                <div><label>颜色：</label><input type="color" id="prop_color_${p.id}" value="${p.color || '#000000'}" oninput="updateProp(${p.id}, 'color', this.value)"></div>
                 <div><label>X (em)：</label><input type="number" step="0.01" id="prop_x_${p.id}" value="${p.x.toFixed(3)}" oninput="updateProp(${p.id}, 'x', clampX(parseFloat(this.value)||0, ${p.w}))"></div>
                 <div><label>Y (em)：</label><input type="number" step="0.01" id="prop_y_${p.id}" value="${p.y.toFixed(3)}" oninput="updateProp(${p.id}, 'y', clampY(parseFloat(this.value)||0, ${p.h}))"></div>
                 <div><label>宽 (em)：</label><input type="number" step="0.01" id="prop_w_${p.id}" value="${p.w.toFixed(3)}" oninput="updateProp(${p.id}, 'w', clampW(parseFloat(this.value)||0.05, ${p.x}))"></div>
@@ -903,10 +1067,6 @@
             syncCropButton();
         }
 
-        function resetPartColor(id) {
-            updateProp(id, 'color', '');
-        }
-
         function updateProp(id, key, value) {
             const p = parts.find(x => x.id === id);
             if (!p) return;
@@ -915,13 +1075,11 @@
             else if (key === 'w') value = clampW(value, p.x);
             else if (key === 'h') value = clampH(value, p.y);
             else if (key === 'color') {
-                p[key] = value;
+                p[key] = value || '#000000';
                 updatePartElement(p);
                 updatePreview();
                 const colorInput = document.getElementById('prop_color_' + id);
-                if (colorInput) colorInput.value = p.color || '#000000';
-                const statusEl = document.getElementById('colorStatus_' + id);
-                if (statusEl) statusEl.textContent = p.color ? '已自定义颜色' : '当前：跟随父级 (currentColor)';
+                if (colorInput) colorInput.value = p.color;
                 return;
             }
             p[key] = value;
@@ -950,9 +1108,9 @@
             const sorted = [...parts].sort((a, b) => a.z - b.z);
             sorted.forEach(p => {
                 const ff = FONT_STACKS[p.fontFamily] || FONT_STACKS['SimSun'];
-                const colorStyle = p.color ? `color:${p.color};` : '';
+                const col = p.color || '#000000';
                 let wrapperStyle = `display:inline-block;position:absolute;left:${fmt(p.x)}em;top:${fmt(p.y)}em;z-index:${p.z};`;
-                let innerStyle = `display:inline-block;transform:scale(${fmt(p.w)},${fmt(p.h)});transform-origin:top left;width:1em;height:1em;line-height:1;font-family:${ff};font-weight:${p.fontWeight};${colorStyle}`;
+                let innerStyle = `display:inline-block;transform:scale(${fmt(p.w)},${fmt(p.h)});transform-origin:top left;width:1em;height:1em;line-height:1;font-family:${ff};font-weight:${p.fontWeight};color:${col};`;
                 if (p.clipPath) innerStyle += `clip-path:${p.clipPath};-webkit-clip-path:${p.clipPath};`;
                 inner += `<span style="${wrapperStyle}"><span style="${innerStyle}">${escapeHtml(p.text)}</span></span>`;
             });
@@ -969,9 +1127,9 @@
             let clipDefsMarkup = '';
             const sorted = [...parts].sort((a, b) => a.z - b.z);
             const items = sorted.map(p => {
-                const colorStyle = p.color ? `color:${p.color};` : '';
+                const col = p.color || '#000000';
                 let wrapperStyle = `display:inline-block;position:absolute;left:${fmt(p.x)}em;top:${fmt(p.y)}em;z-index:${p.z};`;
-                let innerStyle = `display:inline-block;transform:scale(${fmt(p.w)},${fmt(p.h)});transform-origin:top left;width:1em;height:1em;line-height:1;font-weight:${p.fontWeight};${colorStyle}`;
+                let innerStyle = `display:inline-block;transform:scale(${fmt(p.w)},${fmt(p.h)});transform-origin:top left;width:1em;height:1em;line-height:1;font-weight:${p.fontWeight};color:${col};`;
                 if (includeFont) innerStyle += `font-family:${FONT_STACKS[p.fontFamily] || FONT_STACKS['SimSun']};`;
                 if (p.clipPathD) {
                     const clipId = 'clip-' + p.id + '-' + randSuffix;
@@ -1085,3 +1243,160 @@
     </script>
 </body>
 </html>
+    </div>
+
+    <div class="post-meta">
+        <i>
+        
+        </i>
+    </div>
+    <br>
+    
+    
+        
+            
+    
+            <div class="post-footer-pre-next">
+                
+
+                
+            </div>
+    
+        
+    
+
+    
+        
+
+     
+</div>
+
+
+
+
+                    
+
+                    <div class="footer">
+    
+        <span> 
+             
+
+            
+                
+
+            
+        </span>
+       
+    
+</div>
+
+
+
+<!--这是指一条线往下的内容-->
+<div class="footer-last">
+    
+            <span></span>
+            
+    
+</div>
+
+
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+
+    <!--目录-->
+    
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript" ></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" type="text/javascript" ></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/javascripts/jquery.tocify.min.js" type="text/javascript" ></script>
+        
+<script src="/js/toc.js"></script>
+
+    
+
+    
+<script src="/js/randomHeaderContent.js"></script>
+
+    <!--回到顶部按钮-->
+    
+        
+<script src="/js/returnToTop.js"></script>
+
+    
+
+    
+        
+<script src="/js/returnToLastPage.js"></script>
+
+    
+
+
+
+
+
+<script src="/js/lightgallery/lightgallery.umd.min.js"></script>
+
+
+
+<script src="/js/lightgallery/plugins/lg-thumbnail.umd.min.js"></script>
+
+
+
+<script src="/js/lightgallery/plugins/lg-fullscreen.umd.min.js"></script>
+
+
+<script src="/js/lightgallery/plugins/lg-autoplay.umd.min.js"></script>
+
+
+<script src="/js/lightgallery/plugins/lg-zoom.umd.min.js"></script>
+
+
+<script src="/js/lightgallery/plugins/lg-rotate.umd.min.js"></script>
+
+
+<script src="/js/lightgallery/plugins/lg-paper.umd.min.js"></script>
+
+
+
+
+<script type="text/javascript">
+     
+    if (typeof lightGallery !== "undefined") {
+        var options1 = {
+            selector: '.gallery-item',
+            plugins: [lgThumbnail, lgFullscreen, lgAutoplay, lgZoom, lgRotate, lgPager], // 启用插件
+            thumbnail: true,          // 显示缩略图
+            zoom: true,               // 启用缩放功
+            rotate: true,             // 启用旋转功能能
+            autoplay: true,        // 启用自动播放功能
+            fullScreen: true,      // 启用全屏功能
+            pager: false, //页码,
+            zoomFromOrigin: true,   // 从原始位置缩放
+            actualSize: true,       // 启用查看实际大小的功能
+            enableZoomAfter: 300,    // 延迟缩放，确保图片加载完成后可缩放
+        };
+        lightGallery(document.getElementsByClassName('.article-gallery')[0], options1); // 修复选择器
+    }
+    
+</script>
+
+
+                </div>
+            
+            
+                <!-- 回到顶部的按钮-->
+                <div class="progress-wrap shadow-drop-2-bottom">
+                    <svg class="progress-circle svg-content" width="100%" height="100%" viewBox="-1 -1 102 102">
+                        <path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98"/>
+                    </svg>
+                </div>
+            
+            
+    </body>
+</html>
+<script src="/js/emojiHandler.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        wrapEmojis('.paper');
+    });
+</script>
