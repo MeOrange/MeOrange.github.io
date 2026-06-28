@@ -1777,7 +1777,7 @@
                 const colorStyle = p.color ? `color:${p.color};` : '';
 
                 let outerStyle =
-                    `display:inline-block;position:absolute;left:${fmt(p.x)}em;top:${fmt(p.y)}em;width:1em;height:1em;z-index:${p.z};transform-origin:50% 50%;transform:rotate(${fmt(p.angle||0)}deg) skewX(${fmt(p.skew||0)}deg);`;
+                    `display:inline-block;position:absolute;left:${fmt(p.x)}em;top:${fmt(p.y)}em;width:${fmt(p.w)}em;height:${fmt(p.h)}em;z-index:${p.z};transform-origin:50% 50%;transform:rotate(${fmt(p.angle||0)}deg) skewX(${fmt(p.skew||0)}deg);`;
 
                 let innerStyle =
                     `display:inline-block;transform:scale(${fmt(p.w)},${fmt(p.h)});transform-origin:0 0;width:1em;height:1em;line-height:1;font-family:${ff};font-weight:${p.fontWeight};${colorStyle}opacity:${p.opacity};`;
@@ -1837,9 +1837,9 @@
             if (document.getElementById('useSvgPaths').checked) {
                 let inner = '';
                 sorted.forEach(p => {
-                    const colorStyle = p.color ? `fill:${p.color};opacity:${p.opacity};` : `fill:#000;opacity:${p.opacity};`;
+                    const colorStyle = p.color ? `fill:${p.color};opacity:${p.opacity};` : `fill:currentColor;opacity:${p.opacity};`;
                     const outerStyle =
-                        `display:inline-block;position:absolute;left:${fmt(p.x)}em;top:${fmt(p.y)}em;width:1em;height:1em;z-index:${p.z};transform-origin:50% 50%;transform:rotate(${fmt(p.angle||0)}deg) skewX(${fmt(p.skew||0)}deg);`;
+                        `display:inline-block;position:absolute;left:${fmt(p.x)}em;top:${fmt(p.y)}em;width:${fmt(p.w)}em;height:${fmt(p.h)}em;z-index:${p.z};transform-origin:50% 50%;transform:rotate(${fmt(p.angle||0)}deg) skewX(${fmt(p.skew||0)}deg);`;
                     const pathData = generatePartSvgPaths(p);
                     if (pathData.length === 0) {
                         inner += I(1) + `<span style="${outerStyle}"></span>` + nl;
@@ -1863,7 +1863,7 @@
                 const ff = includeFont ? getFontStack(p.fontFamily) : '';
 
                 const outerStyle =
-                    `display:inline-block;position:absolute;left:${fmt(p.x)}em;top:${fmt(p.y)}em;width:1em;height:1em;z-index:${p.z};transform-origin:50% 50%;transform:rotate(${fmt(p.angle||0)}deg) skewX(${fmt(p.skew||0)}deg);`;
+                    `display:inline-block;position:absolute;left:${fmt(p.x)}em;top:${fmt(p.y)}em;width:${fmt(p.w)}em;height:${fmt(p.h)}em;z-index:${p.z};transform-origin:50% 50%;transform:rotate(${fmt(p.angle||0)}deg) skewX(${fmt(p.skew||0)}deg);`;
 
                 let innerStyle =
                     `display:inline-block;transform:scale(${fmt(p.w)},${fmt(p.h)});transform-origin:0 0;width:1em;height:1em;line-height:1;font-weight:${p.fontWeight};${colorStyle}opacity:${p.opacity};`;
