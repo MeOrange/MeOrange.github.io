@@ -1,4 +1,168 @@
 <!DOCTYPE html>
+<html lang="zh-CN">
+    
+    <head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+    <meta name="description" content="" />
+    <meta name="hexo-theme-A4" content="v2.0.1" />
+    <link rel="alternate icon" type="image/webp" href="/MySource/img/avatar.jpg">
+    <title>Ammonia</title>
+
+    
+        
+<link rel="stylesheet" href="/css/highlight/style1.css">
+
+        
+<link rel="stylesheet" href="/css/reset.css">
+
+        
+<link rel="stylesheet" href="/css/markdown.css">
+
+        
+<link rel="stylesheet" href="/css/fonts.css">
+
+         <!--注意：首页既不是post也不是page-->
+        
+
+        
+<link rel="stylesheet" href="/css/ui.css">
+
+        
+<link rel="stylesheet" href="/css/style.css">
+
+
+        
+            <!--返回顶部css-->
+            
+<link rel="stylesheet" href="/css/returnToTop.css">
+
+            
+<link rel="stylesheet" href="/css/unicons.css">
+
+        
+        
+            <!--目录-->
+            
+<link rel="stylesheet" href="/css/toc.css">
+
+        
+    
+
+    
+
+    
+<link rel="stylesheet" href="/css/lightgallery-bundle.min.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/custom.css">
+
+    
+
+    
+
+    <!-- <link rel="stylesheet" href="https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkai/dist/LXGWWenKai-Regular/result.css" /> -->
+    <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/@chinese-fonts/lxgwwenkai@3.0.0/dist/LXGWWenKai-Regular/result.css' /> 
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+    
+    
+
+    
+    
+
+
+
+    
+
+    
+    
+
+
+
+
+    
+    
+
+
+    <body>
+        
+        
+            
+        
+        <div class="paper">
+
+            
+
+            
+                <div class="shadow-drop-2-bottom paper-main">
+                    
+
+
+<div class="header">
+    <div class="header-container">
+        <style>
+            .header-img {
+                width: 56px;
+                height: auto;
+                object-fit: cover; /* 保持图片比例 */
+                transition: transform 0.3s ease-in-out; 
+                border-radius: 50%; 
+            }
+            
+        </style>
+        <img 
+            alt="^-^" 
+            cache-control="max-age=86400" 
+            class="header-img" 
+            src="/MySource/img/avatar.jpg" 
+        />
+        <div class="header-content">
+            <a class="logo" href="/">Ammonia</a> 
+            <span class="description"></span> 
+        </div>
+    </div>
+    
+   
+    <ul class="nav">
+        
+            
+                <li><a href="/">首页</a></li>
+            
+        
+            
+                <li><a href="/list/">文章</a></li>
+            
+        
+            
+                <li><a href="/categories/">分类</a></li>
+            
+        
+    </ul>
+</div>
+
+                    
+                    
+
+                    
+                    
+
+                    <!--说明是文章post页面-->
+                    
+                        <div class="post-main">
+    
+
+    
+
+    
+
+    <div class="post-md">
+        
+            
+        
+        <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -110,18 +274,16 @@
             transform-origin: 0 0;
             color: inherit;
         }
-        .handle { position: absolute; width: 10px; height: 10px; background: #2196F3; border: 1px solid white; box-shadow: 0 0 2px rgba(0, 0, 0, 0.5); }
+        .handle { position: absolute; width: 10px; height: 10px; background: #2196F3; border: 1px solid white; box-shadow: 0 0 2px rgba(0, 0, 0, 0.5); z-index: 100; }
         .canvas.cropping .handle { display: none; }
-        .handle.nw { left:-5px; top:-5px; cursor:nwse-resize; }
-        .handle.n { left:50%; top:-5px; margin-left:-5px; cursor:ns-resize; }
-        .handle.ne { right:-5px; top:-5px; cursor:nesw-resize; }
-        .handle.e { right:-5px; top:50%; margin-top:-5px; cursor:ew-resize; }
-        .handle.se { right:-5px; bottom:-5px; cursor:nwse-resize; }
-        .handle.s { left:50%; bottom:-5px; margin-left:-5px; cursor:ns-resize; }
-        .handle.sw { left:-5px; bottom:-5px; cursor:nesw-resize; }
-        .handle.w { left:-5px; top:50%; margin-top:-5px; cursor:ew-resize; }
-        /* 拖拽期间 .part 继承 canvas 光标，手柄保留自身光标 */
-        .canvas.dragging .part { cursor: inherit !important; }
+        .handle.nw { left: -5px; top: -5px; cursor: nw-resize; }
+        .handle.n { left: 50%; top: -5px; margin-left: -5px; cursor: n-resize; }
+        .handle.ne { right: -5px; top: -5px; cursor: ne-resize; }
+        .handle.e { right: -5px; top: 50%; margin-top: -5px; cursor: e-resize; }
+        .handle.se { right: -5px; bottom: -5px; cursor: se-resize; }
+        .handle.s { left: 50%; bottom: -5px; margin-left: -5px; cursor: s-resize; }
+        .handle.sw { left: -5px; bottom: -5px; cursor: sw-resize; }
+        .handle.w { left: -5px; top: 50%; margin-top: -5px; cursor: w-resize; }
         .crop-box { position: absolute; border: 2px dashed #ff0000; background: rgba(255, 0, 0, 0.2); pointer-events: none; z-index: 9999; box-sizing: border-box; }
         .right-panel { flex: 1; min-width: 320px; position: relative; z-index: 10; }
         .props { margin-bottom: 15px; padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: 4px; }
@@ -316,7 +478,6 @@
                 <div class="copy-area">
                     <button onclick="generateCode()">生成代码</button>
                     <button onclick="copyCode()">复制代码</button>
-                    <button onclick="downloadHTML()">文件下载</button>
                     <span class="copy-tip" id="copyTip">已复制</span>
                 </div>
             </div>
@@ -587,43 +748,6 @@
                 }
                 selectedId = null;
                 renderAll();
-            }
-        }
-
-        class ResetPartCommand extends Command {
-            constructor(id, oldData, snapshot) {
-                super();
-                this.type = 'reset';
-                this.id = id;
-                this.oldData = JSON.parse(JSON.stringify(oldData));
-                this.snapshot = JSON.parse(JSON.stringify(snapshot));
-            }
-            undo() {
-                const p = parts.find(x => x.id === this.id);
-                if (!p) return;
-                Object.assign(p, this.oldData);
-                p.initialSnapshot = this.oldData.initialSnapshot;
-                handleCropsAfterReset(p);
-                renderAll();
-                selectPart(this.id);
-            }
-            redo() {
-                const p = parts.find(x => x.id === this.id);
-                if (!p) return;
-                Object.assign(p, this.snapshot);
-                p.initialSnapshot = this.snapshot.initialSnapshot;
-                handleCropsAfterReset(p);
-                renderAll();
-                selectPart(this.id);
-            }
-        }
-        function handleCropsAfterReset(p) {
-            if (p.crops && p.crops.length > 0) {
-                rebuildClipPath(p);
-            } else {
-                p.clipPath = '';
-                p.clipPathD = '';
-                removeClipDef(p.id);
             }
         }
 
@@ -930,7 +1054,7 @@
             if (!selectedId) return;
             const p = parts.find(x => x.id === selectedId);
             if (!p) return;
-            if (Math.abs(p.angle || 0) > 0.001 || Math.abs(p.skew || 0) > 0.001 || p.flipH || p.flipV) {
+            if (Math.abs(p.angle || 0) > 0.001 || Math.abs(p.skew || 0) > 0.001) {
                 return;
             }
             isCropping = !isCropping;
@@ -972,7 +1096,7 @@
             if (id !== selectedId) return;
             const p = parts.find(x => x.id === id);
             if (!p) return;
-            if (Math.abs(p.angle || 0) > 0.001 || Math.abs(p.skew || 0) > 0.001 || p.flipH || p.flipV) {
+            if (Math.abs(p.angle || 0) > 0.001 || Math.abs(p.skew || 0) > 0.001) {
                 return;
             }
             const entry = partElements.get(p.id);
@@ -1052,8 +1176,6 @@
                 fontFamily: 'SimSun',
                 angle: 0,
                 skew: 0,
-                flipH: false,
-                flipV: false,
                 color: '',
                 opacity: 1,
                 clipPath: '',
@@ -1061,13 +1183,6 @@
                 crops: [],
                 cropHistory: []
             };
-            part.initialSnapshot = JSON.parse(JSON.stringify({
-                text: text, x: 0, y: 0, w: 1, h: 1,
-                z: parts.length + 1, fontWeight: 400, fontFamily: 'SimSun',
-                angle: 0, skew: 0, flipH: false, flipV: false,
-                color: '', opacity: 1,
-                clipPath: '', clipPathD: '', crops: [], cropHistory: []
-            }));
             parts.push(part);
             document.getElementById('partInput').value = '';
             const cmd = new AddPartCommand(part);
@@ -1096,17 +1211,6 @@
             }
         }
 
-        function resetPart(id) {
-            const p = parts.find(x => x.id === id);
-            if (!p || !p.initialSnapshot) return;
-            const cmd = new ResetPartCommand(id, p, p.initialSnapshot);
-            Object.assign(p, JSON.parse(JSON.stringify(p.initialSnapshot)));
-            handleCropsAfterReset(p);
-            executeCommand(cmd);
-            renderAll();
-            selectPart(id);
-        }
-
         let dragState = null;
         let dragStartState = null;
 
@@ -1128,8 +1232,6 @@
             selectPart(id);
             dragState = { type: 'move', id: id, startX: e.clientX, startY: e.clientY };
             dragStartState = { x: p.x, y: p.y, w: p.w, h: p.h };
-            canvas.classList.add('dragging');
-            canvas.style.cursor = 'move';
             e.preventDefault();
         }
 
@@ -1142,8 +1244,6 @@
             selectPart(id);
             dragState = { type: 'resize', id: id, handle: handle, startX: e.clientX, startY: e.clientY };
             dragStartState = { x: p.x, y: p.y, w: p.w, h: p.h };
-            canvas.classList.add('dragging');
-            canvas.style.cursor = getHandleCursor(p, handle);
             e.stopPropagation();
             e.preventDefault();
         }
@@ -1153,20 +1253,8 @@
             if (!dragState) return;
             const p = parts.find(x => x.id === dragState.id);
             if (!p) return;
-            let dx = (e.clientX - dragState.startX) / pxPerEm;
-            let dy = (e.clientY - dragState.startY) / pxPerEm;
-
-            // 反向旋转屏幕位移到部件本地坐标系
-            if (dragState.type === 'resize') {
-                const angle = p.angle || 0;
-                if (Math.abs(angle) > 0.001) {
-                    const rad = angle * Math.PI / 180;
-                    const cosA = Math.cos(-rad), sinA = Math.sin(-rad);
-                    const rdx = dx * cosA - dy * sinA;
-                    const rdy = dx * sinA + dy * cosA;
-                    dx = rdx; dy = rdy;
-                }
-            }
+            const dx = (e.clientX - dragState.startX) / pxPerEm;
+            const dy = (e.clientY - dragState.startY) / pxPerEm;
 
             if (dragState.type === 'move') {
                 p.x = clampX(dragStartState.x + dx, p.w);
@@ -1176,10 +1264,7 @@
                     ny = dragStartState.y,
                     nw = dragStartState.w,
                     nh = dragStartState.h;
-                let h = dragState.handle;
-                // 翻转时交换手柄语义（e↔w / n↔s），使拉伸方向与视觉一致
-                if (p.flipH) h = h.replace(/e/g,'⟪E⟫').replace(/w/g,'e').replace(/⟪E⟫/g,'w');
-                if (p.flipV) h = h.replace(/n/g,'⟪N⟫').replace(/s/g,'n').replace(/⟪N⟫/g,'s');
+                const h = dragState.handle;
                 if (h.includes('e')) nw = dragStartState.w + dx;
                 if (h.includes('w')) { nx = dragStartState.x + dx;
                     nw = dragStartState.w - dx; }
@@ -1242,8 +1327,6 @@
                 }
                 dragState = null;
                 dragStartState = null;
-                canvas.classList.remove('dragging');
-                canvas.style.cursor = '';
             }
         });
 
@@ -1266,74 +1349,6 @@
             return Math.max(0.05, Math.min(maxY - y, h));
         }
 
-        // 光标：手柄指向中心的方向，经 CSS 变换后映射到屏幕方向
-        function getHandleCursor(p, h) {
-            const angleRad=(p.angle||0)*Math.PI/180, skewRad=(p.skew||0)*Math.PI/180;
-            const cosA=Math.cos(angleRad), sinA=Math.sin(angleRad), tanS=Math.tan(skewRad);
-            // 手柄指向中心的本地方向，需按实际宽高比加权（对角手柄 w≠h 时方向非45°）
-            const pw=p.w, ph=p.h;
-            const dirs={n:[0,ph],s:[0,-ph],e:[-pw,0],w:[pw,0],nw:[pw,ph],se:[-pw,-ph],ne:[-pw,ph],sw:[pw,-ph]};
-            let dx=dirs[h][0], dy=dirs[h][1];
-            // CSS transform: rotate(A) skewX(S) scale(fX,fY)
-            // 矩阵 M = R·Sk·Sc，P' = R·Sk·Sc·P，对方向向量按 scale -> skewX -> rotate 顺序变换
-            let cx=(p.flipH?-1:1)*dx, cy=(p.flipV?-1:1)*dy;   // scale (flip)
-            let kx=cx+tanS*cy, ky=cy;                           // skewX
-            let rx=kx*cosA-ky*sinA, ry=kx*sinA+ky*cosA;         // rotate
-            const a=Math.atan2(ry,rx), PI=Math.PI;
-            if(a>-PI/8&&a<=PI/8) return 'ew-resize';
-            if(a>PI/8&&a<=3*PI/8) return 'nwse-resize';
-            if(a>3*PI/8&&a<=5*PI/8) return 'ns-resize';
-            if(a>5*PI/8&&a<=7*PI/8) return 'nesw-resize';
-            if(a>7*PI/8||a<=-7*PI/8) return 'ew-resize';
-            if(a>-7*PI/8&&a<=-5*PI/8) return 'nwse-resize';
-            if(a>-5*PI/8&&a<=-3*PI/8) return 'ns-resize';
-            return 'nesw-resize';
-        }
-
-        // 增量更新裁剪按钮状态和提示文字
-        function updateCropHint(p) {
-            const btnCrop = document.getElementById('cropBtn');
-            if (!btnCrop) return;
-            const hasTransform = (Math.abs(p.angle || 0) > 0.001 || Math.abs(p.skew || 0) > 0.001 || p.flipH || p.flipV);
-            if (hasTransform) {
-                btnCrop.disabled = true;
-                btnCrop.style.opacity = '0.5';
-                btnCrop.style.cursor = 'not-allowed';
-            } else {
-                btnCrop.disabled = false;
-                btnCrop.style.opacity = '';
-                btnCrop.style.cursor = '';
-            }
-            const hintSpan = btnCrop.nextElementSibling;
-            if (hintSpan && hintSpan.tagName === 'SPAN') {
-                hintSpan.textContent = hasTransform ? '（此变换下无法裁剪）' : (isCropping ? '点击选中部件并框选裁剪' : '');
-            }
-        }
-
-        // 仅更新镜像按钮的样式/动作/裁剪提示，避免全量 rebuild 面板导致DOM重建
-        function updateFlipButtonStyle(p) {
-            const activeStyle = 'background:#2196F3;color:#fff;border-color:#1976D2;';
-            const inactiveStyle = 'background:;color:;border-color:;';
-            ['flipH', 'flipV'].forEach(key => {
-                const btn = document.getElementById('prop_' + key + '_' + p.id);
-                if (btn) {
-                    const isActive = p[key];
-                    btn.style.cssText = 'padding:3px 10px;' + (isActive ? activeStyle : inactiveStyle);
-                    // 必须同步更新 onclick，否则按钮始终传递旧值
-                    btn.setAttribute('onclick', `updateProp(${p.id}, '${key}', ${!p[key]})`);
-                }
-            });
-            updateCropHint(p);
-        }
-
-        function buildOuterTransform(p) {
-            let tf = '';
-            if (p.angle || 0) tf += 'rotate(' + (p.angle||0) + 'deg) ';
-            if (p.skew || 0) tf += 'skewX(' + (p.skew||0) + 'deg) ';
-            if (p.flipH || p.flipV) tf += 'scale(' + (p.flipH ? -1 : 1) + ', ' + (p.flipV ? -1 : 1) + ') ';
-            return tf.trim() || 'none';
-        }
-
         function updatePartElement(p) {
             const entry = partElements.get(p.id);
             if (!entry) return;
@@ -1345,7 +1360,7 @@
             el.style.zIndex = (p.id === selectedId) ? 10000 : p.z;
             el.classList.toggle('selected', p.id === selectedId);
             el.style.transformOrigin = '50% 50%';
-            el.style.transform = buildOuterTransform(p);
+            el.style.transform = 'rotate(' + (p.angle || 0) + 'deg) skewX(' + (p.skew || 0) + 'deg)';
             if (inner) {
                 inner.textContent = p.text;
                 inner.style.transform = 'scale(' + p.w + ', ' + p.h + ')';
@@ -1362,10 +1377,6 @@
                 clipWrapper.style.clipPath = '';
                 clipWrapper.style.webkitClipPath = '';
             }
-            // 更新手柄光标（角度/翻转变化时光标方向需要重新计算）
-            if(p.id===selectedId) el.querySelectorAll('.handle').forEach(h=>{
-                h.style.cursor=getHandleCursor(p,h.dataset.handle);
-            });
         }
 
         function renderAll() {
@@ -1392,7 +1403,7 @@
                 el.style.zIndex = (p.id === selectedId) ? 10000 : p.z;
                 el.dataset.id = p.id;
                 el.style.transformOrigin = '50% 50%';
-                el.style.transform = buildOuterTransform(p);
+                el.style.transform = 'rotate(' + (p.angle || 0) + 'deg) skewX(' + (p.skew || 0) + 'deg)';
 
                 const clipWrapper = document.createElement('div');
                 clipWrapper.className = 'part-clip';
@@ -1421,21 +1432,18 @@
 
                 clipWrapper.appendChild(inner);
                 partElements.set(p.id, { el, clipWrapper, inner });
-                el.addEventListener('mousedown', onPartMouseDown);
-                el.appendChild(clipWrapper);
-
-                // 手柄在 .part 内，光标垂直于边线
                 if (p.id === selectedId && !isCropping) {
-                    ['nw','n','ne','e','se','s','sw','w'].forEach(h=>{
-                        const handle=document.createElement('div');
-                        handle.className='handle '+h;
-                        handle.dataset.id=p.id;
-                        handle.dataset.handle=h;
-                        handle.style.cursor=getHandleCursor(p,h);
-                        handle.addEventListener('mousedown',onHandleMouseDown);
+                    ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'].forEach(h => {
+                        const handle = document.createElement('div');
+                        handle.className = 'handle ' + h;
+                        handle.dataset.id = p.id;
+                        handle.dataset.handle = h;
+                        handle.addEventListener('mousedown', onHandleMouseDown);
                         el.appendChild(handle);
                     });
                 }
+                el.addEventListener('mousedown', onPartMouseDown);
+                el.appendChild(clipWrapper);
                 canvas.appendChild(el);
             });
             renderPartsList();
@@ -1485,7 +1493,7 @@
                 `<li data-value="${w}"${p.fontWeight == w ? ' class="selected"' : ''}>${w}${w === 400 ? ' (normal)' : ''}${w === 700 ? ' (bold)' : ''}</li>`
             ).join('');
 
-            const hasTransform = (Math.abs(p.angle || 0) > 0.001 || Math.abs(p.skew || 0) > 0.001 || p.flipH || p.flipV);
+            const hasTransform = (Math.abs(p.angle || 0) > 0.001 || Math.abs(p.skew || 0) > 0.001);
             const cropDisabledAttr = hasTransform ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : '';
             const cropBtnText = isCropping ? '裁剪模式' : '裁剪部件';
             const cropHint = hasTransform ? '（此变换下无法裁剪）' : (isCropping ? '点击选中部件并框选裁剪' : '');
@@ -1576,21 +1584,13 @@
                             <button type="button" onclick="resetPartColor(${p.id})" style="font-size:12px; padding:2px 8px;">跟随父级</button>
                             <span id="colorStatus_${p.id}" style="font-size:11px;color:#888; white-space:nowrap;">${p.color ? '已自定义颜色' : '当前：跟随父级'}</span>
                         </div>
-                        <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
-                            <label style="width:70px; flex:0 0 auto;">镜像：</label>
-                            <button type="button" id="prop_flipH_${p.id}" onclick="updateProp(${p.id}, 'flipH', ${!p.flipH})" style="padding:3px 10px;${p.flipH ? 'background:#2196F3;color:#fff;border-color:#1976D2;' : ''}">⇔ 水平</button>
-                            <button type="button" id="prop_flipV_${p.id}" onclick="updateProp(${p.id}, 'flipV', ${!p.flipV})" style="padding:3px 10px;${p.flipV ? 'background:#2196F3;color:#fff;border-color:#1976D2;' : ''}">⇕ 垂直</button>
-                        </div>
                     </div>
                 </div>
                 <div style="margin-top:8px; display:flex; align-items:center; gap:4px; white-space:nowrap;">
                     <label style="width:70px; flex:0 0 auto;">层级 z：</label>
                     <input type="number" step="1" id="prop_z_${p.id}" value="${p.z}" oninput="updateProp(${p.id}, 'z', parseInt(this.value)||1)" style="width:140px; box-sizing:border-box;">
                 </div>
-                <div style="margin-top:8px; display:flex; gap:6px;">
-                    <button onclick="resetPart(${p.id})" style="color:#d4a017;">复原此部件</button>
-                    <button onclick="deletePart(${p.id})" style="color:red;">删除此部件</button>
-                </div>
+                <div style="margin-top:8px;"><button onclick="deletePart(${p.id})" style="color:red;">删除此部件</button></div>
             `;
 
             // 绑定自定义下拉事件
@@ -1691,7 +1691,7 @@
             const p = parts.find(x => x.id === id);
             if (!p) return;
 
-            if ((key === 'angle' || key === 'skew' || key === 'flipH' || key === 'flipV') && isCropping) {
+            if ((key === 'angle' || key === 'skew') && isCropping) {
                 exitCropMode();
             }
 
@@ -1705,7 +1705,6 @@
             else if (key === 'fontWeight') value = parseInt(value) || 400;
             else if (key === 'angle') value = parseFloat(value) || 0;
             else if (key === 'skew') value = parseFloat(value) || 0;
-            else if (key === 'flipH' || key === 'flipV') value = !!value;
             else if (key === 'color') {
                 p[key] = value;
                 updatePartElement(p);
@@ -1741,15 +1740,12 @@
                     updatePreview();
                     const display = document.querySelector(`#fontSelect_${id} .selected-text`);
                     if (display) display.textContent = value;
-                } else if (key === 'angle' || key === 'skew' || key === 'flipH' || key === 'flipV') {
+                } else if (key === 'angle' || key === 'skew') {
                     p[key] = value;
                     updatePartElement(p);
                     updatePreview();
-                    if (key === 'flipH' || key === 'flipV') updateFlipButtonStyle(p);
                     const inputEl = document.getElementById('prop_' + key + '_' + id);
                     if (inputEl) inputEl.value = value;
-                    // 同步更新裁剪按钮提示
-                    updateCropHint(p);
                 } else if (key === 'text' || key === 'fontWeight') {
                     p[key] = value;
                     updatePartElement(p);
@@ -1778,14 +1774,24 @@
                 updatePreview();
                 const display = document.querySelector(`#fontSelect_${id} .selected-text`);
                 if (display) display.textContent = value;
-            } else if (key === 'angle' || key === 'skew' || key === 'flipH' || key === 'flipV') {
+            } else if (key === 'angle' || key === 'skew') {
                 updatePartElement(p);
                 updatePreview();
-                // 仅更新镜像按钮样式/动作和裁剪按钮状态，不重建整个面板
-                if (key === 'flipH' || key === 'flipV') updateFlipButtonStyle(p);
                 const inputEl = document.getElementById('prop_' + key + '_' + id);
                 if (inputEl) inputEl.value = value;
-                updateCropHint(p);
+                const hasTransform = (Math.abs(p.angle || 0) > 0.001 || Math.abs(p.skew || 0) > 0.001);
+                const btnCrop = document.getElementById('cropBtn');
+                if (btnCrop) {
+                    if (hasTransform) {
+                        btnCrop.disabled = true;
+                        btnCrop.style.opacity = '0.5';
+                        btnCrop.style.cursor = 'not-allowed';
+                    } else {
+                        btnCrop.disabled = false;
+                        btnCrop.style.opacity = '';
+                        btnCrop.style.cursor = '';
+                    }
+                }
             } else if (key === 'text' || key === 'fontWeight') {
                 updatePartElement(p);
                 updatePreview();
@@ -1937,14 +1943,8 @@
                 const ff = getFontStack(p.fontFamily);
                 const colorStyle = p.color ? `color:${p.color};` : '';
 
-                let tf = '';
-                if (p.angle || 0) tf += `rotate(${fmt(p.angle||0)}deg) `;
-                if (p.skew || 0) tf += `skewX(${fmt(p.skew||0)}deg) `;
-                if (p.flipH || p.flipV) tf += `scale(${p.flipH ? -1 : 1},${p.flipV ? -1 : 1}) `;
-                if (!tf) tf = 'none';
-
                 let outerStyle =
-                    `display:inline-block;position:absolute;left:${fmt(p.x)}em;top:${fmt(p.y)}em;width:${fmt(p.w)}em;height:${fmt(p.h)}em;z-index:${p.z};transform-origin:50% 50%;transform:${tf};`;
+                    `display:inline-block;position:absolute;left:${fmt(p.x)}em;top:${fmt(p.y)}em;width:${fmt(p.w)}em;height:${fmt(p.h)}em;z-index:${p.z};transform-origin:50% 50%;transform:rotate(${fmt(p.angle||0)}deg) skewX(${fmt(p.skew||0)}deg);`;
 
                 let innerStyle =
                     `display:inline-block;transform:scale(${fmt(p.w)},${fmt(p.h)});transform-origin:0 0;width:1em;height:1em;line-height:1;font-family:${ff};font-weight:${p.fontWeight};${colorStyle}opacity:${p.opacity};`;
@@ -2005,13 +2005,8 @@
                 let inner = '';
                 sorted.forEach(p => {
                     const colorStyle = p.color ? `fill:${p.color};opacity:${p.opacity};` : `fill:currentColor;opacity:${p.opacity};`;
-                    let tf = '';
-                    if (p.angle || 0) tf += `rotate(${fmt(p.angle||0)}deg) `;
-                    if (p.skew || 0) tf += `skewX(${fmt(p.skew||0)}deg) `;
-                    if (p.flipH || p.flipV) tf += `scale(${p.flipH ? -1 : 1},${p.flipV ? -1 : 1}) `;
-                    if (!tf) tf = 'none';
                     const outerStyle =
-                        `display:inline-block;position:absolute;left:${fmt(p.x)}em;top:${fmt(p.y)}em;width:${fmt(p.w)}em;height:${fmt(p.h)}em;z-index:${p.z};transform-origin:50% 50%;transform:${tf};`;
+                        `display:inline-block;position:absolute;left:${fmt(p.x)}em;top:${fmt(p.y)}em;width:${fmt(p.w)}em;height:${fmt(p.h)}em;z-index:${p.z};transform-origin:50% 50%;transform:rotate(${fmt(p.angle||0)}deg) skewX(${fmt(p.skew||0)}deg);`;
                     const pathData = generatePartSvgPaths(p);
                     if (pathData.length === 0) {
                         inner += I(1) + `<span style="${outerStyle}"></span>` + nl;
@@ -2034,14 +2029,8 @@
                 const colorStyle = p.color ? `color:${p.color};` : '';
                 const ff = includeFont ? getFontStack(p.fontFamily) : '';
 
-                let tf = '';
-                if (p.angle || 0) tf += `rotate(${fmt(p.angle||0)}deg) `;
-                if (p.skew || 0) tf += `skewX(${fmt(p.skew||0)}deg) `;
-                if (p.flipH || p.flipV) tf += `scale(${p.flipH ? -1 : 1},${p.flipV ? -1 : 1}) `;
-                if (!tf) tf = 'none';
-
                 const outerStyle =
-                    `display:inline-block;position:absolute;left:${fmt(p.x)}em;top:${fmt(p.y)}em;width:${fmt(p.w)}em;height:${fmt(p.h)}em;z-index:${p.z};transform-origin:50% 50%;transform:${tf};`;
+                    `display:inline-block;position:absolute;left:${fmt(p.x)}em;top:${fmt(p.y)}em;width:${fmt(p.w)}em;height:${fmt(p.h)}em;z-index:${p.z};transform-origin:50% 50%;transform:rotate(${fmt(p.angle||0)}deg) skewX(${fmt(p.skew||0)}deg);`;
 
                 let innerStyle =
                     `display:inline-block;transform:scale(${fmt(p.w)},${fmt(p.h)});transform-origin:0 0;width:1em;height:1em;line-height:1;font-weight:${p.fontWeight};${colorStyle}opacity:${p.opacity};`;
@@ -2112,24 +2101,6 @@
                 copyTip.classList.add('show');
                 setTimeout(() => { copyTip.classList.remove('show'); }, 1500);
             }
-        }
-
-        function downloadHTML() {
-            if (!codeOutput.value) {
-                copyTip.textContent = '请先生成代码';
-                copyTip.classList.add('show');
-                setTimeout(() => { copyTip.classList.remove('show'); }, 1500);
-                return;
-            }
-            const blob = new Blob([codeOutput.value], { type: 'text/html;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = '拼字_' + Date.now() + '.html';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
         }
 
         function clearAll() {
@@ -2506,3 +2477,160 @@
     </script>
 </body>
 </html>
+    </div>
+
+    <div class="post-meta">
+        <i>
+        
+        </i>
+    </div>
+    <br>
+    
+    
+        
+            
+    
+            <div class="post-footer-pre-next">
+                
+
+                
+            </div>
+    
+        
+    
+
+    
+        
+
+     
+</div>
+
+
+
+
+                    
+
+                    <div class="footer">
+    
+        <span> 
+             
+
+            
+                
+
+            
+        </span>
+       
+    
+</div>
+
+
+
+<!--这是指一条线往下的内容-->
+<div class="footer-last">
+    
+            <span></span>
+            
+    
+</div>
+
+
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+
+    <!--目录-->
+    
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript" ></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" type="text/javascript" ></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/javascripts/jquery.tocify.min.js" type="text/javascript" ></script>
+        
+<script src="/js/toc.js"></script>
+
+    
+
+    
+<script src="/js/randomHeaderContent.js"></script>
+
+    <!--回到顶部按钮-->
+    
+        
+<script src="/js/returnToTop.js"></script>
+
+    
+
+    
+        
+<script src="/js/returnToLastPage.js"></script>
+
+    
+
+
+
+
+
+<script src="/js/lightgallery/lightgallery.umd.min.js"></script>
+
+
+
+<script src="/js/lightgallery/plugins/lg-thumbnail.umd.min.js"></script>
+
+
+
+<script src="/js/lightgallery/plugins/lg-fullscreen.umd.min.js"></script>
+
+
+<script src="/js/lightgallery/plugins/lg-autoplay.umd.min.js"></script>
+
+
+<script src="/js/lightgallery/plugins/lg-zoom.umd.min.js"></script>
+
+
+<script src="/js/lightgallery/plugins/lg-rotate.umd.min.js"></script>
+
+
+<script src="/js/lightgallery/plugins/lg-paper.umd.min.js"></script>
+
+
+
+
+<script type="text/javascript">
+     
+    if (typeof lightGallery !== "undefined") {
+        var options1 = {
+            selector: '.gallery-item',
+            plugins: [lgThumbnail, lgFullscreen, lgAutoplay, lgZoom, lgRotate, lgPager], // 启用插件
+            thumbnail: true,          // 显示缩略图
+            zoom: true,               // 启用缩放功
+            rotate: true,             // 启用旋转功能能
+            autoplay: true,        // 启用自动播放功能
+            fullScreen: true,      // 启用全屏功能
+            pager: false, //页码,
+            zoomFromOrigin: true,   // 从原始位置缩放
+            actualSize: true,       // 启用查看实际大小的功能
+            enableZoomAfter: 300,    // 延迟缩放，确保图片加载完成后可缩放
+        };
+        lightGallery(document.getElementsByClassName('.article-gallery')[0], options1); // 修复选择器
+    }
+    
+</script>
+
+
+                </div>
+            
+            
+                <!-- 回到顶部的按钮-->
+                <div class="progress-wrap shadow-drop-2-bottom">
+                    <svg class="progress-circle svg-content" width="100%" height="100%" viewBox="-1 -1 102 102">
+                        <path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98"/>
+                    </svg>
+                </div>
+            
+            
+    </body>
+</html>
+<script src="/js/emojiHandler.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        wrapEmojis('.paper');
+    });
+</script>
