@@ -1,4 +1,168 @@
 <!DOCTYPE html>
+<html lang="zh-CN">
+    
+    <head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+    <meta name="description" content="" />
+    <meta name="hexo-theme-A4" content="v2.0.1" />
+    <link rel="alternate icon" type="image/webp" href="/MySource/img/avatar.jpg">
+    <title>Ammonia</title>
+
+    
+        
+<link rel="stylesheet" href="/css/highlight/style1.css">
+
+        
+<link rel="stylesheet" href="/css/reset.css">
+
+        
+<link rel="stylesheet" href="/css/markdown.css">
+
+        
+<link rel="stylesheet" href="/css/fonts.css">
+
+         <!--注意：首页既不是post也不是page-->
+        
+
+        
+<link rel="stylesheet" href="/css/ui.css">
+
+        
+<link rel="stylesheet" href="/css/style.css">
+
+
+        
+            <!--返回顶部css-->
+            
+<link rel="stylesheet" href="/css/returnToTop.css">
+
+            
+<link rel="stylesheet" href="/css/unicons.css">
+
+        
+        
+            <!--目录-->
+            
+<link rel="stylesheet" href="/css/toc.css">
+
+        
+    
+
+    
+
+    
+<link rel="stylesheet" href="/css/lightgallery-bundle.min.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/custom.css">
+
+    
+
+    
+
+    <!-- <link rel="stylesheet" href="https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkai/dist/LXGWWenKai-Regular/result.css" /> -->
+    <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/@chinese-fonts/lxgwwenkai@3.0.0/dist/LXGWWenKai-Regular/result.css' /> 
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+    
+    
+
+    
+    
+
+
+
+    
+
+    
+    
+
+
+
+
+    
+    
+
+
+    <body>
+        
+        
+            
+        
+        <div class="paper">
+
+            
+
+            
+                <div class="shadow-drop-2-bottom paper-main">
+                    
+
+
+<div class="header">
+    <div class="header-container">
+        <style>
+            .header-img {
+                width: 56px;
+                height: auto;
+                object-fit: cover; /* 保持图片比例 */
+                transition: transform 0.3s ease-in-out; 
+                border-radius: 50%; 
+            }
+            
+        </style>
+        <img 
+            alt="^-^" 
+            cache-control="max-age=86400" 
+            class="header-img" 
+            src="/MySource/img/avatar.jpg" 
+        />
+        <div class="header-content">
+            <a class="logo" href="/">Ammonia</a> 
+            <span class="description"></span> 
+        </div>
+    </div>
+    
+   
+    <ul class="nav">
+        
+            
+                <li><a href="/">首页</a></li>
+            
+        
+            
+                <li><a href="/list/">文章</a></li>
+            
+        
+            
+                <li><a href="/categories/">分类</a></li>
+            
+        
+    </ul>
+</div>
+
+                    
+                    
+
+                    
+                    
+
+                    <!--说明是文章post页面-->
+                    
+                        <div class="post-main">
+    
+
+    
+
+    
+
+    <div class="post-md">
+        
+            
+        
+        <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -129,8 +293,6 @@
         .props label { display: inline-block; width: 70px; font-size: 13px; }
         .props input, .props select { width: 140px; padding: 5px; border: 1px solid #d1d1d6; border-radius: 3px; box-sizing: border-box; }
         .props input[type="color"] { width: 50px; height: 32px; padding: 2px; cursor: pointer; vertical-align: middle; }
-        .props .font-custom-select .display { height: 32px; box-sizing: border-box; display: flex; align-items: center; }
-        .props input, .props select, .props .font-custom-select .display, .props button { height: 32px; box-sizing: border-box; }
         .preview { padding: 15px; background: white; border: 1px solid #ccc; font-size: 16px; line-height: 1.6; border-radius: 4px; }
         .code { width: 100%; height: 180px; font-family: monospace; font-size: 12px; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; resize: none; }
         .parts-list { margin-top: 10px; max-height: 180px; overflow-y: auto; border: 1px solid #ddd; padding: 5px; background: #fff; border-radius: 4px; }
@@ -420,7 +582,6 @@
         };
         let customFontMap = {};
         let fontNames = Object.keys(DEFAULT_FONT_STACKS);
-        let lockedFontFamily = null;
 
         function getFontStack(name) {
             if (DEFAULT_FONT_STACKS[name]) return DEFAULT_FONT_STACKS[name];
@@ -1120,7 +1281,7 @@
                 h: 1,
                 z: parts.length + 1,
                 fontWeight: 400,
-                fontFamily: lockedFontFamily || 'SimSun',
+                fontFamily: 'SimSun',
                 angle: 0,
                 skew: 0,
                 flipH: false,
@@ -1173,7 +1334,6 @@
             if (!p || !p.initialSnapshot) return;
             const cmd = new ResetPartCommand(id, p, p.initialSnapshot);
             Object.assign(p, JSON.parse(JSON.stringify(p.initialSnapshot)));
-            if (lockedFontFamily) p.fontFamily = lockedFontFamily;
             handleCropsAfterReset(p);
             executeCommand(cmd);
             renderAll();
@@ -1576,6 +1736,26 @@
                 </div>
             `;
 
+            const fontSelectHtml = `
+                <div style="display:flex; align-items:center; gap:4px; white-space:nowrap; flex-wrap:wrap;">
+                    <label style="width:70px; flex:0 0 auto;">字体：</label>
+                    <div class="font-custom-select" id="fontSelect_${p.id}">
+                        <div class="display" id="fontDisplay_${p.id}">
+                            <span class="selected-text">${escapeHtml(p.fontFamily)}</span>
+                            <span class="arrow">▼</span>
+                        </div>
+                        <div class="dropdown" id="fontDropdown_${p.id}">
+                            <div class="search-box">
+                                <input type="text" id="fontSearch_${p.id}" placeholder="搜索字体..." autocomplete="off">
+                            </div>
+                            <ul class="options-list" id="fontOptionsList_${p.id}">
+                                ${fontOptionsHtml}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+
             propsPanel.innerHTML = cropBtnHtml + `
                 <div style="display:flex; gap:30px; align-items:flex-start; flex-wrap:wrap;">
                     <div style="flex:0 0 auto; display:flex; flex-direction:column; gap:8px;">
@@ -1583,6 +1763,7 @@
                             <label style="width:70px; flex:0 0 auto;">文字：</label>
                             <input type="text" id="prop_text_${p.id}" value="${escapeAttr(p.text)}" oninput="updateProp(${p.id}, 'text', this.value)" style="width:140px; box-sizing:border-box;">
                         </div>
+                        ${fontSelectHtml}
                         <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
                             <label style="width:70px; flex:0 0 auto;">X (em)：</label>
                             <input type="number" step="0.01" id="prop_x_${p.id}" value="${p.x.toFixed(3)}" oninput="updateProp(${p.id}, 'x', clampX(parseFloat(this.value)||0, ${p.w}))" style="width:140px; box-sizing:border-box;">
@@ -1600,6 +1781,12 @@
                             <input type="number" step="0.01" id="prop_h_${p.id}" value="${p.h.toFixed(3)}" oninput="updateProp(${p.id}, 'h', clampH(parseFloat(this.value)||0.05, ${p.y}))" style="width:140px; box-sizing:border-box;">
                         </div>
                         <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
+                            <label style="width:70px; flex:0 0 auto;">字号 (px)：</label>
+                            <input type="number" step="2" min="2" max="48" id="prop_fontScale_${p.id}" value="${Math.round((p.fontScale||1)*16)}" oninput="updateProp(${p.id}, 'fontScale', Math.min(3,Math.max(0.1,(parseFloat(this.value)||16)/16)))" style="width:140px; box-sizing:border-box;">
+                        </div>
+                    </div>
+                    <div style="flex:0 0 auto; display:flex; flex-direction:column; gap:8px;">
+                        <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
                             <label style="width:70px; flex:0 0 auto;">粗细：</label>
                             <div class="font-custom-select weight-select" id="weightSelect_${p.id}">
                                 <div class="display" id="weightDisplay_${p.id}">
@@ -1614,30 +1801,6 @@
                             </div>
                         </div>
                         <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
-                            <label style="width:70px; flex:0 0 auto;">字号 (px)：</label>
-                            <input type="number" step="2" min="2" max="48" id="prop_fontScale_${p.id}" value="${Math.round((p.fontScale||1)*16)}" oninput="updateProp(${p.id}, 'fontScale', Math.min(3,Math.max(0.1,(parseFloat(this.value)||16)/16)))" style="width:140px; box-sizing:border-box;">
-                        </div>
-                    </div>
-                    <div style="flex:0 0 auto; display:flex; flex-direction:column; gap:8px;">
-                        <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
-                            <label style="width:70px; flex:0 0 auto;">字体：</label>
-                            <div class="font-custom-select" id="fontSelect_${p.id}" style="${lockedFontFamily ? 'pointer-events:none;opacity:0.5;' : ''}">
-                                <div class="display" id="fontDisplay_${p.id}">
-                                    <span class="selected-text">${escapeHtml(p.fontFamily)}</span>
-                                    <span class="arrow">▼</span>
-                                </div>
-                                <div class="dropdown" id="fontDropdown_${p.id}">
-                                    <div class="search-box">
-                                        <input type="text" id="fontSearch_${p.id}" placeholder="搜索字体..." autocomplete="off">
-                                    </div>
-                                    <ul class="options-list" id="fontOptionsList_${p.id}">
-                                        ${fontOptionsHtml}
-                                    </ul>
-                                </div>
-                            </div>
-                            <button type="button" id="fontLockBtn_${p.id}" onclick="toggleFontLock()" style="width:50px;font-size:12px;" title="锁定字体后，新添加/复原的部件自动使用该字体">${lockedFontFamily ? '锁定' : '解锁'}</button>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
                             <label style="width:70px; flex:0 0 auto;">旋转 (deg)：</label>
                             <input type="number" step="1" id="prop_angle_${p.id}" value="${p.angle || 0}" oninput="updateProp(${p.id}, 'angle', parseFloat(this.value)||0)" style="width:140px; box-sizing:border-box;">
                         </div>
@@ -1648,12 +1811,13 @@
                         <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
                             <label style="width:70px; flex:0 0 auto;">透明度：</label>
                             <input type="number" step="0.01" min="0" max="1" id="prop_opacity_${p.id}" value="${p.opacity}" oninput="updateProp(${p.id}, 'opacity', Math.min(1,Math.max(0,parseFloat(this.value)||1)))" style="width:140px; box-sizing:border-box;">
-                            <span id="opacityVal_${p.id}" style="font-size:11px;color:#888;width:28px;display:inline-block;">${Math.round(p.opacity*100)}%</span>
+                            <span id="opacityVal_${p.id}" style="font-size:11px;color:#888;min-width:32px;">${Math.round(p.opacity*100)}%</span>
                         </div>
                         <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
                             <label style="width:70px; flex:0 0 auto;">颜色：</label>
-                            <input type="color" id="prop_color_${p.id}" value="${p.color || '#000000'}" oninput="updateProp(${p.id}, 'color', this.value)" style="box-sizing:border-box; height:32px; padding:2px; width:68px;">
-                            <button type="button" onclick="resetPartColor(${p.id})" style="width:68px;font-size:12px;">跟随父级</button>
+                            <input type="color" id="prop_color_${p.id}" value="${p.color || '#000000'}" oninput="updateProp(${p.id}, 'color', this.value)" style="box-sizing:border-box; height:32px; padding:2px; width:50px;">
+                            <button type="button" onclick="resetPartColor(${p.id})" style="font-size:12px; padding:2px 8px;">跟随父级</button>
+                            <span id="colorStatus_${p.id}" style="font-size:11px;color:#888; white-space:nowrap;">${p.color ? '已自定义颜色' : '当前：跟随父级'}</span>
                         </div>
                         <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
                             <label style="width:70px; flex:0 0 auto;">镜像：</label>
@@ -1793,6 +1957,8 @@
                 updatePreview();
                 const colorInput = document.getElementById('prop_color_' + id);
                 if (colorInput) colorInput.value = p.color || '#000000';
+                const statusEl = document.getElementById('colorStatus_' + id);
+                if (statusEl) statusEl.textContent = p.color ? '已自定义颜色' : '当前：跟随父级';
                 if (!isUndoing) {
                     const cmd = new UpdatePropCommand(id, key, oldValue, value);
                     executeCommand(cmd);
@@ -1873,6 +2039,8 @@
                 updatePreview();
                 const colorInput = document.getElementById('prop_color_' + id);
                 if (colorInput) colorInput.value = p.color || '#000000';
+                const statusEl = document.getElementById('colorStatus_' + id);
+                if (statusEl) statusEl.textContent = p.color ? '已自定义颜色' : '当前：跟随父级';
             } else if (key === 'opacity') {
                 updatePartElement(p);
                 updatePreview();
@@ -2068,26 +2236,24 @@
                 html += `<span style="${outerStyle}"><span style="${innerStyle}">${escapeHtml(p.text)}</span></span>`;
             });
 
-            // 计算实际大小（考虑字号缩放）
+            // 计算预览框实际大小（考虑字号缩放），并限制至少 1em
             let prX = 0,
                 prY = 0,
                 prW = 1,
                 prH = 1;
             if (sorted.length > 0) {
-                const first = sorted[0];
-                const fs0 = first.fontScale || 1;
-                let minX = first.x + first.w * (1 - fs0) / 2;
-                let minY = first.y + first.h * (1 - fs0) / 2;
-                let maxX = first.x + first.w * (1 - fs0) / 2 + first.w * fs0;
-                let maxY = first.y + first.h * (1 - fs0) / 2 + first.h * fs0;
+                let minX = 0,
+                    minY = 0,
+                    maxX = 1,
+                    maxY = 1;
                 sorted.forEach(p => {
                     const fs = p.fontScale || 1;
-                    const ox = p.w * (1 - fs) / 2,
-                        oy = p.h * (1 - fs) / 2;
-                    const l = p.x + ox,
-                        t = p.y + oy,
-                        r = p.x + ox + p.w * fs,
-                        b = p.y + oy + p.h * fs;
+                    const cx = p.w * (1 - fs) / 2;
+                    const cy = p.h * (1 - fs) / 2;
+                    const l = p.x + cx,
+                        t = p.y + cy,
+                        r = p.x + cx + p.w * fs,
+                        b = p.y + cy + p.h * fs;
                     if (l < minX) minX = l;
                     if (t < minY) minY = t;
                     if (r > maxX) maxX = r;
@@ -2104,7 +2270,7 @@
                 '';
 
             return svgDefs +
-                `<span style="display:inline-block;position:relative;width:${fmt(prW)}em;height:${fmt(prH)}em;line-height:1;vertical-align:${fmt(baseline)}em;">` +
+                `<span style="display:inline-block;position:relative;width:${fmt(prW)}em;height:${fmt(prH)}em;line-height:1;vertical-align:${fmt(baseline)}em;overflow:hidden;">` +
                 (prX !== 0 || prY !== 0 ?
                     `<span style="display:inline-block;position:absolute;left:${fmt(-prX)}em;top:${fmt(-prY)}em;">${html}</span>` :
                     html) +
@@ -2124,25 +2290,24 @@
             // 缩进辅助：level 0 不缩进，level 1=2空格，level 2=4空格，level 3=6空格
             const I = (level) => formatCode ? '  '.repeat(level) : '';
 
+            // 计算预览框大小（考虑字号）
             let cX = 0,
                 cY = 0,
                 cW = 1,
                 cH = 1;
             if (sorted.length > 0) {
-                const first = sorted[0];
-                const fs0 = first.fontScale || 1;
-                let minX = first.x + first.w * (1 - fs0) / 2;
-                let minY = first.y + first.h * (1 - fs0) / 2;
-                let maxX = first.x + first.w * (1 - fs0) / 2 + first.w * fs0;
-                let maxY = first.y + first.h * (1 - fs0) / 2 + first.h * fs0;
+                let minX = 0,
+                    minY = 0,
+                    maxX = 1,
+                    maxY = 1;
                 sorted.forEach(p => {
                     const fs = p.fontScale || 1;
-                    const ox = p.w * (1 - fs) / 2,
-                        oy = p.h * (1 - fs) / 2;
-                    const l = p.x + ox,
-                        t = p.y + oy,
-                        r = p.x + ox + p.w * fs,
-                        b = p.y + oy + p.h * fs;
+                    const cx = p.w * (1 - fs) / 2;
+                    const cy = p.h * (1 - fs) / 2;
+                    const l = p.x + cx,
+                        t = p.y + cy,
+                        r = p.x + cx + p.w * fs,
+                        b = p.y + cy + p.h * fs;
                     if (l < minX) minX = l;
                     if (t < minY) minY = t;
                     if (r > maxX) maxX = r;
@@ -2153,7 +2318,7 @@
                 cW = maxX - minX;
                 cH = maxY - minY;
             }
-            const outerOpen = `<span style="display:inline-block;position:relative;width:${fmt(cW)}em;height:${fmt(cH)}em;line-height:1;vertical-align:${fmt(baseline)}em;">`;
+            const outerOpen = `<span style="display:inline-block;position:relative;width:${fmt(cW)}em;height:${fmt(cH)}em;line-height:1;vertical-align:${fmt(baseline)}em;overflow:hidden;">`;
             const offsetWrapper = cX !== 0 || cY !== 0 ?
                 `<span style="display:inline-block;position:absolute;left:${fmt(-cX)}em;top:${fmt(-cY)}em;">` : '';
             const offsetClose = cX !== 0 || cY !== 0 ? '</span>' : '';
@@ -2366,7 +2531,7 @@
                 if (b.maxX > maxX) maxX = b.maxX;
                 if (b.maxY > maxY) maxY = b.maxY;
             });
-            const pad = 0.3;
+            const pad = 0.1;
             const vbX = minX - pad;
             const vbY = minY - pad;
             const vbW = (maxX - minX) + pad * 2;
@@ -2454,7 +2619,7 @@
                 if (b.maxX > maxX) maxX = b.maxX;
                 if (b.maxY > maxY) maxY = b.maxY;
             });
-            const pad = 0.3;
+            const pad = 0.1;
             minX -= pad;
             minY -= pad;
             maxX += pad;
@@ -2474,54 +2639,39 @@
 
             // 绘制每个部件
             sorted.forEach(p => {
+                ctx.save();
                 const px = (p.x - minX) * scale;
                 const py = (p.y - minY) * scale;
                 const pw = p.w * scale;
                 const ph = p.h * scale;
 
-                // 有裁剪需要先渲染到临时 canvas
-                const hasCrops = p.crops && p.crops.some(r => r.w > 0.001 && r.h > 0.001);
-                const tmpCanvas = hasCrops ? document.createElement('canvas') : null;
-                const renderCtx = tmpCanvas ? tmpCanvas.getContext('2d') : ctx;
-                if (tmpCanvas) {
-                    tmpCanvas.width = canvasEl.width;
-                    tmpCanvas.height = canvasEl.height;
-                    renderCtx.clearRect(0, 0, tmpCanvas.width, tmpCanvas.height);
-                }
-
-                renderCtx.save();
-                renderCtx.translate(px + pw / 2, py + ph / 2);
-                if (p.angle || p.skew || p.flipH || p.flipV) {
-                    if (p.flipH || p.flipV) renderCtx.scale(p.flipH ? -1 : 1, p.flipV ? -1 : 1);
-                    if (p.angle) renderCtx.rotate(p.angle * Math.PI / 180);
-                    if (p.skew) renderCtx.transform(1, 0, Math.tan(p.skew * Math.PI / 180), 1, 0, 0);
-                }
-
-                renderCtx.font = `${p.fontWeight || 400} ${ph}px "${p.fontFamily || 'SimSun'}"`;
-                renderCtx.textAlign = 'center';
-                renderCtx.textBaseline = 'middle';
-                renderCtx.globalAlpha = p.opacity;
-                renderCtx.fillStyle = p.color || '#000000';
-                renderCtx.fillText(p.text, 0, 0);
-
-                // 挖掉裁剪区域（在同一变换空间下，跟随旋转/倾斜）
-                if (hasCrops) {
-                    renderCtx.globalCompositeOperation = 'destination-out';
-                    renderCtx.fillStyle = 'rgba(0,0,0,1)';
-                    p.crops.forEach(r => {
-                        if (r.w <= 0.001 || r.h <= 0.001) return;
-                        const x1 = clamp01(r.x) - 0.5, y1 = clamp01(r.y) - 0.5;
-                        const x2 = clamp01(r.x + r.w) - 0.5, y2 = clamp01(r.y + r.h) - 0.5;
-                        if (x2 - x1 <= 0.001 || y2 - y1 <= 0.001) return;
-                        renderCtx.fillRect(x1 * pw, y1 * ph, (x2 - x1) * pw, (y2 - y1) * ph);
+                // 应用裁切（镂空）
+                if (p.holes && p.holes.length > 0) {
+                    ctx.beginPath();
+                    ctx.rect(px, py, pw, ph);
+                    p.holes.forEach(h => {
+                        ctx.rect(px + h.x * pw, py + h.y * ph, h.w * pw, h.h * ph);
                     });
-                    renderCtx.globalCompositeOperation = 'source-over';
+                    ctx.clip('evenodd');
                 }
-                renderCtx.restore();
 
-                if (hasCrops) {
-                    ctx.drawImage(tmpCanvas, 0, 0);
+                const cx = px + pw / 2;
+                const cy = py + ph / 2;
+                ctx.translate(cx, cy);
+                if (p.angle || p.skew || p.flipH || p.flipV) {
+                    if (p.flipH || p.flipV) ctx.scale(p.flipH ? -1 : 1, p.flipV ? -1 : 1);
+                    if (p.angle) ctx.rotate(p.angle * Math.PI / 180);
+                    if (p.skew) ctx.transform(1, 0, Math.tan(p.skew * Math.PI / 180), 1, 0, 0);
                 }
+
+                ctx.font = `${p.fontWeight || 400} ${ph}px "${p.fontFamily || 'SimSun'}"`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.globalAlpha = p.opacity;
+                ctx.fillStyle = p.color || '#000000';
+                ctx.fillText(p.text, 0, 0);
+
+                ctx.restore();
             });
 
             canvasEl.toBlob(function(blob) {
@@ -2562,13 +2712,6 @@
                 const cmd = new BatchDeleteCommand(partsData);
                 executeCommand(cmd);
             }
-        }
-
-        function toggleFontLock() {
-            const p = parts.find(x => x.id === selectedId);
-            if (!p) return;
-            lockedFontFamily = lockedFontFamily ? null : p.fontFamily;
-            updateProps();
         }
 
         function toggleOverflow(val) {
@@ -2842,7 +2985,6 @@
                     newPart.x = newX;
                     newPart.y = newY;
                     newPart.z = parts.length + 1;
-                    if (lockedFontFamily) newPart.fontFamily = lockedFontFamily;
                     newPart.crops = [];
                     newPart.clipPath = '';
                     newPart.clipPathD = '';
@@ -2918,3 +3060,160 @@
     </script>
 </body>
 </html>
+    </div>
+
+    <div class="post-meta">
+        <i>
+        
+        </i>
+    </div>
+    <br>
+    
+    
+        
+            
+    
+            <div class="post-footer-pre-next">
+                
+
+                
+            </div>
+    
+        
+    
+
+    
+        
+
+     
+</div>
+
+
+
+
+                    
+
+                    <div class="footer">
+    
+        <span> 
+             
+
+            
+                
+
+            
+        </span>
+       
+    
+</div>
+
+
+
+<!--这是指一条线往下的内容-->
+<div class="footer-last">
+    
+            <span></span>
+            
+    
+</div>
+
+
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+
+    <!--目录-->
+    
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript" ></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" type="text/javascript" ></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/javascripts/jquery.tocify.min.js" type="text/javascript" ></script>
+        
+<script src="/js/toc.js"></script>
+
+    
+
+    
+<script src="/js/randomHeaderContent.js"></script>
+
+    <!--回到顶部按钮-->
+    
+        
+<script src="/js/returnToTop.js"></script>
+
+    
+
+    
+        
+<script src="/js/returnToLastPage.js"></script>
+
+    
+
+
+
+
+
+<script src="/js/lightgallery/lightgallery.umd.min.js"></script>
+
+
+
+<script src="/js/lightgallery/plugins/lg-thumbnail.umd.min.js"></script>
+
+
+
+<script src="/js/lightgallery/plugins/lg-fullscreen.umd.min.js"></script>
+
+
+<script src="/js/lightgallery/plugins/lg-autoplay.umd.min.js"></script>
+
+
+<script src="/js/lightgallery/plugins/lg-zoom.umd.min.js"></script>
+
+
+<script src="/js/lightgallery/plugins/lg-rotate.umd.min.js"></script>
+
+
+<script src="/js/lightgallery/plugins/lg-paper.umd.min.js"></script>
+
+
+
+
+<script type="text/javascript">
+     
+    if (typeof lightGallery !== "undefined") {
+        var options1 = {
+            selector: '.gallery-item',
+            plugins: [lgThumbnail, lgFullscreen, lgAutoplay, lgZoom, lgRotate, lgPager], // 启用插件
+            thumbnail: true,          // 显示缩略图
+            zoom: true,               // 启用缩放功
+            rotate: true,             // 启用旋转功能能
+            autoplay: true,        // 启用自动播放功能
+            fullScreen: true,      // 启用全屏功能
+            pager: false, //页码,
+            zoomFromOrigin: true,   // 从原始位置缩放
+            actualSize: true,       // 启用查看实际大小的功能
+            enableZoomAfter: 300,    // 延迟缩放，确保图片加载完成后可缩放
+        };
+        lightGallery(document.getElementsByClassName('.article-gallery')[0], options1); // 修复选择器
+    }
+    
+</script>
+
+
+                </div>
+            
+            
+                <!-- 回到顶部的按钮-->
+                <div class="progress-wrap shadow-drop-2-bottom">
+                    <svg class="progress-circle svg-content" width="100%" height="100%" viewBox="-1 -1 102 102">
+                        <path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98"/>
+                    </svg>
+                </div>
+            
+            
+    </body>
+</html>
+<script src="/js/emojiHandler.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        wrapEmojis('.paper');
+    });
+</script>
