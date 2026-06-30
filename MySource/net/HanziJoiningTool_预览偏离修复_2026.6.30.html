@@ -1,4 +1,168 @@
 <!DOCTYPE html>
+<html lang="zh-CN">
+    
+    <head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+    <meta name="description" content="" />
+    <meta name="hexo-theme-A4" content="v2.0.1" />
+    <link rel="alternate icon" type="image/webp" href="/MySource/img/avatar.jpg">
+    <title>Ammonia</title>
+
+    
+        
+<link rel="stylesheet" href="/css/highlight/style1.css">
+
+        
+<link rel="stylesheet" href="/css/reset.css">
+
+        
+<link rel="stylesheet" href="/css/markdown.css">
+
+        
+<link rel="stylesheet" href="/css/fonts.css">
+
+         <!--注意：首页既不是post也不是page-->
+        
+
+        
+<link rel="stylesheet" href="/css/ui.css">
+
+        
+<link rel="stylesheet" href="/css/style.css">
+
+
+        
+            <!--返回顶部css-->
+            
+<link rel="stylesheet" href="/css/returnToTop.css">
+
+            
+<link rel="stylesheet" href="/css/unicons.css">
+
+        
+        
+            <!--目录-->
+            
+<link rel="stylesheet" href="/css/toc.css">
+
+        
+    
+
+    
+
+    
+<link rel="stylesheet" href="/css/lightgallery-bundle.min.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/custom.css">
+
+    
+
+    
+
+    <!-- <link rel="stylesheet" href="https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkai/dist/LXGWWenKai-Regular/result.css" /> -->
+    <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/@chinese-fonts/lxgwwenkai@3.0.0/dist/LXGWWenKai-Regular/result.css' /> 
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+    
+    
+
+    
+    
+
+
+
+    
+
+    
+    
+
+
+
+
+    
+    
+
+
+    <body>
+        
+        
+            
+        
+        <div class="paper">
+
+            
+
+            
+                <div class="shadow-drop-2-bottom paper-main">
+                    
+
+
+<div class="header">
+    <div class="header-container">
+        <style>
+            .header-img {
+                width: 56px;
+                height: auto;
+                object-fit: cover; /* 保持图片比例 */
+                transition: transform 0.3s ease-in-out; 
+                border-radius: 50%; 
+            }
+            
+        </style>
+        <img 
+            alt="^-^" 
+            cache-control="max-age=86400" 
+            class="header-img" 
+            src="/MySource/img/avatar.jpg" 
+        />
+        <div class="header-content">
+            <a class="logo" href="/">Ammonia</a> 
+            <span class="description"></span> 
+        </div>
+    </div>
+    
+   
+    <ul class="nav">
+        
+            
+                <li><a href="/">首页</a></li>
+            
+        
+            
+                <li><a href="/list/">文章</a></li>
+            
+        
+            
+                <li><a href="/categories/">分类</a></li>
+            
+        
+    </ul>
+</div>
+
+                    
+                    
+
+                    
+                    
+
+                    <!--说明是文章post页面-->
+                    
+                        <div class="post-main">
+    
+
+    
+
+    
+
+    <div class="post-md">
+        
+            
+        
+        <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -1155,6 +1319,7 @@
                 flipV: false,
                 color: '',
                 opacity: 1,
+                fontScale: 1,
                 charW: charW,
                 initW: initW,
                 clipPath: '',
@@ -1166,7 +1331,7 @@
                 text: text, x: initX, y: initY, w: initW, h: initH,
                 z: parts.length + 1, fontWeight: 400, fontFamily: 'SimSun',
                 angle: 0, skew: 0, flipH: false, flipV: false,
-                color: '', opacity: 1, charW: charW, initW: initW,
+                color: '', opacity: 1, fontScale: 1, charW: charW, initW: initW,
                 clipPath: '', clipPathD: '', crops: [], cropHistory: []
             }));
             parts.push(part);
@@ -1456,6 +1621,7 @@
                 inner.style.fontFamily = getFontStack(p.fontFamily);
                 inner.style.color = p.color || '';
                 inner.style.opacity = p.opacity;
+                inner.style.letterSpacing = (((p.fontScale || 1) - 1) * pxPerEm * 0.4) + 'px';
             }
             if (p.clipPath) {
                 clipWrapper.style.clipPath = p.clipPath;
@@ -1520,6 +1686,7 @@
                 inner.style.fontFamily = getFontStack(p.fontFamily);
                 inner.style.color = p.color || '';
                 inner.style.opacity = p.opacity;
+                inner.style.letterSpacing = (((p.fontScale || 1) - 1) * pxPerEm * 0.4) + 'px';
 
                 clipWrapper.appendChild(inner);
                 partElements.set(p.id, { el, clipWrapper, inner });
@@ -1642,6 +1809,10 @@
                                 </div>
                             </div>
                         </div>
+                        <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
+                            <label style="width:70px; flex:0 0 auto;">字号 (px)：</label>
+                            <input type="number" step="2" min="2" max="48" id="prop_fontScale_${p.id}" value="${Math.round((p.fontScale||1)*16)}" oninput="updateProp(${p.id}, 'fontScale', Math.min(3,Math.max(0.1,(parseFloat(this.value)||16)/16)))" style="width:140px; box-sizing:border-box;">
+                        </div>
                     </div>
                     <div style="flex:0 0 auto; display:flex; flex-direction:column; gap:8px;">
                         <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
@@ -1660,7 +1831,7 @@
                                     </ul>
                                 </div>
                             </div>
-                            <button type="button" id="fontLockBtn_${p.id}" onclick="toggleFontLock()" style="width:50px;font-size:12px;" title="锁定字体后，新添加/复原的部件自动使用该字体">${lockedFontFamily ? '解锁' : '锁定'}</button>
+                            <button type="button" id="fontLockBtn_${p.id}" onclick="toggleFontLock()" style="width:50px;font-size:12px;" title="锁定字体后，新添加/复原的部件自动使用该字体">${lockedFontFamily ? '锁定' : '解锁'}</button>
                         </div>
                         <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
                             <label style="width:70px; flex:0 0 auto;">旋转 (deg)：</label>
@@ -1864,6 +2035,12 @@
                     if (inputEl) inputEl.value = value;
                     // 同步更新裁剪按钮提示
                     updateCropHint(p);
+                } else if (key === 'fontScale') {
+                    p[key] = value;
+                    // 整体字号：同步到所有部件，不重建面板（避免打断输入）
+                    parts.forEach(pp => { pp.fontScale = value; });
+                    parts.forEach(pp => updatePartElement(pp));
+                    updatePreview();
                 } else if (key === 'text' || key === 'fontWeight') {
                     p[key] = value;
                     updatePartElement(p);
@@ -1908,6 +2085,10 @@
                 const inputEl = document.getElementById('prop_' + key + '_' + id);
                 if (inputEl) inputEl.value = value;
                 updateCropHint(p);
+            } else if (key === 'fontScale') {
+                parts.forEach(pp => { pp.fontScale = value; });
+                parts.forEach(pp => updatePartElement(pp));
+                updatePreview();
             } else if (key === 'text' || key === 'fontWeight') {
                 updatePartElement(p);
                 updatePreview();
@@ -2069,8 +2250,28 @@
             let clipDefs = [];
             let html = '';
 
-            // 字号缩放：仅字号影响容器宽=间距，其他操作不影响
-            const s = 1;
+            // 整体字号缩放 + 包围盒计算
+            const s = sorted.length > 0 ? (sorted[0].fontScale || 1) : 1;
+
+            // 计算所有部件缩放后的实际包围盒
+            let prX = 0, prY = 0, prW = 1, prH = 1;
+            if (sorted.length > 0) {
+                let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                sorted.forEach(p => {
+                    const ox = p.w * (1 - s) / 2;
+                    const oy = p.h * (1 - s) / 2;
+                    const l = p.x + ox;
+                    const t = p.y + oy;
+                    const r = p.x + ox + p.w * s;
+                    const b = p.y + oy + p.h * s;
+                    if (l < minX) minX = l;
+                    if (t < minY) minY = t;
+                    if (r > maxX) maxX = r;
+                    if (b > maxY) maxY = b;
+                });
+                prX = minX; prY = minY;
+                prW = maxX - minX; prH = maxY - minY;
+            }
 
             sorted.forEach(p => {
                 const ff = getFontStack(p.fontFamily);
@@ -2122,7 +2323,11 @@
                 '';
 
             return svgDefs +
-                `<span style="display:inline-block;position:relative;width:${fmt(s)}em;height:1em;line-height:1;vertical-align:${fmt(baseline)}em;overflow:visible;">${html}</span>`;
+                `<span style="display:inline-block;position:relative;width:${fmt(prW)}em;height:${fmt(prH)}em;line-height:1;vertical-align:${fmt(baseline)}em;">` +
+                (prX !== 0 || prY !== 0 ?
+                    `<span style="display:inline-block;position:absolute;left:${fmt(-prX)}em;top:${fmt(-prY)}em;">${html}</span>` :
+                    html) +
+                '</span>';
         }
 
         function generateCodeHTML() {
@@ -2138,8 +2343,23 @@
             // 缩进辅助：level 0 不缩进，level 1=2空格，level 2=4空格，level 3=6空格
             const I = (level) => formatCode ? '  '.repeat(level) : '';
 
-            let s = 1;
-            const outerOpen = `<span style="display:inline-block;position:relative;width:1em;height:1em;line-height:1;vertical-align:${fmt(baseline)}em;overflow:visible;">`;
+            let s = sorted.length > 0 ? (sorted[0].fontScale || 1) : 1;
+            // 包围盒
+            let prX = 0, prY = 0, prW = 1, prH = 1;
+            if (sorted.length > 0) {
+                let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                sorted.forEach(p => {
+                    const ox = p.w * (1 - s) / 2, oy = p.h * (1 - s) / 2;
+                    const l = p.x + ox, t = p.y + oy, r = p.x + ox + p.w * s, b = p.y + oy + p.h * s;
+                    if (l < minX) minX = l; if (t < minY) minY = t;
+                    if (r > maxX) maxX = r; if (b > maxY) maxY = b;
+                });
+                prX = minX; prY = minY; prW = maxX - minX; prH = maxY - minY;
+            }
+            const wrapShift = prX !== 0 || prY !== 0 ?
+                `<span style="display:inline-block;position:absolute;left:${fmt(-prX)}em;top:${fmt(-prY)}em;">` : '';
+            const wrapClose = prX !== 0 || prY !== 0 ? `</span>` : '';
+            const outerOpen = `<span style="display:inline-block;position:relative;width:${fmt(prW)}em;height:${fmt(prH)}em;line-height:1;vertical-align:${fmt(baseline)}em;">` + wrapShift;
 
             if (document.getElementById('useSvgPaths').checked) {
                 let inner = '';
@@ -2164,7 +2384,7 @@
                         I(2) + `</svg>` + nl +
                         I(1) + `</span>` + nl;
                 });
-                return outerOpen + nl + inner + '' + I(0) + '</span>';
+                return outerOpen + nl + inner + wrapClose + I(0) + '</span>';
             }
 
             let clipDefs = [];
@@ -2230,7 +2450,7 @@
                     I(0) + `</svg>` + nl;
             }
 
-            return defsStr + outerOpen + nl + inner + '' + I(0) + '</span>';
+            return defsStr + outerOpen + nl + inner + wrapClose + I(0) + '</span>';
         }
 
         function generateCode() { codeOutput.value = generateCodeHTML(); }
@@ -2902,3 +3122,160 @@
     </script>
 </body>
 </html>
+    </div>
+
+    <div class="post-meta">
+        <i>
+        
+        </i>
+    </div>
+    <br>
+    
+    
+        
+            
+    
+            <div class="post-footer-pre-next">
+                
+
+                
+            </div>
+    
+        
+    
+
+    
+        
+
+     
+</div>
+
+
+
+
+                    
+
+                    <div class="footer">
+    
+        <span> 
+             
+
+            
+                
+
+            
+        </span>
+       
+    
+</div>
+
+
+
+<!--这是指一条线往下的内容-->
+<div class="footer-last">
+    
+            <span></span>
+            
+    
+</div>
+
+
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+
+    <!--目录-->
+    
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript" ></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" type="text/javascript" ></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/javascripts/jquery.tocify.min.js" type="text/javascript" ></script>
+        
+<script src="/js/toc.js"></script>
+
+    
+
+    
+<script src="/js/randomHeaderContent.js"></script>
+
+    <!--回到顶部按钮-->
+    
+        
+<script src="/js/returnToTop.js"></script>
+
+    
+
+    
+        
+<script src="/js/returnToLastPage.js"></script>
+
+    
+
+
+
+
+
+<script src="/js/lightgallery/lightgallery.umd.min.js"></script>
+
+
+
+<script src="/js/lightgallery/plugins/lg-thumbnail.umd.min.js"></script>
+
+
+
+<script src="/js/lightgallery/plugins/lg-fullscreen.umd.min.js"></script>
+
+
+<script src="/js/lightgallery/plugins/lg-autoplay.umd.min.js"></script>
+
+
+<script src="/js/lightgallery/plugins/lg-zoom.umd.min.js"></script>
+
+
+<script src="/js/lightgallery/plugins/lg-rotate.umd.min.js"></script>
+
+
+<script src="/js/lightgallery/plugins/lg-paper.umd.min.js"></script>
+
+
+
+
+<script type="text/javascript">
+     
+    if (typeof lightGallery !== "undefined") {
+        var options1 = {
+            selector: '.gallery-item',
+            plugins: [lgThumbnail, lgFullscreen, lgAutoplay, lgZoom, lgRotate, lgPager], // 启用插件
+            thumbnail: true,          // 显示缩略图
+            zoom: true,               // 启用缩放功
+            rotate: true,             // 启用旋转功能能
+            autoplay: true,        // 启用自动播放功能
+            fullScreen: true,      // 启用全屏功能
+            pager: false, //页码,
+            zoomFromOrigin: true,   // 从原始位置缩放
+            actualSize: true,       // 启用查看实际大小的功能
+            enableZoomAfter: 300,    // 延迟缩放，确保图片加载完成后可缩放
+        };
+        lightGallery(document.getElementsByClassName('.article-gallery')[0], options1); // 修复选择器
+    }
+    
+</script>
+
+
+                </div>
+            
+            
+                <!-- 回到顶部的按钮-->
+                <div class="progress-wrap shadow-drop-2-bottom">
+                    <svg class="progress-circle svg-content" width="100%" height="100%" viewBox="-1 -1 102 102">
+                        <path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98"/>
+                    </svg>
+                </div>
+            
+            
+    </body>
+</html>
+<script src="/js/emojiHandler.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        wrapEmojis('.paper');
+    });
+</script>
