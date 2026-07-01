@@ -1,4 +1,168 @@
 <!DOCTYPE html>
+<html lang="zh-CN">
+    
+    <head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport" />
+    <meta name="description" content="" />
+    <meta name="hexo-theme-A4" content="v2.0.1" />
+    <link rel="alternate icon" type="image/webp" href="/MySource/img/avatar.jpg">
+    <title>Ammonia</title>
+
+    
+        
+<link rel="stylesheet" href="/css/highlight/style1.css">
+
+        
+<link rel="stylesheet" href="/css/reset.css">
+
+        
+<link rel="stylesheet" href="/css/markdown.css">
+
+        
+<link rel="stylesheet" href="/css/fonts.css">
+
+         <!--注意：首页既不是post也不是page-->
+        
+
+        
+<link rel="stylesheet" href="/css/ui.css">
+
+        
+<link rel="stylesheet" href="/css/style.css">
+
+
+        
+            <!--返回顶部css-->
+            
+<link rel="stylesheet" href="/css/returnToTop.css">
+
+            
+<link rel="stylesheet" href="/css/unicons.css">
+
+        
+        
+            <!--目录-->
+            
+<link rel="stylesheet" href="/css/toc.css">
+
+        
+    
+
+    
+
+    
+<link rel="stylesheet" href="/css/lightgallery-bundle.min.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/custom.css">
+
+    
+
+    
+
+    <!-- <link rel="stylesheet" href="https://chinese-fonts-cdn.deno.dev/packages/lxgwwenkai/dist/LXGWWenKai-Regular/result.css" /> -->
+    <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/@chinese-fonts/lxgwwenkai@3.0.0/dist/LXGWWenKai-Regular/result.css' /> 
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+    
+    
+
+    
+    
+
+
+
+    
+
+    
+    
+
+
+
+
+    
+    
+
+
+    <body>
+        
+        
+            
+        
+        <div class="paper">
+
+            
+
+            
+                <div class="shadow-drop-2-bottom paper-main">
+                    
+
+
+<div class="header">
+    <div class="header-container">
+        <style>
+            .header-img {
+                width: 56px;
+                height: auto;
+                object-fit: cover; /* 保持图片比例 */
+                transition: transform 0.3s ease-in-out; 
+                border-radius: 50%; 
+            }
+            
+        </style>
+        <img 
+            alt="^-^" 
+            cache-control="max-age=86400" 
+            class="header-img" 
+            src="/MySource/img/avatar.jpg" 
+        />
+        <div class="header-content">
+            <a class="logo" href="/">Ammonia</a> 
+            <span class="description"></span> 
+        </div>
+    </div>
+    
+   
+    <ul class="nav">
+        
+            
+                <li><a href="/">首页</a></li>
+            
+        
+            
+                <li><a href="/list/">文章</a></li>
+            
+        
+            
+                <li><a href="/categories/">分类</a></li>
+            
+        
+    </ul>
+</div>
+
+                    
+                    
+
+                    
+                    
+
+                    <!--说明是文章post页面-->
+                    
+                        <div class="post-main">
+    
+
+    
+
+    
+
+    <div class="post-md">
+        
+            
+        
+        <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -127,38 +291,6 @@
         /* 拖拽期间 .part 继承 canvas 光标，手柄保留自身光标 */
         .canvas.dragging .part { cursor: inherit !important; }
         .crop-box { position: absolute; border: 2px dashed #ff0000; background: rgba(255, 0, 0, 0.2); pointer-events: none; z-index: 9999; box-sizing: border-box; }
-        .freehand-line { position: absolute; left:0; top:0; width:100%; height:100%; pointer-events: none; z-index: 9998; }
-        .freehand-line path { fill: rgba(255, 0, 0, 0.2); stroke: #ff0000; stroke-width: 2; stroke-dasharray: 5,3; }
-        /* 裁剪类型下拉（复用文件下载样式） */
-        .crop-type-dropdown {
-            position: relative; display: inline-block; vertical-align: middle;
-        }
-        .crop-type-dropdown .ctd-btn {
-            padding: 4px 10px; cursor: pointer;
-            border: 1px solid #d1d1d6; border-radius: 4px;
-            background: #fff; font-size: 13px; color: #333;
-            position: relative; white-space: nowrap;
-        }
-        .crop-type-dropdown .ctd-btn:hover { background: #f5f5f7; border-color: #c7c7cc; }
-        .crop-type-dropdown .ctd-btn .ctd-arrow {
-            display: inline-block; margin-left: 3px; font-size: 10px; color: #888;
-        }
-        .crop-type-dropdown .ctd-menu {
-            display: none; position: absolute; left: 0; top: 100%;
-            min-width: 110px; background: #fff; border: 1px solid #d1d1d6;
-            border-radius: 6px; z-index: 10100;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.12); overflow: hidden;
-        }
-        .crop-type-dropdown.open .ctd-menu { display: block; }
-        .crop-type-dropdown .ctd-menu .ctd-item {
-            display: block; width: 100%; padding: 7px 14px;
-            border: none; background: none; cursor: pointer;
-            font-size: 13px; color: #333; text-align: left; white-space: nowrap;
-            transition: background 0.12s;
-        }
-        .crop-type-dropdown .ctd-menu .ctd-item:hover { background: #f0f0f5; }
-        .crop-type-dropdown .ctd-menu .ctd-item:active { background: #e0e0e8; }
-        .crop-type-dropdown .ctd-menu .ctd-item.selected { color: #2196F3; font-weight: 600; }
         .right-panel { flex: 1; min-width: 320px; position: relative; z-index: 10; }
         .props { margin-bottom: 15px; padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: 4px; }
         .props>div { margin: 4px 0; }
@@ -475,10 +607,7 @@
     let clipboardPart = null;
 
     let isCropping = false;
-    let cropType = 'rect'; // 'rect' | 'freehand'
     let cropState = null;
-    let freehandPoints = []; // 自由绘制模式的点序列（canvas 相对坐标）
-    let freehandLine = null; // 自由绘制时显示的临时线条元素
     const EPS = 0.0001;
     const CLIP_EPS = 0.00001;
 
@@ -783,24 +912,6 @@
             return (p.w / (p.initW || 1)) * (p.charW || p.w);
         }
 
-        /** 重新测量部件的 initW 和 p.w（使用当前 fontWeight/fontFamily/text，适用于所有字符类型） */
-        function remeasureInitW(p) {
-            const allCJK = [...p.text].every(isCJK);
-            const mcv = document.createElement('canvas');
-            const mctx = mcv.getContext('2d');
-            // 使用与 CSS 相同的 font-stack，确保 canvas 和 DOM 使用一致的回退字体
-            mctx.font = p.fontWeight + ' ' + pxPerEm + 'px ' + getFontStack(p.fontFamily);
-            const mm = mctx.measureText(p.text);
-            const lo = allCJK ? 0.5 : 0.15;
-            const hi = 1.5;
-            const newW = Math.max(lo, Math.min(hi, Math.round(mm.width / pxPerEm * 20) / 20));
-            // 仅当测量值与当前值差异显著时才更新，避免微小浮动导致抖动
-            if (Math.abs(newW - p.initW) > 0.02) {
-                p.initW = newW;
-                p.w = newW;
-            }
-        }
-
 
     function rectEq(a, b) {
         return Math.abs(a.x - b.x) < EPS && Math.abs(a.y - b.y) < EPS &&
@@ -888,11 +999,9 @@
             p.clipPathD = '';
             return;
         }
-        // 分离矩形和多边形裁剪条目
-        const rectHoles = p.crops.filter(r => !r.type || r.type !== 'poly');
-        const polyHoles = p.crops.filter(r => r.type === 'poly');
-        let holes = rectHoles.filter(r => r.w > CLIP_EPS && r.h > CLIP_EPS);
-        if (holes.length === 0 && polyHoles.length === 0) { p.clipPath = ''; p.clipPathD = ''; return; }
+        let holes = p.crops.filter(r => r.w > CLIP_EPS && r.h > CLIP_EPS);
+        if (holes.length === 0) { p.clipPath = '';
+            p.clipPathD = ''; return; }
         holes.sort((a, b) => a.x - b.x || a.y - b.y);
         const dedup = [];
         for (const h of holes) {
@@ -904,6 +1013,8 @@
             if (!dup) dedup.push(h);
         }
         holes = dedup;
+        if (holes.length === 0) { p.clipPath = '';
+            p.clipPathD = ''; return; }
         holes = mergeAdjacentRects(holes);
 
         const entry = partElements.get(p.id);
@@ -911,23 +1022,17 @@
         const clipId = 'clip-part-' + p.id;
         let clipEl = document.getElementById(clipId);
         if (!entry) {
-            // objectBoundingBox 分支
             const outer = 'M0,0 L1,0 L1,1 L0,1 Z';
-            const holePaths = [];
-            // 矩形洞
-            holes.forEach(h => {
-                const x1 = clamp01(h.x), y1 = clamp01(h.y),
-                    x2 = clamp01(h.x + h.w), y2 = clamp01(h.y + h.h);
-                if (x2 - x1 < CLIP_EPS || y2 - y1 < CLIP_EPS) return;
-                holePaths.push(`M${fmt(x1)},${fmt(y1)} L${fmt(x2)},${fmt(y1)} L${fmt(x2)},${fmt(y2)} L${fmt(x1)},${fmt(y2)} Z`);
-            });
-            // 多边形洞
-            polyHoles.forEach(ph => {
-                if (!ph.points || ph.points.length < 3) return;
-                const d = buildPolyPath(ph.points);
-                holePaths.push(d);
-            });
-            if (holePaths.length === 0) { p.clipPath = ''; p.clipPathD = ''; return; }
+            const holePaths = holes.map(h => {
+                const x1 = clamp01(h.x),
+                    y1 = clamp01(h.y),
+                    x2 = clamp01(h.x + h.w),
+                    y2 = clamp01(h.y + h.h);
+                if (x2 - x1 < CLIP_EPS || y2 - y1 < CLIP_EPS) return null;
+                return `M${fmt(x1)},${fmt(y1)} L${fmt(x2)},${fmt(y1)} L${fmt(x2)},${fmt(y2)} L${fmt(x1)},${fmt(y2)} Z`;
+            }).filter(Boolean);
+            if (holePaths.length === 0) { p.clipPath = '';
+                p.clipPathD = ''; return; }
             const d = outer + ' ' + holePaths.join(' ');
             p.clipPathD = d;
             p.clipPath = `url(#${clipId})`;
@@ -944,33 +1049,21 @@
             return;
         }
 
-        // userSpaceOnUse 分支（编辑区）
         const el = entry.el;
         const rect = el.getBoundingClientRect();
         if (!rect.width || !rect.height) return;
         const outer =
             `M${fmt(rect.left)},${fmt(rect.top)} L${fmt(rect.right)},${fmt(rect.top)} L${fmt(rect.right)},${fmt(rect.bottom)} L${fmt(rect.left)},${fmt(rect.bottom)} Z`;
-        const holePaths = [];
-        // 矩形洞
-        holes.forEach(h => {
+        const holePaths = holes.map(h => {
             const x1 = rect.left + clamp01(h.x) * rect.width;
             const y1 = rect.top + clamp01(h.y) * rect.height;
             const x2 = rect.left + clamp01(h.x + h.w) * rect.width;
             const y2 = rect.top + clamp01(h.y + h.h) * rect.height;
-            if (Math.abs(x2 - x1) < CLIP_EPS || Math.abs(y2 - y1) < CLIP_EPS) return;
-            holePaths.push(`M${fmt(x1)},${fmt(y1)} L${fmt(x2)},${fmt(y1)} L${fmt(x2)},${fmt(y2)} L${fmt(x1)},${fmt(y2)} Z`);
-        });
-        // 多边形洞（缩放到屏幕坐标）
-        polyHoles.forEach(ph => {
-            if (!ph.points || ph.points.length < 3) return;
-            const screenPoints = ph.points.map(pt => ({
-                x: rect.left + clamp01(pt.x) * rect.width,
-                y: rect.top + clamp01(pt.y) * rect.height
-            }));
-            const d = buildPolyPath(screenPoints);
-            holePaths.push(d);
-        });
-        if (holePaths.length === 0) { p.clipPath = ''; p.clipPathD = ''; return; }
+            if (Math.abs(x2 - x1) < CLIP_EPS || Math.abs(y2 - y1) < CLIP_EPS) return null;
+            return `M${fmt(x1)},${fmt(y1)} L${fmt(x2)},${fmt(y1)} L${fmt(x2)},${fmt(y2)} L${fmt(x1)},${fmt(y2)} Z`;
+        }).filter(Boolean);
+        if (holePaths.length === 0) { p.clipPath = '';
+            p.clipPathD = ''; return; }
         const d = outer + ' ' + holePaths.join(' ');
         p.clipPathD = d;
         p.clipPath = `url(#${clipId})`;
@@ -985,17 +1078,6 @@
             defs.appendChild(clipEl);
         }
         clipEl.querySelector('path').setAttribute('d', d);
-    }
-
-    /** 将点数组转为 SVG path d 字符串 */
-    function buildPolyPath(points) {
-        if (!points || points.length < 3) return '';
-        let d = '';
-        points.forEach((pt, i) => {
-            d += (i === 0 ? 'M' : 'L') + fmt(clamp01(pt.x)) + ',' + fmt(clamp01(pt.y));
-        });
-        d += ' Z';
-        return d;
     }
 
     function removeClipDef(partId) {
@@ -1026,9 +1108,7 @@
         if (newRect.w < EPS || newRect.h < EPS) return;
         if (!p.crops) p.crops = [];
 
-        // 仅对矩形条目进行吸附（跳过多边形）
-        const rectOnlyCrops = p.crops.filter(r => !r.type || r.type !== 'poly');
-        newRect = snapRectEdges(newRect, rectOnlyCrops, rect.width, rect.height);
+        newRect = snapRectEdges(newRect, p.crops, rect.width, rect.height);
         if (newRect.w < EPS || newRect.h < EPS) return;
 
         const oldCrops = JSON.parse(JSON.stringify(p.crops));
@@ -1036,8 +1116,7 @@
         const oldClipPathD = p.clipPathD || '';
 
         let remaining = [newRect];
-        // 仅对矩形条目进行减法（跳过多边形）
-        for (const existing of rectOnlyCrops) {
+        for (const existing of p.crops) {
             const next = [];
             for (const r of remaining) {
                 const pieces = subtractRect(r, existing);
@@ -1047,7 +1126,6 @@
             if (remaining.length === 0) break;
         }
         let added = 0;
-        const polyCrops = p.crops.filter(r => r.type === 'poly');
         for (const r of remaining) {
             const rr = {
                 x: clamp01(r.x),
@@ -1055,18 +1133,15 @@
                 w: Math.max(EPS, Math.min(r.w, 1 - clamp01(r.x))),
                 h: Math.max(EPS, Math.min(r.h, 1 - clamp01(r.y)))
             };
-            if (rr.w <= EPS || rr.h <= EPS) continue;
-
-            if (polyCrops.length > 0) {
-                // 归并法：将新矩形与所有已有裁剪（含多边形）做并集，消除重叠
-                p.crops = unifyCrops(p.crops, { x: rr.x, y: rr.y, w: rr.w, h: rr.h });
-                added++;
-            } else {
+            if (rr.w > EPS && rr.h > EPS) {
                 let dup = false;
                 for (const exist of p.crops) {
-                    if (!exist.type && rectEq(exist, rr)) { dup = true; break; }
+                    if (rectEq(exist, rr)) { dup = true; break; }
                 }
-                if (!dup) { p.crops.push(rr); added++; }
+                if (!dup) {
+                    p.crops.push(rr);
+                    added++;
+                }
             }
         }
 
@@ -1091,8 +1166,6 @@
                 if (cropState.box) cropState.box.remove();
                 cropState = null;
             }
-            clearFreehandLine();
-            freehandPoints = [];
             syncCropButton();
             renderAll();
         }
@@ -1120,38 +1193,7 @@
         btn.textContent = isCropping ? '裁剪模式' : '裁剪部件';
         btn.classList.toggle('active', isCropping);
         canvas.classList.toggle('cropping', isCropping);
-        const dropdown = document.getElementById('cropTypeDropdown');
-        if (dropdown) dropdown.style.display = isCropping ? '' : 'none';
     }
-
-    function toggleCropTypeMenu(e) {
-        e.stopPropagation();
-        const dropdown = document.getElementById('cropTypeDropdown');
-        if (dropdown) dropdown.classList.toggle('open');
-    }
-
-    function setCropType(type) {
-        cropType = type;
-        // 关闭下拉菜单
-        const dropdown = document.getElementById('cropTypeDropdown');
-        if (dropdown) dropdown.classList.remove('open');
-        // 清理当前的裁剪状态
-        if (cropState) {
-            if (cropState.box) cropState.box.remove();
-            cropState = null;
-        }
-        clearFreehandLine();
-        freehandPoints = [];
-        renderAll();
-    }
-
-    // 点击页面其他地方关闭裁剪类型下拉
-    document.addEventListener('click', function(e) {
-        const dropdown = document.getElementById('cropTypeDropdown');
-        if (dropdown && !dropdown.contains(e.target)) {
-            dropdown.classList.remove('open');
-        }
-    });
 
     canvas.addEventListener('mousedown', (e) => {
         const partEl = e.target.closest('.part');
@@ -1189,49 +1231,19 @@
         const startX = e.clientX - canvasRect.left;
         const startY = e.clientY - canvasRect.top;
 
-        if (cropType === 'freehand') {
-            // 自由绘制模式：开始记录点序列
-            cropState = {
-                startX, startY,
-                el, p,
-                canvasRect
-            };
-            freehandPoints = [{ x: startX, y: startY }];
-            // 创建自由绘制线条 SVG 元素
-            clearFreehandLine();
-            const svgEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            svgEl.className = 'freehand-line';
-            svgEl.style.left = '0px';
-            svgEl.style.top = '0px';
-            svgEl.style.width = canvasRect.width + 'px';
-            svgEl.style.height = canvasRect.height + 'px';
-            const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            pathEl.setAttribute('d', `M${startX},${startY}`);
-            // 显式设置填充和边框，确保样式生效
-            pathEl.setAttribute('fill', 'rgba(255,0,0,0.2)');
-            pathEl.setAttribute('stroke', '#ff0000');
-            pathEl.setAttribute('stroke-width', '2');
-            pathEl.setAttribute('stroke-dasharray', '5,3');
-            svgEl.appendChild(pathEl);
-            canvas.appendChild(svgEl);
-            freehandLine = svgEl;
-            cropState.box = svgEl; // 复用 box 字段来存储 SVG 引用
-        } else {
-            // 矩形裁剪模式
-            cropState = {
-                startX, startY,
-                el, p,
-                canvasRect
-            };
-            const box = document.createElement('div');
-            box.className = 'crop-box';
-            box.style.left = startX + 'px';
-            box.style.top = startY + 'px';
-            box.style.width = '0px';
-            box.style.height = '0px';
-            canvas.appendChild(box);
-            cropState.box = box;
-        }
+        cropState = {
+            startX, startY,
+            el, p,
+            canvasRect
+        };
+        const box = document.createElement('div');
+        box.className = 'crop-box';
+        box.style.left = startX + 'px';
+        box.style.top = startY + 'px';
+        box.style.width = '0px';
+        box.style.height = '0px';
+        canvas.appendChild(box);
+        cropState.box = box;
         e.stopPropagation();
         e.preventDefault();
     });
@@ -1244,58 +1256,19 @@
         x = Math.max(0, Math.min(x, canvasRect.width));
         y = Math.max(0, Math.min(y, canvasRect.height));
         const box = cropState.box;
-        if (cropType === 'freehand' && freehandLine) {
-            // 自由绘制：间距采样（最少3px才加新点）防止点过多导致崩溃
-            const lastPt = freehandPoints[freehandPoints.length - 1];
-            const dist = lastPt ? Math.hypot(x - lastPt.x, y - lastPt.y) : Infinity;
-            const MAX_POINTS = 400;
-            if (dist >= 3 && freehandPoints.length < MAX_POINTS) {
-                freehandPoints.push({ x, y });
-                // 每6个点更新一次路径显示（降低刷新频率）
-                if (freehandPoints.length % 6 === 0 || freehandPoints.length === 2) {
-                    updateFreehandPath();
-                }
-            }
-            cropState.startX = x;
-            cropState.startY = y;
-        } else {
-            // 矩形裁剪模式
-            const sx = cropState.startX;
-            const sy = cropState.startY;
-            box.style.left = Math.min(sx, x) + 'px';
-            box.style.top = Math.min(sy, y) + 'px';
-            box.style.width = Math.abs(x - sx) + 'px';
-            box.style.height = Math.abs(y - sy) + 'px';
-        }
+        const sx = cropState.startX;
+        const sy = cropState.startY;
+        box.style.left = Math.min(sx, x) + 'px';
+        box.style.top = Math.min(sy, y) + 'px';
+        box.style.width = Math.abs(x - sx) + 'px';
+        box.style.height = Math.abs(y - sy) + 'px';
     });
-
-    // 更新自由绘制线条的SVG路径（含临时闭合以显示填充）
-    function updateFreehandPath() {
-        if (!freehandLine || freehandPoints.length < 2) return;
-        const pathEl = freehandLine.querySelector('path');
-        if (!pathEl) return;
-        let d = '';
-        freehandPoints.forEach((pt, i) => {
-            d += (i === 0 ? 'M' : 'L') + pt.x + ',' + pt.y;
-        });
-        d += ' Z'; // 临时闭合以显示填充
-        pathEl.setAttribute('d', d);
-    }
 
     document.addEventListener('mouseup', () => {
         if (!cropState) return;
         const p = cropState.p;
         const box = cropState.box;
-        if (cropType === 'freehand') {
-            // 自由绘制模式：闭合路径并应用裁剪
-            if (freehandPoints.length >= 3) {
-                // 闭合路径：添加起点作为终点
-                const pts = [...freehandPoints, { x: freehandPoints[0].x, y: freehandPoints[0].y }];
-                applyFreehandCrop(p, pts);
-            }
-            clearFreehandLine();
-            freehandPoints = [];
-        } else if (box) {
+        if (box) {
             const boxRect = box.getBoundingClientRect();
             if (boxRect.width > 5 && boxRect.height > 5) {
                 applyCrop(p, boxRect);
@@ -1305,102 +1278,6 @@
         cropState = null;
         renderAll();
     });
-
-    // 清除自由绘制临时线条
-    function clearFreehandLine() {
-        if (freehandLine) {
-            freehandLine.remove();
-            freehandLine = null;
-        }
-    }
-
-    // 应用自由绘制裁剪：统一通过 canvas 布尔并集避开已裁剪区域
-    function applyFreehandCrop(p, canvasPoints) {
-        const entry = partElements.get(p.id);
-        if (!entry) return;
-        const el = entry.el;
-        const rect = el.getBoundingClientRect();
-        if (!rect.width || !rect.height) return;
-        if (canvasPoints.length < 3) return;
-
-        const normalizedPoints = canvasPoints.map(pt => ({
-            x: clamp01((pt.x - (rect.left - cropState.canvasRect.left)) / rect.width),
-            y: clamp01((pt.y - (rect.top - cropState.canvasRect.top)) / rect.height)
-        }));
-
-        const oldCrops = JSON.parse(JSON.stringify(p.crops || []));
-        const oldClipPath = p.clipPath || '';
-        const oldClipPathD = p.clipPathD || '';
-
-        // 归并法：将所有已有裁剪 + 新多边形渲染到 canvas 做并集追踪
-        p.crops = unifyCrops(p.crops || [], { type: 'poly', points: normalizedPoints });
-
-        rebuildClipPath(p);
-        const newCrops = JSON.parse(JSON.stringify(p.crops));
-        const newClipPath = p.clipPath || '';
-        const newClipPathD = p.clipPathD || '';
-        const cmd = new CropCommand(p.id, oldCrops, oldClipPath, oldClipPathD, newCrops, newClipPath, newClipPathD);
-        executeCommand(cmd);
-        renderAll();
-    }
-
-    /** 归并法：将已有裁剪 + 新裁剪渲染到 canvas，追踪并集轮廓，消除重叠 */
-    function unifyCrops(existingCrops, newCrop) {
-        const S = 5; // 500x500 精度足够
-        const cvsW = 100 * S;
-        const cvsH = 100 * S;
-        const cvs = document.createElement('canvas');
-        cvs.width = cvsW;
-        cvs.height = cvsH;
-        const ctx = cvs.getContext('2d');
-        ctx.fillStyle = '#fff';
-
-        const drawCrop = (crop) => {
-            if (crop.type === 'poly') {
-                if (!crop.points || crop.points.length < 3) return;
-                ctx.beginPath();
-                crop.points.forEach((pt, i) => {
-                    const x = clamp01(pt.x) * cvsW;
-                    const y = clamp01(pt.y) * cvsH;
-                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-                });
-                ctx.closePath();
-                ctx.fill();
-            } else {
-                if (crop.w <= EPS || crop.h <= EPS) return;
-                const rx = Math.round(clamp01(crop.x) * cvsW);
-                const ry = Math.round(clamp01(crop.y) * cvsH);
-                const rw = Math.max(1, Math.round(clamp01(crop.x + crop.w) * cvsW) - rx);
-                const rh = Math.max(1, Math.round(clamp01(crop.y + crop.h) * cvsH) - ry);
-                ctx.fillRect(rx, ry, rw, rh);
-            }
-        };
-
-        existingCrops.forEach(drawCrop);
-        drawCrop(newCrop);
-
-        const imageData = ctx.getImageData(0, 0, cvsW, cvsH);
-        const contours = traceContours(imageData.data, cvsW, cvsH, 40);
-
-        const result = [];
-        for (const contour of contours) {
-            if (contour.length < 3) continue;
-            const pts = contour.map(p => ({ x: clamp01(p.x / cvsW), y: clamp01(p.y / cvsH) }));
-            // 矩形检测：尽量保持矩形格式
-            const b = { minX: 1, minY: 1, maxX: 0, maxY: 0 };
-            pts.forEach(p => { b.minX = Math.min(b.minX, p.x); b.minY = Math.min(b.minY, p.y); b.maxX = Math.max(b.maxX, p.x); b.maxY = Math.max(b.maxY, p.y); });
-            const bw = b.maxX - b.minX, bh = b.maxY - b.minY;
-            if (bw > 0.002 && bh > 0.002 && pts.every(pt =>
-                Math.abs(pt.x - b.minX) < 0.028 || Math.abs(pt.x - b.maxX) < 0.028 ||
-                Math.abs(pt.y - b.minY) < 0.028 || Math.abs(pt.y - b.maxY) < 0.028
-            )) {
-                result.push({ x: b.minX, y: b.minY, w: bw, h: bh });
-            } else {
-                result.push({ type: 'poly', points: pts });
-            }
-        }
-        return result;
-    }
 
     // ============================================================
     // 6. 其他操作
@@ -1425,8 +1302,7 @@
             const fontName = lockedFontFamily || 'SimSun';
             const measureCvs = document.createElement('canvas');
             const measureCtx = measureCvs.getContext('2d');
-            // 使用与 CSS 相同的 font-stack，确保 canvas 和 DOM 使用一致的回退字体
-            measureCtx.font = '400 ' + pxPerEm + 'px ' + getFontStack(fontName);
+            measureCtx.font = '400 ' + pxPerEm + 'px "' + fontName + '"';
             const mMetrics = measureCtx.measureText(text);
             initW = Math.max(0.15, Math.min(1.5, Math.round(mMetrics.width / pxPerEm * 20) / 20));
             initH = 1; // 高度始终1em
@@ -1890,19 +1766,11 @@
         const hasTransform = (Math.abs(p.angle || 0) > 0.001 || Math.abs(p.skew || 0) > 0.001 || p.flipH || p.flipV);
         const cropDisabledAttr = hasTransform ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : '';
         const cropBtnText = isCropping ? '裁剪模式' : '裁剪部件';
-        const cropModeLabel = cropType === 'freehand' ? '自由绘制' : '矩形框选';
-        const cropHint = hasTransform ? '（此变换下无法裁剪）' : (isCropping ? '点击选中部件然后' + cropModeLabel + '裁剪' : '');
+        const cropHint = hasTransform ? '（此变换下无法裁剪）' : (isCropping ? '点击选中部件并框选裁剪' : '');
 
         const cropBtnHtml = `
                 <div style="margin-bottom:10px; display:flex; align-items:center; flex-wrap:wrap; gap:8px;">
                     <button id="cropBtn" onclick="toggleCropMode()" ${cropDisabledAttr} class="${isCropping ? 'active' : ''}">${cropBtnText}</button>
-                    <div class="crop-type-dropdown" id="cropTypeDropdown" style="${isCropping ? '' : 'display:none;'}">
-                        <button class="ctd-btn" onclick="toggleCropTypeMenu(event)">${cropModeLabel}<span class="ctd-arrow">▼</span></button>
-                        <div class="ctd-menu">
-                            <button class="ctd-item${cropType==='rect'?' selected':''}" onclick="setCropType('rect')">矩形框选</button>
-                            <button class="ctd-item${cropType==='freehand'?' selected':''}" onclick="setCropType('freehand')">自由绘制</button>
-                        </div>
-                    </div>
                     <span style="font-size:12px;color:#888;">${cropHint}</span>
                 </div>
             `;
@@ -2143,8 +2011,16 @@
                 updatePreview();
             } else if (key === 'fontFamily') {
                 p[key] = value;
-                // 更新拉伸框为实际像素宽度（涵盖汉字和非汉字）
-                remeasureInitW(p);
+                // 非汉字更新拉伸框为实际像素宽度
+                const allCJK = [...p.text].every(isCJK);
+                if (!allCJK) {
+                    const mcv = document.createElement('canvas');
+                    const mctx = mcv.getContext('2d');
+                    mctx.font = '400 ' + pxPerEm + 'px "' + value + '"';
+                    const mm = mctx.measureText(p.text);
+                    p.w = Math.max(0.15, Math.min(1.5, Math.round(mm.width / pxPerEm * 20) / 20));
+                    p.initW = p.w;
+                }
                 updatePartElement(p);
                 updatePreview();
                 const display = document.querySelector(`#fontSelect_${id} .selected-text`);
@@ -2160,8 +2036,6 @@
                 updateCropHint(p);
             } else if (key === 'text' || key === 'fontWeight') {
                 p[key] = value;
-                // 文字内容或字重变化后重新测量 initW，确保缩放准确
-                remeasureInitW(p);
                 updatePartElement(p);
                 updatePreview();
                 const inputEl = document.getElementById('prop_' + key + '_' + id);
@@ -2182,8 +2056,16 @@
             renderAll();
             updatePreview();
         } else if (key === 'fontFamily') {
-            // 更新拉伸框为实际像素宽度（涵盖汉字和非汉字）
-            remeasureInitW(p);
+            // 非汉字更新拉伸框为实际像素宽度
+            const allCJK = [...p.text].every(isCJK);
+            if (!allCJK) {
+                const mcv = document.createElement('canvas');
+                const mctx = mcv.getContext('2d');
+                mctx.font = '400 ' + pxPerEm + 'px "' + value + '"';
+                const mm = mctx.measureText(p.text);
+                p.w = Math.max(0.15, Math.min(1.5, Math.round(mm.width / pxPerEm * 20) / 20));
+                p.initW = p.w;
+            }
             updatePartElement(p);
             updatePreview();
             const display = document.querySelector(`#fontSelect_${id} .selected-text`);
@@ -2197,8 +2079,6 @@
             if (inputEl) inputEl.value = value;
             updateCropHint(p);
         } else if (key === 'text' || key === 'fontWeight') {
-            // 文字内容或字重变化后重新测量 initW，确保缩放准确
-            remeasureInitW(p);
             updatePartElement(p);
             updatePreview();
             const inputEl = document.getElementById('prop_' + key + '_' + id);
@@ -2243,10 +2123,9 @@
     // ============================================================
     async function loadSystemFonts() {
         if (!window.queryLocalFonts) {
-            showFontStatus('浏览器不支持 queryLocalFonts API', '#c00');
+            alert('您的浏览器不支持 queryLocalFonts API，请手动添加字体名称。');
             return;
         }
-        showFontStatus('加载系统字体中...', '#888');
         try {
             const fonts = await window.queryLocalFonts();
             const names = new Set();
@@ -2263,34 +2142,24 @@
                 }
             }
             if (added > 0) {
-                showFontStatus('成功添加 ' + added + ' 个系统字体', '#080');
+                alert(`成功添加 ${added} 个系统字体`);
                 updateProps();
             } else {
-                showFontStatus('没有新的字体可添加', '#888');
+                alert('没有新的字体可添加');
             }
         } catch (e) {
-            showFontStatus('获取系统字体失败：' + e.message, '#c00');
+            alert('获取系统字体失败：' + e.message);
         }
-    }
-
-    /** 共用字体状态提示（3-4秒后自动消失） */
-    let _fontStatusTimer = null;
-    function showFontStatus(text, color) {
-        const statusEl = document.getElementById('zsftStatus');
-        if (!statusEl) return;
-        statusEl.textContent = text;
-        statusEl.style.color = color;
-        // 清除之前的定时器
-        if (_fontStatusTimer) clearTimeout(_fontStatusTimer);
-        _fontStatusTimer = setTimeout(() => { statusEl.textContent = ''; }, 3500);
     }
 
     /** 加载 ZSFT 字体（通过 CSS URL） */
     async function loadZsftFont() {
         const url = document.getElementById('zsftUrl').value.trim();
-        if (!url) { showFontStatus('请输入字体URL', '#c00'); return; }
+        const statusEl = document.getElementById('zsftStatus');
+        if (!url) { statusEl.textContent = '请输入字体URL'; return; }
 
-        showFontStatus('加载中...', '#888');
+        statusEl.textContent = '加载中...';
+        statusEl.style.color = '#888';
 
         try {
             // 1. fetch 获取 CSS 文本（用于解析字体名）
@@ -2308,7 +2177,8 @@
             }
 
             if (names.size === 0) {
-                showFontStatus('未找到字体定义，请检查URL', '#c00');
+                statusEl.textContent = '未找到字体定义，请检查URL';
+                statusEl.style.color = '#c00';
                 return;
             }
 
@@ -2325,7 +2195,11 @@
             let added = 0;
             const fontList = [...names];
             for (const name of fontList) {
-                try { await document.fonts.load('1em "' + name + '"'); } catch (_) {}
+                // 尝试用 load 确认字体是否真正可用
+                try {
+                    await document.fonts.load('1em "' + name + '"');
+                } catch (_) { /* 忽略 */ }
+
                 if (!customFontMap[name] && !DEFAULT_FONT_STACKS[name]) {
                     customFontMap[name] = "'" + name + "',sans-serif";
                     fontNames.push(name);
@@ -2334,13 +2208,16 @@
             }
 
             if (added > 0) {
-                showFontStatus('成功加载 ' + added + ' 个字体', '#080');
+                statusEl.textContent = '成功加载 ' + added + ' 个字体';
+                statusEl.style.color = '#080';
                 updateProps();
             } else {
-                showFontStatus('字体已存在，无需重复添加', '#888');
+                statusEl.textContent = '字体已存在，无需重复添加';
+                statusEl.style.color = '#888';
             }
         } catch (e) {
-            showFontStatus('加载失败：' + e.message, '#c00');
+            statusEl.textContent = '加载失败：' + e.message;
+            statusEl.style.color = '#c00';
         }
     }
 
@@ -2379,25 +2256,24 @@
             // 裁剪 clip-path 加在 clipWrapper 上，与编辑区完全一致
             let clipStyle = '';
             if (p.crops && p.crops.length > 0) {
-                const clipId = 'preview-clip-' + p.id;
-                const outerPath = 'M0,0 L1,0 L1,1 L0,1 Z';
-                const holePaths = [];
-                p.crops.forEach(r => {
-                    if (r.type === 'poly') {
-                        if (r.points && r.points.length >= 3) holePaths.push(buildPolyPath(r.points));
-                    } else {
-                        if (r.w <= CLIP_EPS || r.h <= CLIP_EPS) return;
-                        const x1 = clamp01(r.x), y1 = clamp01(r.y),
-                            x2 = clamp01(r.x + r.w), y2 = clamp01(r.y + r.h);
-                        holePaths.push(`M${fmt(x1)},${fmt(y1)} L${fmt(x2)},${fmt(y1)} L${fmt(x2)},${fmt(y2)} L${fmt(x1)},${fmt(y2)} Z`);
+                const rects = p.crops.filter(r => r.w > CLIP_EPS && r.h > CLIP_EPS);
+                if (rects.length > 0) {
+                    const clipId = 'preview-clip-' + p.id;
+                    const outerPath = 'M0,0 L1,0 L1,1 L0,1 Z';
+                    const holePaths = rects.map(r => {
+                        const x1 = clamp01(r.x),
+                            y1 = clamp01(r.y),
+                            x2 = clamp01(r.x + r.w),
+                            y2 = clamp01(r.y + r.h);
+                        return `M${fmt(x1)},${fmt(y1)} L${fmt(x2)},${fmt(y1)} L${fmt(x2)},${fmt(y2)} L${fmt(x1)},${fmt(y2)} Z`;
+                    }).filter(Boolean);
+                    if (holePaths.length > 0) {
+                        const d = outerPath + ' ' + holePaths.join(' ');
+                        clipDefs.push(
+                            `<clipPath id="${clipId}" clipPathUnits="objectBoundingBox"><path clip-rule="evenodd" d="${d}"/></clipPath>`
+                        );
+                        clipStyle = `clip-path:url(#${clipId});-webkit-clip-path:url(#${clipId});`;
                     }
-                });
-                if (holePaths.length > 0) {
-                    const d = outerPath + ' ' + holePaths.join(' ');
-                    clipDefs.push(
-                        `<clipPath id="${clipId}" clipPathUnits="objectBoundingBox"><path clip-rule="evenodd" d="${d}"/></clipPath>`
-                    );
-                    clipStyle = `clip-path:url(#${clipId});-webkit-clip-path:url(#${clipId});`;
                 }
             }
 
@@ -2479,23 +2355,22 @@
             // 裁剪 clip-path 加在 clipWrapper 上，与编辑区完全一致
             let clipStyle = '';
             if (p.crops && p.crops.length > 0) {
-                const clipId = 'clip-' + p.id + '-' + randSuffix;
-                const outerPath = 'M0,0 L1,0 L1,1 L0,1 Z';
-                const holePaths = [];
-                p.crops.forEach(r => {
-                    if (r.type === 'poly') {
-                        if (r.points && r.points.length >= 3) holePaths.push(buildPolyPath(r.points));
-                    } else {
-                        if (r.w <= CLIP_EPS || r.h <= CLIP_EPS) return;
-                        const x1 = clamp01(r.x), y1 = clamp01(r.y),
-                            x2 = clamp01(r.x + r.w), y2 = clamp01(r.y + r.h);
-                        holePaths.push(`M${fmt(x1)},${fmt(y1)} L${fmt(x2)},${fmt(y1)} L${fmt(x2)},${fmt(y2)} L${fmt(x1)},${fmt(y2)} Z`);
+                const rects = p.crops.filter(r => r.w > CLIP_EPS && r.h > CLIP_EPS);
+                if (rects.length > 0) {
+                    const clipId = 'clip-' + p.id + '-' + randSuffix;
+                    const outerPath = 'M0,0 L1,0 L1,1 L0,1 Z';
+                    const holePaths = rects.map(r => {
+                        const x1 = clamp01(r.x),
+                            y1 = clamp01(r.y),
+                            x2 = clamp01(r.x + r.w),
+                            y2 = clamp01(r.y + r.h);
+                        return `M${fmt(x1)},${fmt(y1)} L${fmt(x2)},${fmt(y1)} L${fmt(x2)},${fmt(y2)} L${fmt(x1)},${fmt(y2)} Z`;
+                    }).filter(Boolean);
+                    if (holePaths.length > 0) {
+                        const d = outerPath + ' ' + holePaths.join(' ');
+                        clipDefs.push({ clipId, d });
+                        clipStyle = `clip-path:url(#${clipId});-webkit-clip-path:url(#${clipId});`;
                     }
-                });
-                if (holePaths.length > 0) {
-                    const d = outerPath + ' ' + holePaths.join(' ');
-                    clipDefs.push({ clipId, d });
-                    clipStyle = `clip-path:url(#${clipId});-webkit-clip-path:url(#${clipId});`;
                 }
             }
 
@@ -2841,20 +2716,10 @@
         // 使用 DOM 内层等价的 x 缩放因子绘制文字，确保非汉字的拉伸/压缩得到正确追踪
         const xScaleFactor = getInnerXScale(p);
         ctx.scale(xScaleFactor * DPI, p.h * DPI);
-        // 使用与 CSS 相同的 font-stack，确保 canvas 和 DOM 使用一致的回退字体
-        ctx.font = p.fontWeight + ' ' + pxPerEm + 'px ' + getFontStack(p.fontFamily);
-
-        // 测量当前字体在 scale 后的实际度量，计算 CSS line-height:1 下的基线位置
-        // CSS 中 inline-block line-height:1 时，文本垂直位置由字体度量决定：
-        // 基线位置 = (lineHeight + ascent - descent) / 2（使用 fontBoundingBox 更符合 CSS）
-        const metrics = ctx.measureText(p.text);
-        const asc = metrics.fontBoundingBoxAscent || metrics.actualBoundingBoxAscent || (pxPerEm * 0.88);
-        const desc = metrics.fontBoundingBoxDescent || metrics.actualBoundingBoxDescent || (pxPerEm * 0.12);
-        const cssBaselineY = (pxPerEm + asc - desc) / 2;
-
-        ctx.textBaseline = 'alphabetic';
+        ctx.font = p.fontWeight + ' ' + pxPerEm + 'px "' + p.fontFamily + '"';
+        ctx.textBaseline = 'top';
         ctx.fillStyle = '#000';
-        ctx.fillText(p.text, 0, cssBaselineY);
+        ctx.fillText(p.text, 0, 0);
 
         // 用 destination-out 挖掉裁剪区域（相当于 clipPath 的镂空效果）
         if (p.crops && p.crops.length > 0) {
@@ -2862,32 +2727,17 @@
             ctx.globalCompositeOperation = 'destination-out';
             ctx.fillStyle = '#fff';
             for (const r of p.crops) {
-                if (r.type === 'poly') {
-                    // 多边形裁剪：使用 canvas Path2D
-                    if (!r.points || r.points.length < 3) continue;
-                    ctx.beginPath();
-                    r.points.forEach((pt, i) => {
-                        const px = clamp01(pt.x) * cvsW;
-                        const py = clamp01(pt.y) * cvsH;
-                        if (i === 0) ctx.moveTo(px, py);
-                        else ctx.lineTo(px, py);
-                    });
-                    ctx.closePath();
-                    ctx.fill();
-                } else {
-                    // 矩形裁剪
-                    if (r.w <= CLIP_EPS || r.h <= CLIP_EPS) continue;
-                    const x1 = clamp01(r.x),
-                        y1 = clamp01(r.y);
-                    const x2 = clamp01(r.x + r.w),
-                        y2 = clamp01(r.y + r.h);
-                    if (x2 - x1 <= 0.001 || y2 - y1 <= 0.001) continue;
-                    const px = Math.round(x1 * cvsW);
-                    const py = Math.round(y1 * cvsH);
-                    const pw = Math.max(1, Math.round((x2 - x1) * cvsW));
-                    const ph = Math.max(1, Math.round((y2 - y1) * cvsH));
-                    ctx.fillRect(px, py, pw, ph);
-                }
+                if (r.w <= CLIP_EPS || r.h <= CLIP_EPS) continue;
+                const x1 = clamp01(r.x),
+                    y1 = clamp01(r.y);
+                const x2 = clamp01(r.x + r.w),
+                    y2 = clamp01(r.y + r.h);
+                if (x2 - x1 <= 0.001 || y2 - y1 <= 0.001) continue;
+                const px = Math.round(x1 * cvsW);
+                const py = Math.round(y1 * cvsH);
+                const pw = Math.max(1, Math.round((x2 - x1) * cvsW));
+                const ph = Math.max(1, Math.round((y2 - y1) * cvsH));
+                ctx.fillRect(px, py, pw, ph);
             }
             ctx.globalCompositeOperation = 'source-over';
         }
@@ -3171,3 +3021,160 @@
 </script>
 </body>
 </html>
+    </div>
+
+    <div class="post-meta">
+        <i>
+        
+        </i>
+    </div>
+    <br>
+    
+    
+        
+            
+    
+            <div class="post-footer-pre-next">
+                
+
+                
+            </div>
+    
+        
+    
+
+    
+        
+
+     
+</div>
+
+
+
+
+                    
+
+                    <div class="footer">
+    
+        <span> 
+             
+
+            
+                
+
+            
+        </span>
+       
+    
+</div>
+
+
+
+<!--这是指一条线往下的内容-->
+<div class="footer-last">
+    
+            <span></span>
+            
+    
+</div>
+
+
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+
+    <!--目录-->
+    
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript" ></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" type="text/javascript" ></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/javascripts/jquery.tocify.min.js" type="text/javascript" ></script>
+        
+<script src="/js/toc.js"></script>
+
+    
+
+    
+<script src="/js/randomHeaderContent.js"></script>
+
+    <!--回到顶部按钮-->
+    
+        
+<script src="/js/returnToTop.js"></script>
+
+    
+
+    
+        
+<script src="/js/returnToLastPage.js"></script>
+
+    
+
+
+
+
+
+<script src="/js/lightgallery/lightgallery.umd.min.js"></script>
+
+
+
+<script src="/js/lightgallery/plugins/lg-thumbnail.umd.min.js"></script>
+
+
+
+<script src="/js/lightgallery/plugins/lg-fullscreen.umd.min.js"></script>
+
+
+<script src="/js/lightgallery/plugins/lg-autoplay.umd.min.js"></script>
+
+
+<script src="/js/lightgallery/plugins/lg-zoom.umd.min.js"></script>
+
+
+<script src="/js/lightgallery/plugins/lg-rotate.umd.min.js"></script>
+
+
+<script src="/js/lightgallery/plugins/lg-paper.umd.min.js"></script>
+
+
+
+
+<script type="text/javascript">
+     
+    if (typeof lightGallery !== "undefined") {
+        var options1 = {
+            selector: '.gallery-item',
+            plugins: [lgThumbnail, lgFullscreen, lgAutoplay, lgZoom, lgRotate, lgPager], // 启用插件
+            thumbnail: true,          // 显示缩略图
+            zoom: true,               // 启用缩放功
+            rotate: true,             // 启用旋转功能能
+            autoplay: true,        // 启用自动播放功能
+            fullScreen: true,      // 启用全屏功能
+            pager: false, //页码,
+            zoomFromOrigin: true,   // 从原始位置缩放
+            actualSize: true,       // 启用查看实际大小的功能
+            enableZoomAfter: 300,    // 延迟缩放，确保图片加载完成后可缩放
+        };
+        lightGallery(document.getElementsByClassName('.article-gallery')[0], options1); // 修复选择器
+    }
+    
+</script>
+
+
+                </div>
+            
+            
+                <!-- 回到顶部的按钮-->
+                <div class="progress-wrap shadow-drop-2-bottom">
+                    <svg class="progress-circle svg-content" width="100%" height="100%" viewBox="-1 -1 102 102">
+                        <path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98"/>
+                    </svg>
+                </div>
+            
+            
+    </body>
+</html>
+<script src="/js/emojiHandler.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        wrapEmojis('.paper');
+    });
+</script>
