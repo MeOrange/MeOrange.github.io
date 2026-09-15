@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="340" height="210" viewBox="0 0 340 210">
+<rect width="340" height="210" fill="#ffffff"/>
+<rect x="16" y="18" width="296" height="26" fill="#f2f4f7"/>
+<g stroke="#c8cfd7" stroke-width="1" fill="none">
+<path d="M16 18 H312"/>
+<path d="M16 44 H312"/>
+<path d="M16 70 H312"/>
+<path d="M16 96 H312"/>
+<path d="M16 122 H312"/>
+<path d="M16 148 H312"/>
+<path d="M16 174 H312"/>
+<path d="M16 18 V174"/>
+<path d="M92 18 V174"/>
+<path d="M147 18 V174"/>
+<path d="M202 18 V174"/>
+<path d="M257 18 V174"/>
+<path d="M312 18 V174"/>
+</g>
+<g text-anchor="middle" font-family="SimSun,STSong,serif" font-size="9.5" fill="#3f4854">
+<text x="54" y="34">项目</text>
+<text x="119" y="34">简单扩散</text>
+<text x="174" y="34">易化扩散</text>
+<text x="229" y="34">主动转运</text>
+<text x="284" y="34">膜动转运</text>
+<text x="54" y="60" fill="#5a6472">载体</text>
+<text x="119" y="60">不需要</text>
+<text x="174" y="60">需要</text>
+<text x="229" y="60">需要</text>
+<text x="284" y="60">不需要</text>
+<text x="54" y="86" fill="#5a6472">耗能</text>
+<text x="119" y="86">不耗能</text>
+<text x="174" y="86">不耗能</text>
+<text x="229" y="86">耗能</text>
+<text x="284" y="86">耗能</text>
+<text x="54" y="112" fill="#5a6472">饱和现象</text>
+<text x="119" y="112">无</text>
+<text x="174" y="112">有</text>
+<text x="229" y="112">有</text>
+<text x="284" y="112">无</text>
+<text x="54" y="138" fill="#5a6472">竞争抑制</text>
+<text x="119" y="138">无</text>
+<text x="174" y="138">有</text>
+<text x="229" y="138">有</text>
+<text x="284" y="138">无</text>
+<text x="54" y="164" fill="#5a6472">转运方向</text>
+<text x="119" y="164">顺浓度梯度</text>
+<text x="174" y="164">顺浓度梯度</text>
+<text x="229" y="164">逆浓度梯度</text>
+<text x="284" y="164">与梯度无关</text>
+</g>
+<text x="170" y="196" text-anchor="middle" font-family="SimSun,STSong,serif" font-size="11" fill="#7a828d">图 2-2　药物跨膜转运方式的特点</text>
+</svg>

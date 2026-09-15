@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="340" height="210" viewBox="0 0 340 210">
+<rect width="340" height="210" fill="#ffffff"/>
+<rect x="92" y="22" width="230" height="26" fill="#f2f4f7"/>
+<path d="M92 48 H322" stroke="#9aa5b1" stroke-width="1" fill="none"/>
+<text x="104" y="40" font-family="SimSun,STSong,serif" font-size="10" fill="#3f4854">毛细血管腔（血浆）</text>
+<path d="M92 56 H322" stroke="#8d99a6" stroke-width="1.4" fill="none"/>
+<g stroke="#8d99a6" stroke-width="1.4" fill="none">
+<path d="M140 51 V61"/>
+<path d="M200 51 V61"/>
+<path d="M260 51 V61"/>
+</g>
+<path d="M92 72 H322" stroke="#b6bec8" stroke-width="1.2" fill="none"/>
+<g fill="#eef1f4" stroke="#8d99a6" stroke-width="1">
+<path d="M107 72 A16 16 0 0 0 139 72 Z"/>
+<path d="M167 72 A16 16 0 0 0 199 72 Z"/>
+<path d="M227 72 A16 16 0 0 0 259 72 Z"/>
+<path d="M287 72 A16 16 0 0 0 319 72 Z"/>
+</g>
+<rect x="92" y="96" width="230" height="52" fill="#fbfcfd" stroke="#c8cfd7" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="207" y="126" text-anchor="middle" font-family="SimSun,STSong,serif" font-size="10" fill="#3f4854">脑细胞外液 / 脑组织</text>
+<g text-anchor="end" font-family="SimSun,STSong,serif" font-size="9.5" fill="#5a6472">
+<text x="84" y="60">内皮细胞·紧密连接</text>
+<text x="84" y="76">基　膜</text>
+<text x="84" y="90">星形胶质细胞足突</text>
+</g>
+<text x="170" y="172" text-anchor="middle" font-family="SimSun,STSong,serif" font-size="10" fill="#8d99a6">三部分共同构成屏障，限制药物由血浆进入脑组织</text>
+<text x="170" y="196" text-anchor="middle" font-family="SimSun,STSong,serif" font-size="11" fill="#7a828d">图 2-4　血脑屏障</text>
+</svg>

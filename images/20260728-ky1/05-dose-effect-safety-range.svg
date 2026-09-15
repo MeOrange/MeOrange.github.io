@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="340" height="210" viewBox="0 0 340 210">
+<rect width="340" height="210" fill="#ffffff"/>
+<g stroke="#9aa5b1" stroke-width="1">
+<rect x="56" y="70" width="94" height="26" fill="#f6f7f9"/>
+<rect x="150" y="70" width="88" height="26" fill="#e6ebf0"/>
+<rect x="238" y="70" width="68" height="26" fill="#f2eeee"/>
+</g>
+<text x="103" y="87" text-anchor="middle" font-family="SimSun,STSong,serif" font-size="11" fill="#6b7480">无效</text>
+<text x="194" y="87" text-anchor="middle" font-family="SimSun,STSong,serif" font-size="11" fill="#4a5462">治疗量</text>
+<text x="272" y="87" text-anchor="middle" font-family="SimSun,STSong,serif" font-size="11" fill="#6b7480">中毒</text>
+<g fill="none" stroke="#b6bec8" stroke-width="1" stroke-dasharray="4 3">
+<path d="M150 54 V112"/>
+<path d="M238 54 V112"/>
+</g>
+<g fill="none" stroke="#55606e" stroke-width="1.2">
+<path d="M56 132 H302"/>
+</g>
+<path d="M308 132 l-8 -4 v8 z" fill="#55606e"/>
+<text x="150" y="148" text-anchor="middle" font-family="SimSun,STSong,serif" font-size="10" fill="#6b7480">最小有效量</text>
+<text x="246" y="148" text-anchor="middle" font-family="SimSun,STSong,serif" font-size="10" fill="#6b7480">最小中毒量</text>
+<text x="308" y="152" text-anchor="middle" font-family="SimSun,STSong,serif" font-size="10" fill="#3f4854">剂量</text>
+<text x="170" y="188" text-anchor="middle" font-family="SimSun,STSong,serif" font-size="11" fill="#7a828d">图 5　剂量-效应关系与安全范围</text>
+<text x="170" y="204" text-anchor="middle" font-family="SimSun,STSong,serif" font-size="10" fill="#8d99a6">食物 · 药物 · 毒物：只有剂量的区别</text>
+</svg>

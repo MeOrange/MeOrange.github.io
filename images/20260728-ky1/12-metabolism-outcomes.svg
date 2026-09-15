@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="340" height="210" viewBox="0 0 340 210">
+<rect width="340" height="210" fill="#ffffff"/>
+<rect x="20" y="82" width="64" height="34" rx="2" fill="#f2f4f7" stroke="#8d99a6"/>
+<text x="52" y="104" text-anchor="middle" font-family="SimSun,STSong,serif" font-size="12" fill="#3f4854">药物</text>
+<g fill="none" stroke="#b6bec8" stroke-width="1.2">
+<path d="M84 99 L178 33"/>
+<path d="M84 99 L178 73"/>
+<path d="M84 99 L178 113"/>
+<path d="M84 99 L178 153"/>
+</g>
+<g fill="#b6bec8">
+<path d="M178 33 l-9 1 l5 7 z"/>
+<path d="M178 73 l-9 1 l5 7 z"/>
+<path d="M178 113 l-9 1 l5 7 z"/>
+<path d="M178 153 l-9 1 l5 7 z"/>
+</g>
+<g fill="#fbfcfd" stroke="#c8cfd7" stroke-width="1">
+<rect x="178" y="18" width="146" height="30" rx="2"/>
+<rect x="178" y="58" width="146" height="30" rx="2"/>
+<rect x="178" y="98" width="146" height="30" rx="2"/>
+<rect x="178" y="138" width="146" height="30" rx="2"/>
+</g>
+<g font-family="SimSun,STSong,serif" font-size="10" fill="#4a5462">
+<text x="186" y="37">① 失活（普鲁卡因）</text>
+<text x="186" y="77">② 活化（可待因→吗啡）</text>
+<text x="186" y="117">③ 水溶性增强，易排泄</text>
+<text x="186" y="157">④ 生成毒性代谢物</text>
+</g>
+<text x="170" y="196" text-anchor="middle" font-family="SimSun,STSong,serif" font-size="11" fill="#7a828d">图 2-6　药物代谢后的四种结果</text>
+</svg>

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="340" height="210" viewBox="0 0 340 210">
+<rect width="340" height="210" fill="#ffffff"/>
+<g fill="#f6f7f9" stroke="#9aa5b1" stroke-width="1">
+<rect x="54" y="22" width="132" height="28" rx="2"/>
+<rect x="54" y="68" width="132" height="28" rx="2"/>
+<rect x="54" y="114" width="132" height="28" rx="2"/>
+<rect x="54" y="160" width="132" height="28" rx="2"/>
+</g>
+<g fill="none" stroke="#b6bec8" stroke-width="1.2">
+<path d="M120 50 V68"/>
+<path d="M120 96 V114"/>
+<path d="M120 142 V160"/>
+</g>
+<path d="M120 68 l-4 -7 h8 z" fill="#b6bec8"/>
+<path d="M120 114 l-4 -7 h8 z" fill="#b6bec8"/>
+<path d="M120 160 l-4 -7 h8 z" fill="#b6bec8"/>
+<g text-anchor="middle" font-family="SimSun,STSong,serif" font-size="11" fill="#3f4854">
+<text x="120" y="41">口服给药</text>
+<text x="120" y="87">肠壁（部分被代谢）</text>
+<text x="120" y="133">门静脉 → 肝（首过消除）</text>
+<text x="120" y="179">体循环（有效药量减少）</text>
+</g>
+<text x="204" y="94" font-family="SimSun,STSong,serif" font-size="9.5" fill="#8d99a6">肠壁和肝的代谢酶</text>
+<text x="204" y="108" font-family="SimSun,STSong,serif" font-size="9.5" fill="#8d99a6">使进入体循环的药量</text>
+<text x="204" y="122" font-family="SimSun,STSong,serif" font-size="9.5" fill="#8d99a6">减少 → 生物利用度↓</text>
+<text x="170" y="204" text-anchor="middle" font-family="SimSun,STSong,serif" font-size="11" fill="#7a828d">图 2-3　首过效应</text>
+</svg>

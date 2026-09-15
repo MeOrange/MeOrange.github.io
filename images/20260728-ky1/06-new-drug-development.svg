@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="340" height="210" viewBox="0 0 340 210">
+<rect width="340" height="210" fill="#ffffff"/>
+<g fill="#f6f7f9" stroke="#9aa5b1" stroke-width="1">
+<rect x="62" y="22" width="216" height="28" rx="2"/>
+<rect x="62" y="66" width="216" height="28" rx="2"/>
+<rect x="62" y="110" width="216" height="28" rx="2"/>
+<rect x="62" y="154" width="216" height="28" rx="2"/>
+</g>
+<g fill="none" stroke="#b6bec8" stroke-width="1.2">
+<path d="M170 50 V66"/>
+<path d="M170 94 V110"/>
+<path d="M170 138 V154"/>
+</g>
+<path d="M170 66 l-4 -7 h8 z" fill="#b6bec8"/>
+<path d="M170 110 l-4 -7 h8 z" fill="#b6bec8"/>
+<path d="M170 154 l-4 -7 h8 z" fill="#b6bec8"/>
+<text x="170" y="41" text-anchor="middle" font-family="SimSun,STSong,serif" font-size="11" fill="#3f4854">活性筛选（确定先导化合物）</text>
+<text x="170" y="85" text-anchor="middle" font-family="SimSun,STSong,serif" font-size="11" fill="#3f4854">临床前研究（药效·药动·毒理）</text>
+<text x="170" y="129" text-anchor="middle" font-family="SimSun,STSong,serif" font-size="11" fill="#3f4854">Ⅰ～Ⅲ 期临床试验</text>
+<text x="170" y="173" text-anchor="middle" font-family="SimSun,STSong,serif" font-size="11" fill="#3f4854">Ⅳ 期临床与上市后再评价</text>
+<text x="170" y="198" text-anchor="middle" font-family="SimSun,STSong,serif" font-size="11" fill="#7a828d">图 6　新药研发流程中的药理学</text>
+</svg>

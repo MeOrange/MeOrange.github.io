@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="340" height="210" viewBox="0 0 340 210">
+<rect width="340" height="210" fill="#ffffff"/>
+<g fill="#fbfcfd" stroke="#c8cfd7" stroke-width="1">
+<rect x="18" y="20" width="150" height="78" rx="2"/>
+<rect x="172" y="20" width="150" height="78" rx="2"/>
+<rect x="18" y="106" width="150" height="78" rx="2"/>
+<rect x="172" y="106" width="150" height="78" rx="2"/>
+</g>
+<g font-family="SimSun,STSong,serif" font-size="11" fill="#3f4854">
+<text x="28" y="40">吸　收</text>
+<text x="182" y="40">分　布</text>
+<text x="28" y="126">代　谢</text>
+<text x="182" y="126">排　泄</text>
+</g>
+<g font-family="SimSun,STSong,serif" font-size="9.5" fill="#5a6472">
+<text x="28" y="58">① 胃肠 pH</text>
+<text x="28" y="74">② 胃排空速度与肠蠕动</text>
+<text x="28" y="90">③ 离子作用与间接作用</text>
+<text x="182" y="58">① 血浆蛋白结合竞争</text>
+<text x="182" y="74">② 游离型药物增多</text>
+<text x="182" y="90">③ 药理作用增强，可中毒</text>
+<text x="28" y="144">① 酶诱导 → 代谢加快，疗效↓</text>
+<text x="28" y="160">② 酶抑制 → 代谢减慢</text>
+<text x="28" y="176">③ 作用增强，甚至中毒</text>
+<text x="182" y="144">① 肾小管分泌竞争</text>
+<text x="182" y="160">② 丙磺舒 ＋ 青霉素</text>
+<text x="182" y="176">③ 青霉素血药浓度↑，疗效↑</text>
+</g>
+<text x="170" y="202" text-anchor="middle" font-family="SimSun,STSong,serif" font-size="11" fill="#7a828d">图 2-9　ADME 过程中的药物相互作用</text>
+</svg>
