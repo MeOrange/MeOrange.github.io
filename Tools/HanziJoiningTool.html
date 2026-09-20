@@ -128,6 +128,9 @@
         .canvas.dragging .part { cursor: inherit !important; }
         .crop-box { position: absolute; border: 2px dashed #ff0000; background: rgba(255, 0, 0, 0.2); pointer-events: none; z-index: 9999; box-sizing: border-box; }
         .selection-box { position: absolute; border: 2px dashed #2196F3; background: rgba(33, 150, 243, 0.08); pointer-events: none; z-index: 9999; box-sizing: border-box; }
+        /* 多选整体编辑包围框 */
+        .group-box { position: absolute; border: 1.5px dashed #FF9800; background: rgba(255, 152, 0, 0.06); pointer-events: none; z-index: 9998; box-sizing: border-box; }
+        .group-box .handle { pointer-events: auto; background: #FF9800; }
         .freehand-line { position: absolute; left:0; top:0; width:100%; height:100%; pointer-events: none; z-index: 9998; }
         .freehand-line path { fill: rgba(255, 0, 0, 0.2); stroke: #ff0000; stroke-width: 2; stroke-dasharray: 5,3; }
         /* 裁剪类型下拉（复用文件下载样式） */
@@ -615,6 +618,26 @@
                 updateProps();
             }
         }
+    }
+
+    /** 多选批量移动/缩放命令 */
+    class BatchMoveResizeCommand extends Command {
+        constructor(before, after) {
+            super();
+            this.type = 'batchmove';
+            this.before = before.map(s => ({ ...s }));
+            this.after = after.map(s => ({ ...s }));
+        }
+        apply(list) {
+            list.forEach(s => {
+                const p = parts.find(x => x.id === s.id);
+                if (p) { p.x = s.x; p.y = s.y; p.w = s.w; p.h = s.h; }
+            });
+            renderAll();
+            updatePreview();
+        }
+        undo() { this.apply(this.before); }
+        redo() { this.apply(this.after); }
     }
 
     class CropCommand extends Command {
@@ -1322,6 +1345,11 @@
         }
     });
 
+    // Ctrl+点击在部分浏览器（Windows）会弹出右键菜单，阻止它以免干扰多选
+    canvas.addEventListener('contextmenu', (e) => {
+        if (e.ctrlKey || e.target.closest('.part')) e.preventDefault();
+    });
+
     canvas.addEventListener('mousedown', (e) => {
         // 如果点击的是顶点圆点，由顶点事件处理，这里不处理
         if (e.target.closest('.vertex-dot') || e.target.closest('.vertex-handle-dot')) return;
@@ -1334,22 +1362,20 @@
                     cropState = null;
                 }
             }
-            // 非裁剪模式且非顶点编辑模式：在空白区域拖动启动选择框
-            if (!isCropping && vertexEditId === null) {
-                startSelectionDrag(e);
-                return;
-            }
             // 退出顶点编辑模式
             if (vertexEditId !== null) {
                 const oldP = parts.find(x => x.id === vertexEditId);
                 if (oldP) { delete oldP._subpaths; delete oldP._displayD; }
                 vertexEditId = null;
             }
+            // 空白处按下：清除选中（含多选）
             selectedId = null;
             selectedIds = new Set();
             selectedVertex = null;
             syncCropButton();
             renderAll();
+            // 继续在空白区域拖动可新建框选
+            startSelectionDrag(e);
             e.stopPropagation();
             e.preventDefault();
             return;
@@ -2969,6 +2995,8 @@
 
     let dragState = null;
     let dragStartState = null;
+    let groupDragState = null; // 多选整体拖拽状态
+    let groupBoxEl = null; // 多选包围框元素
 
     function onPartMouseDown(e) {
         const id = parseInt(e.currentTarget.dataset.id);
@@ -2985,12 +3013,174 @@
         if (e.target.classList.contains('handle')) return;
         const p = parts.find(x => x.id === id);
         if (!p) return;
+        // Shift / Ctrl + 点击：切换该部件的多选状态（增减选中）
+        if (e.shiftKey || e.ctrlKey || e.metaKey) {
+            if (selectedIds.size === 0 && selectedId !== null) selectedIds.add(selectedId);
+            if (selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
+            selectedId = selectedIds.size > 0 ? selectedIds.values().next().value : null;
+            renderAll();
+            e.stopPropagation();
+            e.preventDefault();
+            return;
+        }
+        // 多选状态下按下任一已选中的部件：整体移动（保留多选）
+        if (selectedIds.size > 1 && selectedIds.has(id)) {
+            startGroupDrag(e, 'move', null, id);
+            return;
+        }
         selectPart(id);
         dragState = { type: 'move', id: id, startX: e.clientX, startY: e.clientY };
         dragStartState = { x: p.x, y: p.y, w: p.w, h: p.h };
         canvas.classList.add('dragging');
         canvas.style.cursor = 'move';
         e.preventDefault();
+    }
+
+    // ============================================================
+    // 多选整体编辑（移动 / 缩放）
+    // ============================================================
+    /** 计算当前多选部件的整体包围盒（em 坐标） */
+    function getGroupBBox() {
+        const sel = parts.filter(p => selectedIds.has(p.id));
+        if (sel.length === 0) return null;
+        let l = Infinity, t = Infinity, r = -Infinity, b = -Infinity;
+        sel.forEach(p => {
+            l = Math.min(l, p.x);
+            t = Math.min(t, p.y);
+            r = Math.max(r, p.x + p.w);
+            b = Math.max(b, p.y + p.h);
+        });
+        return { x: l, y: t, w: Math.max(EPS, r - l), h: Math.max(EPS, b - t) };
+    }
+
+    /** 渲染多选包围框与整体缩放手柄 */
+    function renderGroupBox() {
+        if (groupBoxEl) { groupBoxEl.remove(); groupBoxEl = null; }
+        if (selectedIds.size <= 1 || isCropping || vertexEditId !== null) return;
+        const bb = getGroupBBox();
+        if (!bb || bb.w <= 0 || bb.h <= 0) return;
+        const box = document.createElement('div');
+        box.className = 'group-box';
+        box.style.left = (bb.x * pxPerEm) + 'px';
+        box.style.top = (bb.y * pxPerEm) + 'px';
+        box.style.width = (bb.w * pxPerEm) + 'px';
+        box.style.height = (bb.h * pxPerEm) + 'px';
+        ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'].forEach(h => {
+            const handle = document.createElement('div');
+            handle.className = 'handle ' + h;
+            handle.dataset.groupHandle = h;
+            handle.addEventListener('mousedown', onGroupHandleMouseDown);
+            box.appendChild(handle);
+        });
+        canvas.appendChild(box);
+        groupBoxEl = box;
+    }
+
+    function startGroupDrag(e, type, handle, pressedId) {
+        const sel = parts.filter(p => selectedIds.has(p.id));
+        if (sel.length === 0) return;
+        groupDragState = {
+            type: type,
+            handle: handle,
+            pressedId: pressedId != null ? pressedId : null, // 单击（未拖动）时收敛选中到该部件
+            moved: false,
+            startX: e.clientX,
+            startY: e.clientY,
+            bbox: getGroupBBox(),
+            items: sel.map(p => ({ id: p.id, x: p.x, y: p.y, w: p.w, h: p.h }))
+        };
+        canvas.classList.add('dragging');
+        canvas.style.cursor = type === 'move' ? 'move' : '';
+        e.stopPropagation();
+        e.preventDefault();
+    }
+
+    function onGroupHandleMouseDown(e) {
+        if (isCropping) return;
+        if (selectedIds.size <= 1) return;
+        startGroupDrag(e, 'resize', e.target.dataset.groupHandle);
+    }
+
+    /** 多选整体拖拽的 mousemove 处理 */
+    function onGroupDragMove(e) {
+        const gs = groupDragState;
+        const bb = gs.bbox;
+        if (!gs.moved && (Math.abs(e.clientX - gs.startX) > 3 || Math.abs(e.clientY - gs.startY) > 3)) {
+            gs.moved = true;
+        }
+        let dx = (e.clientX - gs.startX) / pxPerEm;
+        let dy = (e.clientY - gs.startY) / pxPerEm;
+
+        if (gs.type === 'move') {
+            if (!allowOverflow) {
+                dx = Math.max(-bb.x, Math.min(1 - (bb.x + bb.w), dx));
+                dy = Math.max(-bb.y, Math.min(1 - (bb.y + bb.h), dy));
+            }
+            gs.items.forEach(it => {
+                const p = parts.find(x => x.id === it.id);
+                if (!p) return;
+                p.x = it.x + dx;
+                p.y = it.y + dy;
+                updatePartElement(p);
+            });
+            if (groupBoxEl) {
+                groupBoxEl.style.left = ((bb.x + dx) * pxPerEm) + 'px';
+                groupBoxEl.style.top = ((bb.y + dy) * pxPerEm) + 'px';
+            }
+        } else {
+            let nx = bb.x, ny = bb.y, nw = bb.w, nh = bb.h;
+            const h = gs.handle || 'se';
+            if (h.includes('e')) nw = bb.w + dx;
+            if (h.includes('w')) { nx = bb.x + dx; nw = bb.w - dx; }
+            if (h.includes('s')) nh = bb.h + dy;
+            if (h.includes('n')) { ny = bb.y + dy; nh = bb.h - dy; }
+            if (lockAspectRatio) {
+                const ratio = bb.h / bb.w;
+                if (h.includes('e') || h.includes('w')) {
+                    nh = nw * ratio;
+                    if (h.includes('n')) ny = bb.y + (bb.h - nh);
+                } else {
+                    nw = nh / ratio;
+                    if (h.includes('w')) nx = bb.x + (bb.w - nw);
+                }
+            }
+            if (nw < 0.05) { nw = 0.05; if (h.includes('w')) nx = bb.x + bb.w - 0.05; }
+            if (nh < 0.05) { nh = 0.05; if (h.includes('n')) ny = bb.y + bb.h - 0.05; }
+            if (!allowOverflow) {
+                if (nx < 0) { nw += nx; nx = 0; }
+                if (ny < 0) { nh += ny; ny = 0; }
+                if (nx + nw > 1) nw = 1 - nx;
+                if (ny + nh > 1) nh = 1 - ny;
+            }
+            const sx = nw / bb.w, sy = nh / bb.h;
+            gs.items.forEach(it => {
+                const p = parts.find(x => x.id === it.id);
+                if (!p) return;
+                p.x = nx + (it.x - bb.x) * sx;
+                p.y = ny + (it.y - bb.y) * sy;
+                p.w = Math.max(0.01, it.w * sx);
+                p.h = Math.max(0.01, it.h * sy);
+                updatePartElement(p);
+            });
+            if (groupBoxEl) {
+                groupBoxEl.style.left = (nx * pxPerEm) + 'px';
+                groupBoxEl.style.top = (ny * pxPerEm) + 'px';
+                groupBoxEl.style.width = (nw * pxPerEm) + 'px';
+                groupBoxEl.style.height = (nh * pxPerEm) + 'px';
+            }
+        }
+        // 同步主选中部件的属性面板数值
+        const prim = parts.find(x => x.id === selectedId);
+        if (prim) {
+            const ex = document.getElementById('prop_x_' + prim.id);
+            if (ex) {
+                ex.value = prim.x.toFixed(3);
+                document.getElementById('prop_y_' + prim.id).value = prim.y.toFixed(3);
+                document.getElementById('prop_w_' + prim.id).value = prim.w.toFixed(3);
+                document.getElementById('prop_h_' + prim.id).value = prim.h.toFixed(3);
+            }
+        }
+        updatePreview();
     }
 
     function onHandleMouseDown(e) {
@@ -3010,6 +3200,7 @@
 
     document.addEventListener('mousemove', (e) => {
         if (cropState) return;
+        if (groupDragState) { onGroupDragMove(e); return; }
         if (!dragState) return;
         const p = parts.find(x => x.id === dragState.id);
         if (!p) return;
@@ -3088,6 +3279,43 @@
     });
 
     document.addEventListener('mouseup', () => {
+        if (groupDragState) {
+            const gs = groupDragState;
+            // 未发生拖动（单击）：恢复原位并把选中收敛到被点击的部件
+            if (gs.type === 'move' && !gs.moved) {
+                gs.items.forEach(it => {
+                    const p = parts.find(x => x.id === it.id);
+                    if (p) { p.x = it.x; p.y = it.y; p.w = it.w; p.h = it.h; }
+                });
+                groupDragState = null;
+                canvas.classList.remove('dragging');
+                canvas.style.cursor = '';
+                if (gs.pressedId !== null) {
+                    selectedId = gs.pressedId;
+                    selectedIds = new Set();
+                }
+                renderAll();
+                return;
+            }
+            const after = [];
+            gs.items.forEach(it => {
+                const p = parts.find(x => x.id === it.id);
+                if (p) after.push({ id: p.id, x: p.x, y: p.y, w: p.w, h: p.h });
+            });
+            const changed = after.some(a => {
+                const b = gs.items.find(it => it.id === a.id);
+                return !b || Math.abs(a.x - b.x) > EPS || Math.abs(a.y - b.y) > EPS ||
+                    Math.abs(a.w - b.w) > EPS || Math.abs(a.h - b.h) > EPS;
+            });
+            groupDragState = null;
+            canvas.classList.remove('dragging');
+            canvas.style.cursor = '';
+            if (changed) {
+                executeCommand(new BatchMoveResizeCommand(gs.items, after));
+            }
+            renderAll();
+            return;
+        }
         if (dragState) {
             const p = parts.find(x => x.id === dragState.id);
             if (p) {
@@ -3204,7 +3432,7 @@
         el.style.width = (p.w * pxPerEm) + 'px';
         el.style.height = (p.h * pxPerEm) + 'px';
         el.style.zIndex = p.z;
-        el.classList.toggle('selected', p.id === selectedId);
+        el.classList.toggle('selected', p.id === selectedId || selectedIds.has(p.id));
         el.style.transformOrigin = '50% 50%';
         el.style.transform = buildOuterTransform(p);
         if (inner) {
@@ -3323,8 +3551,8 @@
             zBadge.style.cssText = 'position:absolute;top:2px;left:2px;font-size:10px;color:rgba(0,0,0,0.45);pointer-events:none;line-height:1;font-family:sans-serif;';
             el.appendChild(zBadge);
 
-            // 手柄在 .part 内，光标垂直于边线（顶点编辑模式下隐藏手柄）
-            if (p.id === selectedId && !isCropping && vertexEditId !== p.id) {
+            // 手柄在 .part 内，光标垂直于边线（顶点编辑/多选模式下隐藏单件手柄）
+            if (p.id === selectedId && selectedIds.size <= 1 && !isCropping && vertexEditId !== p.id) {
                 ['nw','n','ne','e','se','s','sw','w'].forEach(h=>{
                     const handle=document.createElement('div');
                     handle.className='handle '+h;
@@ -3341,6 +3569,7 @@
             }
             canvas.appendChild(el);
         });
+        renderGroupBox();
         renderPartsList();
         updatePreview();
         updateProps();
