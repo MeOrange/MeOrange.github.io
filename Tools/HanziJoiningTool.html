@@ -131,6 +131,9 @@
         /* 多选整体编辑包围框 */
         .group-box { position: absolute; border: 1.5px dashed #FF9800; background: rgba(255, 152, 0, 0.06); pointer-events: none; z-index: 9998; box-sizing: border-box; }
         .group-box .handle { pointer-events: auto; background: #FF9800; }
+        .group-box .group-rotate { position: absolute; left: 50%; top: 6px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: #fff; border: 1.5px solid #FF9800; box-sizing: border-box; pointer-events: auto; cursor: grab; }
+        .group-box .group-rotate:hover { background: #FFE0B2; }
+        .group-box .group-rotate:active { cursor: grabbing; }
         .freehand-line { position: absolute; left:0; top:0; width:100%; height:100%; pointer-events: none; z-index: 9998; }
         .freehand-line path { fill: rgba(255, 0, 0, 0.2); stroke: #ff0000; stroke-width: 2; stroke-dasharray: 5,3; }
         /* 裁剪类型下拉（复用文件下载样式） */
@@ -494,6 +497,9 @@
     let selectedId = null;
     let selectedIds = new Set(); // 多选状态（框选时使用）
     let nextId = 1;
+    let nextGroupId = 1; // 编组ID分配（部件通过 groupId 归属编组）
+    let groupFrameAngle = 0; // 当前多选/编组编辑框的整体旋转角（度）
+    const groupFrameAngles = new Map(); // 编组ID → 该编组编辑框的旋转角（随编组持久保存）
     let debugMode = false; // 调试模式：连续点击标题3次切换
     const DEFAULT_PX_PER_EM = 400;
     let pxPerEm = DEFAULT_PX_PER_EM;
@@ -542,6 +548,7 @@
                 partElements.delete(this.id);
                 removeClipDef(this.id);
                 if (selectedId === this.id) selectedId = null;
+                selectedIds.delete(this.id); // 同步清掉多选集合里的该 id，避免残留导致选中集判据失真
                 renderAll();
             }
         }
@@ -575,6 +582,7 @@
                 partElements.delete(this.id);
                 removeClipDef(this.id);
                 if (selectedId === this.id) selectedId = null;
+                selectedIds.delete(this.id); // 同步清掉多选集合里的该 id
                 renderAll();
             }
         }
@@ -620,21 +628,95 @@
         }
     }
 
-    /** 多选批量移动/缩放命令 */
+    /** 多选批量移动/缩放/旋转命令（frameBefore/After 记录编辑框旋转状态，便于撤销时还原） */
     class BatchMoveResizeCommand extends Command {
-        constructor(before, after) {
+        constructor(before, after, frameBefore, frameAfter) {
             super();
             this.type = 'batchmove';
+            this.before = before.map(s => ({ ...s }));
+            this.after = after.map(s => ({ ...s }));
+            this.frameBefore = frameBefore || null;
+            this.frameAfter = frameAfter || null;
+        }
+        apply(list, frame) {
+            list.forEach(s => {
+                const p = parts.find(x => x.id === s.id);
+                if (!p) return;
+                p.x = s.x;
+                p.y = s.y;
+                p.w = s.w;
+                p.h = s.h;
+                if (s.angle !== undefined) p.angle = s.angle;
+            });
+            restoreFrameState(frame);
+            renderAll();
+            updatePreview();
+        }
+        undo() { this.apply(this.before, this.frameBefore); }
+        redo() { this.apply(this.after, this.frameAfter); }
+    }
+
+    /** 编组 / 解组命令：批量修改部件的 groupId */
+    class GroupChangeCommand extends Command {
+        constructor(before, after) {
+            super();
+            this.type = 'group';
             this.before = before.map(s => ({ ...s }));
             this.after = after.map(s => ({ ...s }));
         }
         apply(list) {
             list.forEach(s => {
                 const p = parts.find(x => x.id === s.id);
-                if (p) { p.x = s.x; p.y = s.y; p.w = s.w; p.h = s.h; }
+                if (!p) return;
+                if (s.groupId == null) delete p.groupId;
+                else p.groupId = s.groupId;
             });
             renderAll();
             updatePreview();
+        }
+        undo() { this.apply(this.before); }
+        redo() { this.apply(this.after); }
+    }
+
+    /** 批量属性命令：一次修改多个部件的同一属性（属性面板多选编辑） */
+    class BatchPropCommand extends Command {
+        constructor(key, before, after) {
+            super();
+            this.type = 'batchprop';
+            this.key = key;
+            this.before = before.map(s => ({ ...s }));
+            this.after = after.map(s => ({ ...s }));
+        }
+        apply(list) {
+            list.forEach(s => {
+                const p = parts.find(x => x.id === s.id);
+                if (p) p[this.key] = s.value;
+            });
+            if (this.key === 'z') parts.sort((a, b) => a.z - b.z);
+            renderAll();
+            updatePreview();
+        }
+        undo() { this.apply(this.before); }
+        redo() { this.apply(this.after); }
+    }
+
+    /** 整组倾斜命令：位置与倾斜角一并还原 */
+    class GroupSkewCommand extends Command {
+        constructor(before, after) {
+            super();
+            this.type = 'groupskew';
+            this.before = before.map(s => ({ ...s }));
+            this.after = after.map(s => ({ ...s }));
+        }
+        apply(list) {
+            list.forEach(s => {
+                const p = parts.find(x => x.id === s.id);
+                if (!p) return;
+                p.x = s.x;
+                p.y = s.y;
+                p.skew = s.skew;
+            });
+            renderAll();
         }
         undo() { this.apply(this.before); }
         redo() { this.apply(this.after); }
@@ -746,6 +828,7 @@
                     partElements.delete(item.id);
                     removeClipDef(item.id);
                 }
+                selectedIds.delete(item.id); // 同步清掉多选集合里的该 id
             }
             selectedId = null;
             renderAll();
@@ -804,6 +887,9 @@
             this.id = id;
             this.oldData = JSON.parse(JSON.stringify(oldData));
             this.snapshot = JSON.parse(JSON.stringify(snapshot));
+            // 复原会一并清掉编辑框旋转，撤销/重做要同步还原框角度（含所属编组的记录）
+            this.frameBefore = captureFrameState();
+            this.frameAfter = { angle: 0, gid: this.frameBefore.gid, gidAngle: 0 };
         }
         undo() {
             const p = parts.find(x => x.id === this.id);
@@ -811,6 +897,7 @@
             Object.assign(p, this.oldData);
             p.initialSnapshot = this.oldData.initialSnapshot;
             handleCropsAfterReset(p);
+            restoreFrameState(this.frameBefore);
             renderAll();
             selectPart(this.id);
         }
@@ -820,6 +907,7 @@
             Object.assign(p, this.snapshot);
             p.initialSnapshot = this.snapshot.initialSnapshot;
             handleCropsAfterReset(p);
+            restoreFrameState(this.frameAfter);
             renderAll();
             selectPart(this.id);
         }
@@ -1345,55 +1433,73 @@
         }
     });
 
+    // 点击页面其他地方关闭字体/字重下拉
+    // 只能在这里注册一次：若写在 updateProps 里，每次 renderAll 都会新增一个匿名监听器且无法移除
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.font-custom-select')) {
+            document.querySelectorAll('.font-custom-select .dropdown').forEach(el => el.style.display = 'none');
+        }
+    });
+
     // Ctrl+点击在部分浏览器（Windows）会弹出右键菜单，阻止它以免干扰多选
     canvas.addEventListener('contextmenu', (e) => {
         if (e.ctrlKey || e.target.closest('.part')) e.preventDefault();
     });
 
-    canvas.addEventListener('mousedown', (e) => {
-        // 如果点击的是顶点圆点，由顶点事件处理，这里不处理
-        if (e.target.closest('.vertex-dot') || e.target.closest('.vertex-handle-dot')) return;
-        const partEl = e.target.closest('.part');
-        if (!partEl) {
-            if (isCropping) {
-                isCropping = false;
-                if (cropState) {
-                    if (cropState.box) cropState.box.remove();
-                    cropState = null;
-                }
+    /** 按下画布空白处：退出裁剪/顶点编辑；只有点在选中集合的操作框之外时才清除选中并开始框选 */
+    function handleCanvasEmptyMouseDown(e) {
+        const wasCropping = isCropping;
+        const wasVertexEdit = vertexEditId !== null;
+        if (isCropping) {
+            isCropping = false;
+            if (cropState) {
+                if (cropState.box) cropState.box.remove();
+                cropState = null;
             }
-            // 退出顶点编辑模式
-            if (vertexEditId !== null) {
-                const oldP = parts.find(x => x.id === vertexEditId);
-                if (oldP) { delete oldP._subpaths; delete oldP._displayD; }
-                vertexEditId = null;
-            }
-            // 空白处按下：清除选中（含多选）
-            selectedId = null;
-            selectedIds = new Set();
-            selectedVertex = null;
-            syncCropButton();
-            renderAll();
-            // 继续在空白区域拖动可新建框选
-            startSelectionDrag(e);
-            e.stopPropagation();
-            e.preventDefault();
+        }
+        // 退出顶点编辑模式
+        if (vertexEditId !== null) {
+            const oldP = parts.find(x => x.id === vertexEditId);
+            if (oldP) { delete oldP._subpaths; delete oldP._displayD; }
+            vertexEditId = null;
+        }
+        // 点在“当前选中集合的操作框”内（单选=部件框，多选/编组=群组框）的空白处：
+        // 不算点到画布空白，保持选中并直接进入拖动；只有框外的空白才取消选中
+        if (!wasCropping && !wasVertexEdit &&
+            isPointInSelectionBox(e.clientX, e.clientY) && startDragInsideSelectionBox(e)) {
             return;
         }
-        if (!isCropping) return;
-        const id = parseInt(partEl.dataset.id);
-        if (id !== selectedId) return;
-        const p = parts.find(x => x.id === id);
-        if (!p) return;
+        // 空白处按下：清除选中（含多选）
+        selectedId = null;
+        selectedIds = new Set();
+        selectedVertex = null;
+        syncCropButton();
+        renderAll();
+        // 继续在空白区域拖动可新建框选
+        startSelectionDrag(e);
+        e.stopPropagation();
+        e.preventDefault();
+    }
+
+    /**
+     * 裁剪模式下的按下处理：只要按在“待裁剪部件”的边框范围内就立即开始裁剪。
+     * 完全基于坐标判定，不要求鼠标落在部件的着墨像素或 .part 元素上，
+     * 因此即使部件带 clip-path（已裁剪过）在透明区域按下也能正常裁剪。
+     * @returns {boolean} 是否成功进入裁剪
+     */
+    function tryStartCrop(e) {
+        if (!isCropping || selectedId === null) return false;
+        const p = parts.find(x => x.id === selectedId);
+        if (!p) return false;
         if (Math.abs(p.angle || 0) > 0.001 || Math.abs(p.skew || 0) > 0.001 || p.flipH || p.flipV) {
-            return;
+            return false;
         }
         const entry = partElements.get(p.id);
-        if (!entry) return;
+        if (!entry || !entry.el) return false;
         const el = entry.el;
         const rect = el.getBoundingClientRect();
         if (e.clientX < rect.left || e.clientX > rect.right ||
-            e.clientY < rect.top || e.clientY > rect.bottom) return;
+            e.clientY < rect.top || e.clientY > rect.bottom) return false;
 
         const canvasRect = canvas.getBoundingClientRect();
         const startX = e.clientX - canvasRect.left;
@@ -1444,6 +1550,29 @@
         }
         e.stopPropagation();
         e.preventDefault();
+        return true;
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+        // 如果点击的是顶点圆点，由顶点事件处理，这里不处理
+        if (e.target.closest('.vertex-dot') || e.target.closest('.vertex-handle-dot')) return;
+        // 裁剪模式优先：按在待裁剪部件范围内就直接开始裁剪（不依赖是否命中像素/部件元素）
+        if (tryStartCrop(e)) return;
+        const partEl = e.target.closest('.part');
+        if (!partEl) {
+            handleCanvasEmptyMouseDown(e);
+            return;
+        }
+        // 非裁剪模式按下部件：由部件自身的 mousedown 处理器负责，这里不处理
+        if (!isCropping) return;
+        // 裁剪模式下按到其他部件：切换为裁剪该部件（不拖动、不退出裁剪模式）
+        const id = parseInt(partEl.dataset.id);
+        if (id !== selectedId) {
+            const q = parts.find(x => x.id === id);
+            if (!q) return;
+            selectPart(id);
+            renderAll();
+        }
     });
 
     document.addEventListener('mousemove', (e) => {
@@ -1591,6 +1720,7 @@
             }
         });
 
+        syncGroupFrameToSelection(foundIds);
         if (foundIds.length > 0) {
             // 多选：所有被框中的部件
             selectedIds = new Set(foundIds);
@@ -1941,9 +2071,30 @@
             partElements.delete(id);
             removeClipDef(id);
             if (selectedId === id) selectedId = null;
+            selectedIds.delete(id); // 同步清掉多选集合里的该 id，避免选中集残留导致手柄/面板状态错乱
             renderAll();
             executeCommand(cmd);
         }
+    }
+
+    /** 复原：多选/编组时批量复原全部选中部件 */
+    function resetSelectedParts() {
+        const sel = getSelectedParts();
+        if (sel.length === 0) return;
+        if (sel.length === 1) { resetPart(sel[0].id); return; }
+        const ids = sel.map(q => q.id);
+        sel.forEach(q => {
+            if (!q.initialSnapshot) return;
+            const cmd = new ResetPartCommand(q.id, q, q.initialSnapshot);
+            Object.assign(q, JSON.parse(JSON.stringify(q.initialSnapshot)));
+            if (lockedFontFamily) q.fontFamily = lockedFontFamily;
+            handleCropsAfterReset(q);
+            executeCommand(cmd);
+        });
+        selectedIds = new Set(ids);
+        selectedId = ids[ids.length - 1];
+        clearFrameAngleAfterReset(sel); // 复原后框不应继续保留旧旋转
+        renderAll();
     }
 
     function resetPart(id) {
@@ -1953,6 +2104,7 @@
         Object.assign(p, JSON.parse(JSON.stringify(p.initialSnapshot)));
         if (lockedFontFamily) p.fontFamily = lockedFontFamily;
         handleCropsAfterReset(p);
+        clearFrameAngleAfterReset([p]); // 复原后框不应继续保留旧旋转
         executeCommand(cmd);
         renderAll();
         selectPart(id);
@@ -1964,7 +2116,10 @@
         if (pxPerEm !== DEFAULT_PX_PER_EM) return false; // 缩放已改变
         if (!p.initialSnapshot) return true; // 无初始快照则允许
         const s = p.initialSnapshot;
-        if (Math.abs(p.w - s.w) > EPS || Math.abs(p.h - s.h) > EPS) return false; // 拉伸了
+        // 宽度基准用 initW（当前字体/文字下的“自然宽度”）：改字体或文字会同时改写 initW 与 w，
+        // 不应算作“被拉伸”；只有手动拖框改过 w（initW 不变）才判为拉伸
+        const baseW = p.initW || s.w;
+        if (Math.abs(p.w - baseW) > EPS || Math.abs(p.h - s.h) > EPS) return false; // 拉伸了
         if (Math.abs((p.angle || 0) - (s.angle || 0)) > EPS) return false; // 旋转了
         if (Math.abs((p.skew || 0) - (s.skew || 0)) > EPS) return false; // 倾斜了
         if ((p.flipH || false) !== (s.flipH || false) || (p.flipV || false) !== (s.flipV || false)) return false; // 镜像了
@@ -1977,11 +2132,28 @@
         if (pxPerEm !== DEFAULT_PX_PER_EM) return '请先将画布缩放恢复为默认值(400)后再矢量化';
         if (!p.initialSnapshot) return '';
         const s = p.initialSnapshot;
-        if (Math.abs(p.w - s.w) > EPS || Math.abs(p.h - s.h) > EPS) return '部件已拉伸，禁止矢量化';
+        const baseW = p.initW || s.w;
+        if (Math.abs(p.w - baseW) > EPS || Math.abs(p.h - s.h) > EPS) return '部件已拉伸，禁止矢量化';
         if (Math.abs((p.angle || 0) - (s.angle || 0)) > EPS) return '部件已旋转，禁止矢量化';
         if (Math.abs((p.skew || 0) - (s.skew || 0)) > EPS) return '部件已倾斜，禁止矢量化';
         if ((p.flipH || false) !== (s.flipH || false) || (p.flipV || false) !== (s.flipV || false)) return '部件已镜像，禁止矢量化';
         return '';
+    }
+
+    /** 多选/编组时：批量矢量化所有可矢量化的选中部件 */
+    function vectorizeSelectedParts() {
+        const targets = getSelectedParts().filter(q => q.type !== 'vector' && canVectorize(q));
+        if (targets.length === 0) { showTip('选中的部件都不满足矢量化条件'); return; }
+        if (targets.length === 1) { vectorizePart(targets[0].id); return; }
+        const beforeIds = new Set(parts.map(q => q.id));
+        targets.forEach(q => vectorizePart(q.id));
+        const newIds = parts.filter(q => !beforeIds.has(q.id)).map(q => q.id);
+        if (newIds.length > 0) {
+            selectedIds = new Set(newIds);
+            selectedId = newIds[newIds.length - 1];
+        }
+        renderAll();
+        updatePreview();
     }
 
     /** 更新单个部件的矢量化按钮状态（不重建整个面板） */
@@ -1990,6 +2162,16 @@
         if (!btn) return;
         const p = parts.find(x => x.id === id);
         if (!p) return;
+        if (selectedIds.size > 1) {
+            const targets = getSelectedParts().filter(q => q.type !== 'vector' && canVectorize(q));
+            const mDisabled = targets.length === 0;
+            btn.disabled = mDisabled;
+            btn.style.color = mDisabled ? '#ccc' : '';
+            btn.style.cursor = mDisabled ? 'not-allowed' : '';
+            btn.title = mDisabled ? '选中的部件都不满足矢量化条件' : `批量矢量化选中的 ${targets.length} 个部件`;
+            btn.onclick = mDisabled ? null : vectorizeSelectedParts;
+            return;
+        }
         const vDisabled = !canVectorize(p);
         btn.disabled = vDisabled;
         btn.style.color = vDisabled ? '#ccc' : '';
@@ -2303,6 +2485,7 @@
         // ============ 调试结束 ============
 
         const newParts = [];
+        const totalParts = outerContours.length; // 拆分出的部件总数（用于按图层序号命名）
         outerContours.forEach((group, gi) => {
             // 合并outer + holes的路径
             const pathList = [group.outer.d, ...group.holes.map(h => h.d)];
@@ -2315,7 +2498,10 @@
             const vectorPart = {
                 id: nextId++,
                 type: 'vector',
-                text: p.text + '_' + (gi + 1),
+                // 继承原部件的编组归属：否则对编组成员矢量化会把编组静默解散
+                groupId: p.groupId,
+                // 命名序号与界面层号一致：层号 1 = 最上层；内部 z 随 gi 增大而更靠上，故取名次的反序
+                text: p.text + '_' + (totalParts - gi),
                 pathData: adjustedD,
                 x: p.x + b.minX,
                 y: p.y + b.minY,
@@ -2998,26 +3184,222 @@
     let groupDragState = null; // 多选整体拖拽状态
     let groupBoxEl = null; // 多选包围框元素
 
-    function onPartMouseDown(e) {
-        const id = parseInt(e.currentTarget.dataset.id);
-        if (isCropping) {
-            if (id !== selectedId) {
-                isCropping = false;
-                if (cropState) { if (cropState.box) cropState.box.remove();
-                    cropState = null; }
-                syncCropButton();
+    // ============================================================
+    // 点选命中区域：只认部件真实着墨（有像素）的地方
+    // 仅影响“点击选中”；操作框、手柄、整体拖拽等交互不变
+    // ============================================================
+    /** 屏幕点 → 部件未做 rotate/skew/scale 变换前的本地坐标（px，相对部件左上角）；失败返回 null */
+    function getPartLocalPoint(el, p, clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        const bw = p.w * pxPerEm, bh = p.h * pxPerEm;
+        const ox = bw / 2, oy = bh / 2; // transform-origin: 50% 50%
+        let m;
+        try {
+            const tf = getComputedStyle(el).transform;
+            m = (tf && tf !== 'none') ? new DOMMatrixReadOnly(tf).inverse() : new DOMMatrixReadOnly();
+        } catch (err) {
+            return null;
+        }
+        const vx = (clientX - rect.left) - p.x * pxPerEm - ox;
+        const vy = (clientY - rect.top) - p.y * pxPerEm - oy;
+        return {
+            x: m.a * vx + m.c * vy + m.e + ox,
+            y: m.b * vx + m.d * vy + m.f + oy
+        };
+    }
+
+    /** 矢量部件：用 SVG isPointInFill 判断点是否落在路径填充（着墨）内；不支持时返回 null */
+    function isVectorInkAt(entry, p, lx, ly) {
+        const svg = entry.inner;
+        const pathEl = svg && svg.querySelector('path');
+        if (!pathEl || typeof pathEl.isPointInFill !== 'function') return null;
+        const bw = Math.max(EPS, p.w * pxPerEm), bh = Math.max(EPS, p.h * pxPerEm);
+        const vW = p.vW || p.w, vH = p.vH || p.h;
+        const sx = vW / bw, sy = vH / bh; // 本地 px → viewBox 用户坐标
+        // 近邻采样：给细笔画留一点容差，避免难点中
+        const r = 2;
+        const probes = [[0, 0], [r, 0], [-r, 0], [0, r], [0, -r], [r, r], [r, -r], [-r, r], [-r, -r]];
+        for (let i = 0; i < probes.length; i++) {
+            const ux = (lx + probes[i][0]) * sx;
+            const uy = (ly + probes[i][1]) * sy;
+            let hit;
+            try {
+                hit = pathEl.isPointInFill({ x: ux, y: uy });
+            } catch (err) {
+                return null;
+            }
+            if (hit) return true;
+        }
+        return false;
+    }
+
+    /** 文字部件：把字形画到离屏 canvas 上做 alpha 命中测试；失败返回 null */
+    function isTextInkAt(entry, p, lx, ly) {
+        const F = pxPerEm;
+        if (!p.text) return false; // 无文字即无着墨
+        const sx = getInnerXScale(p), sy = p.h; // 与 inner 的 scale(sx, sy)（origin 0 0）一致
+        if (!(sx > 0) || !(sy > 0)) return null;
+        // inner 被缩放过，反算回 span 未缩放的坐标系
+        const ux = lx / sx, uy = ly / sy;
+        const cvs = document.createElement('canvas');
+        let ctx = cvs.getContext('2d');
+        if (!ctx) return null;
+        const font = (p.fontWeight || 400) + ' ' + F + 'px ' + getFontStack(p.fontFamily);
+        ctx.font = font;
+        const met = ctx.measureText(p.text);
+        const asc = (typeof met.fontBoundingBoxAscent === 'number') ? met.fontBoundingBoxAscent : F * 0.88;
+        const desc = (typeof met.fontBoundingBoxDescent === 'number') ? met.fontBoundingBoxDescent : F * 0.12;
+        const pad = 2;
+        const wpx = Math.max(1, Math.ceil(met.width) + pad * 2);
+        const hpx = Math.max(1, Math.ceil(asc + desc) + pad * 2);
+        if (ux < -pad || uy < -pad || ux > wpx + pad || uy > hpx + pad) return false;
+        cvs.width = wpx;
+        cvs.height = hpx;
+        ctx = cvs.getContext('2d'); // 重设尺寸会重置状态，需要重新设置
+        if (!ctx) return null;
+        ctx.font = font;
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = '#000000';
+        // CSS line-height:1 时基线 = 半行距 + ascent
+        ctx.fillText(p.text, pad, pad + (F - (asc + desc)) / 2 + asc);
+        // 允许 ±2px 容差，边缘点也能命中（同时仍能排除远离字形的空白）
+        const x0 = Math.max(0, Math.floor(ux) - 2);
+        const y0 = Math.max(0, Math.floor(uy) - 2);
+        const w = Math.min(5, wpx - x0), h = Math.min(5, hpx - y0);
+        if (w <= 0 || h <= 0) return false;
+        let data;
+        try {
+            data = ctx.getImageData(x0, y0, w, h).data;
+        } catch (err) {
+            return null;
+        }
+        for (let i = 3; i < data.length; i += 4) {
+            if (data[i] > 16) return true;
+        }
+        return false;
+    }
+
+    /** 点（归一化 0..1 部件坐标）是否落在某个裁剪区域内（即被裁掉的不可见区域） */
+    function isPointInCrop(crops, nx, ny) {
+        for (const r of crops) {
+            if (r.type === 'poly') {
+                if (!r.points || r.points.length < 3) continue;
+                let inside = false;
+                for (let i = 0, j = r.points.length - 1; i < r.points.length; j = i++) {
+                    const xi = r.points[i].x, yi = r.points[i].y;
+                    const xj = r.points[j].x, yj = r.points[j].y;
+                    if (((yi > ny) !== (yj > ny)) && (nx < (xj - xi) * (ny - yi) / (yj - yi) + xi)) inside = !inside;
+                }
+                if (inside) return true;
             } else {
+                if (nx >= r.x && nx <= r.x + r.w && ny >= r.y && ny <= r.y + r.h) return true;
+            }
+        }
+        return false;
+    }
+
+    /** 点击是否落在部件真实着墨区域；无法判定时返回 true（宁可命中，避免选不中） */
+    function isPointOnPartInk(p, e) {
+        const entry = partElements.get(p.id);
+        if (!entry || !entry.el) return true;
+        const local = getPartLocalPoint(entry.el, p, e.clientX, e.clientY);
+        if (!local) return true;
+        const bw = p.w * pxPerEm, bh = p.h * pxPerEm;
+        const tol = 1; // px 容差
+        if (local.x < -tol || local.y < -tol || local.x > bw + tol || local.y > bh + tol) return false;
+        // 被裁剪掉的区域在画布上不可见，不算着墨：否则会选中看不见的部件，并挡住下层真正可见的部件
+        if (p.crops && p.crops.length > 0 && bw > 0 && bh > 0 &&
+            isPointInCrop(p.crops, local.x / bw, local.y / bh)) return false;
+        const hit = (p.type === 'vector')
+            ? isVectorInkAt(entry, p, local.x, local.y)
+            : isTextInkAt(entry, p, local.x, local.y);
+        return hit === null ? true : hit;
+    }
+
+    /** 在鼠标位置真正着墨的最上层部件（自上层向下层逐个判定着墨区）；无可命中的部件时返回 null */
+    function findPartAtPoint(clientX, clientY, excludeId) {
+        const hitEvent = { clientX, clientY };
+        for (const q of getLayerOrder()) {
+            if (q.id === excludeId) continue;
+            if (isPointOnPartInk(q, hitEvent)) return q;
+        }
+        return null;
+    }
+
+    /** 点是否落在“当前选中集合的操作框”内（单选 = 部件框，多选/编组 = 群组框；带少量容差覆盖手柄附近） */
+    function isPointInSelectionBox(clientX, clientY) {
+        if (selectedIds.size > 1) {
+            const fr = getGroupFrame();
+            if (!fr) return false;
+            const rect = canvas.getBoundingClientRect();
+            const ex = (clientX - rect.left) / pxPerEm, ey = (clientY - rect.top) / pxPerEm;
+            // 反变换 M⁻¹ = SkewX(-S)·R(-A)（与 getGroupFrame 的 M = R(A)·SkewX(S) 对应），取相对框中心的坐标
+            const a = (fr.angle || 0) * Math.PI / 180;
+            const ca = Math.cos(a), sa = Math.sin(a);
+            const dx = ex - (fr.x + fr.w / 2), dy = ey - (fr.y + fr.h / 2);
+            const rx = dx * ca + dy * sa, ry = -dx * sa + dy * ca;
+            const lx = rx - ry * Math.tan((fr.skew || 0) * Math.PI / 180);
+            const tol = 6 / pxPerEm;
+            return Math.abs(lx) <= fr.w / 2 + tol && Math.abs(ry) <= fr.h / 2 + tol;
+        }
+        const p = parts.find(q => q.id === selectedId);
+        if (!p) return false;
+        const entry = partElements.get(p.id);
+        if (!entry || !entry.el) return false;
+        const local = getPartLocalPoint(entry.el, p, clientX, clientY);
+        if (!local) return false;
+        const tol = 6; // px：覆盖手柄附近
+        return local.x >= -tol && local.y >= -tol &&
+            local.x <= p.w * pxPerEm + tol && local.y <= p.h * pxPerEm + tol;
+    }
+
+    /** 在选中集合的操作框内按下（框内空白处）：保持选中并直接进入拖动 */
+    function startDragInsideSelectionBox(e) {
+        if (selectedIds.size > 1) {
+            startGroupDrag(e, 'move', null, null); // 多选/编组：整组拖动（不收敛选中）
+            return true;
+        }
+        const p = parts.find(q => q.id === selectedId);
+        if (!p) return false;
+        if (getPartGroupId(p) !== null) {
+            startGroupDrag(e, 'move', null, p.id);
+            return true;
+        }
+        dragState = { type: 'move', id: p.id, startX: e.clientX, startY: e.clientY };
+        dragStartState = { x: p.x, y: p.y, w: p.w, h: p.h };
+        canvas.classList.add('dragging');
+        canvas.style.cursor = 'move';
+        e.preventDefault();
+        return true;
+    }
+
+    function onPartMouseDown(e) {
+        const hitId = parseInt(e.currentTarget.dataset.id);
+        // 裁剪模式：部件自身一律不响应拖动/选中，直接让事件冒泡给画布层，
+        // 由画布层用坐标统一判定裁剪起点（部件带 clip-path 时透明区域不接收事件，
+        // 只有这样才能保证在部件任意位置按下都能开始裁剪而不会把部件拖走）
+        if (isCropping) return;
+        if (e.target.classList.contains('handle')) return;
+        let p = parts.find(x => x.id === hitId);
+        if (!p) return;
+        // 命中区域只认部件真实着墨处：点在框内空白处时继续向下层查找，
+        // 否则上层部件的透明框会挡住下层部件，导致被遮挡的部件无法点选
+        if (!isPointOnPartInk(p, e)) {
+            p = findPartAtPoint(e.clientX, e.clientY, hitId);
+            if (!p) {
+                handleCanvasEmptyMouseDown(e);
                 return;
             }
         }
-        if (e.target.classList.contains('handle')) return;
-        const p = parts.find(x => x.id === id);
-        if (!p) return;
+        const id = p.id;
         // Shift / Ctrl + 点击：切换该部件的多选状态（增减选中）
         if (e.shiftKey || e.ctrlKey || e.metaKey) {
-            if (selectedIds.size === 0 && selectedId !== null) selectedIds.add(selectedId);
-            if (selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
-            selectedId = selectedIds.size > 0 ? selectedIds.values().next().value : null;
+            const next = new Set(selectedIds);
+            if (next.size === 0 && selectedId !== null) next.add(selectedId);
+            if (next.has(id)) next.delete(id); else next.add(id);
+            syncGroupFrameToSelection([...next]); // 恰好又选回同一个编组时恢复该编组的框角度
+            selectedIds = next;
+            selectedId = next.size > 0 ? next.values().next().value : null;
             renderAll();
             e.stopPropagation();
             e.preventDefault();
@@ -3025,6 +3407,14 @@
         }
         // 多选状态下按下任一已选中的部件：整体移动（保留多选）
         if (selectedIds.size > 1 && selectedIds.has(id)) {
+            startGroupDrag(e, 'move', null, id);
+            return;
+        }
+        // 编组：点击任一成员即选中整组，整组一起移动
+        const gid = getPartGroupId(p);
+        if (gid !== null) {
+            selectGroup(gid, id);
+            renderAll();
             startGroupDrag(e, 'move', null, id);
             return;
         }
@@ -3039,12 +3429,11 @@
     // ============================================================
     // 多选整体编辑（移动 / 缩放）
     // ============================================================
-    /** 计算当前多选部件的整体包围盒（em 坐标） */
-    function getGroupBBox() {
-        const sel = parts.filter(p => selectedIds.has(p.id));
-        if (sel.length === 0) return null;
+    /** 计算一组部件的整体包围盒（em 坐标） */
+    function calcBBox(list) {
+        if (!list || list.length === 0) return null;
         let l = Infinity, t = Infinity, r = -Infinity, b = -Infinity;
-        sel.forEach(p => {
+        list.forEach(p => {
             l = Math.min(l, p.x);
             t = Math.min(t, p.y);
             r = Math.max(r, p.x + p.w);
@@ -3053,18 +3442,198 @@
         return { x: l, y: t, w: Math.max(EPS, r - l), h: Math.max(EPS, b - t) };
     }
 
+    /** 计算当前多选部件的整体包围盒（em 坐标） */
+    function getGroupBBox() {
+        return calcBBox(parts.filter(p => selectedIds.has(p.id)));
+    }
+
+    /** 部件渲染后的四个角（含旋转/倾斜/翻转，与 buildOuterTransform 一致），em 坐标 */
+    function getPartRenderCorners(q) {
+        const cx = q.x + q.w / 2, cy = q.y + q.h / 2;
+        const rad = (q.angle || 0) * Math.PI / 180;
+        const c = Math.cos(rad), s = Math.sin(rad);
+        const tanS = Math.tan((q.skew || 0) * Math.PI / 180);
+        const fx = q.flipH ? -1 : 1, fy = q.flipV ? -1 : 1;
+        const hw = q.w / 2, hh = q.h / 2;
+        return [[-hw, -hh], [hw, -hh], [hw, hh], [-hw, hh]].map(([dx, dy]) => {
+            // CSS transform: rotate(A) skewX(S) scale(fX,fY) —— 右到左：scale → skewX → rotate
+            const x1 = dx * fx, y1 = dy * fy;
+            const kx = x1 + tanS * y1, ky = y1;
+            return [cx + kx * c - ky * s, cy + kx * s + ky * c];
+        });
+    }
+
+    /** 计算多选编辑框（返回的矩形绕自身中心做 rotate(angle) skewX(skew) 即为显示框，与单选部件同一变换链） */
+    function getGroupFrame() {
+        const sel = getSelectedParts();
+        if (sel.length === 0) return null;
+        const A = groupFrameAngle || 0;
+        const S = getSelectionSkew();
+        // 用“渲染后的矩形角点”而非轴对齐槽位：整体旋转时槽位仍轴对齐，会导致包围盒随角度变大
+        const pts = [];
+        sel.forEach(q => getPartRenderCorners(q).forEach(pt => pts.push(pt)));
+        // 框的变换 M = R(A)·SkewX(S)：角点先经 M⁻¹ 回到框内坐标，求轴对齐包围盒；
+        // 该形状在整组旋转中保持不变，再整体经 M 转回即为显示框
+        const back = -A * Math.PI / 180;
+        const cb = Math.cos(back), sb = Math.sin(back);
+        const tanS = Math.tan(S * Math.PI / 180);
+        let l = Infinity, t = Infinity, r = -Infinity, b = -Infinity;
+        pts.forEach(pt => {
+            const rx = pt[0] * cb - pt[1] * sb;
+            const ry = pt[0] * sb + pt[1] * cb;
+            const lx = rx - ry * tanS; // SkewX(-S)
+            const ly = ry;
+            l = Math.min(l, lx);
+            t = Math.min(t, ly);
+            r = Math.max(r, lx);
+            b = Math.max(b, ly);
+        });
+        const w = Math.max(EPS, r - l), h = Math.max(EPS, b - t);
+        // 框内中心 → 画布中心：SkewX(S) 再 R(A)
+        const fwd = A * Math.PI / 180;
+        const cf = Math.cos(fwd), sf = Math.sin(fwd);
+        const mx = l + w / 2, my = t + h / 2;
+        const kx = mx + my * tanS, ky = my;
+        const dcx = kx * cf - ky * sf, dcy = kx * sf + ky * cf;
+        return { x: dcx - w / 2, y: dcy - h / 2, w: w, h: h, angle: A, skew: S };
+    }
+
+    /** 多选框的显示中心（em） */
+    function getGroupFrameCenter() {
+        const fr = getGroupFrame();
+        if (!fr) return null;
+        return { x: fr.x + fr.w / 2, y: fr.y + fr.h / 2 };
+    }
+
+    /** 选中集合的倾斜角是否完全一致 */
+    function hasUniformSkew(sel) {
+        if (!sel || sel.length === 0) return false;
+        const s0 = sel[0].skew || 0;
+        return sel.every(q => Math.abs((q.skew || 0) - s0) < EPS);
+    }
+
+    /** 选中集合共有的倾斜角：全部相同才采用该值（与单选部件的倾斜框保持一致），否则 0 */
+    function getSelectionSkew() {
+        const sel = getSelectedParts();
+        return hasUniformSkew(sel) ? (sel[0].skew || 0) : 0;
+    }
+
+    /** 当前选中集合所属的编组ID（全部同属一个编组时返回该ID，否则 null） */
+    function getSelectionGroupId() {
+        const sel = getSelectedParts();
+        if (sel.length === 0) return null;
+        const gid = getPartGroupId(sel[0]);
+        if (gid === null) return null;
+        return sel.every(q => getPartGroupId(q) === gid) ? gid : null;
+    }
+
+    /** 选择变化时同步编辑框旋转角：恰好选中一个编组时沿用该编组的角度，否则归零 */
+    function syncGroupFrameToSelection(newIds) {
+        const same = newIds.length === selectedIds.size && newIds.every(id => selectedIds.has(id));
+        if (same) return;
+        const idSet = new Set(newIds);
+        const sel = parts.filter(q => idSet.has(q.id));
+        let gid = null;
+        if (sel.length > 0) {
+            const g0 = getPartGroupId(sel[0]);
+            if (g0 !== null && sel.every(q => getPartGroupId(q) === g0)) gid = g0;
+        }
+        groupFrameAngle = gid !== null ? (groupFrameAngles.get(gid) || 0) : 0;
+    }
+
+    function resetGroupFrame() {
+        groupFrameAngle = 0;
+    }
+
+    /** 复原后清掉编辑框旋转：复原会把部件角度还原到初始值，框和所属编组的记录都不应继续保留旧旋转 */
+    function clearFrameAngleAfterReset(list) {
+        const gids = new Set();
+        (list || []).forEach(q => {
+            const g = getPartGroupId(q);
+            if (g !== null) gids.add(g);
+        });
+        gids.forEach(g => groupFrameAngles.set(g, 0));
+        groupFrameAngle = 0;
+    }
+
+    /** 设置当前编辑框旋转角；若当前选中的是一个编组，同时记到该编组上 */
+    function setGroupFrameAngle(angle) {
+        groupFrameAngle = angle;
+        const gid = getSelectionGroupId();
+        if (gid !== null) groupFrameAngles.set(gid, angle);
+    }
+
+    /** 编辑框旋转状态快照（供撤销/重做还原） */
+    function captureFrameState() {
+        const gid = getSelectionGroupId();
+        return {
+            angle: groupFrameAngle || 0,
+            gid: gid,
+            gidAngle: gid !== null ? (groupFrameAngles.get(gid) || 0) : 0
+        };
+    }
+
+    function restoreFrameState(s) {
+        if (!s) return;
+        if (s.gid != null) groupFrameAngles.set(s.gid, s.gidAngle || 0);
+        // 当前选中集合是一个编组时以其记录为准，避免撤销影响到别的选中对象
+        const cur = getSelectionGroupId();
+        if (cur !== null) groupFrameAngle = groupFrameAngles.get(cur) || 0;
+        else if (s.gid === null) groupFrameAngle = s.angle || 0;
+    }
+
+    /** 把多选框写到 DOM（含整体旋转与倾斜，与单选部件的变换链一致） */
+    function applyGroupFrameToEl(el, fr) {
+        if (!el || !fr) return;
+        el.style.left = (fr.x * pxPerEm) + 'px';
+        el.style.top = (fr.y * pxPerEm) + 'px';
+        el.style.width = (fr.w * pxPerEm) + 'px';
+        el.style.height = (fr.h * pxPerEm) + 'px';
+        el.style.transformOrigin = '50% 50%';
+        let tf = '';
+        if (fr.angle) tf += 'rotate(' + fr.angle + 'deg) ';
+        if (fr.skew) tf += 'skewX(' + fr.skew + 'deg) ';
+        el.style.transform = tf.trim() || 'none';
+    }
+
+    /** 同步多选包围框的位置、尺寸、旋转/倾斜与手柄光标 */
+    function syncGroupBox() {
+        if (!groupBoxEl) return;
+        const fr = getGroupFrame();
+        applyGroupFrameToEl(groupBoxEl, fr);
+        if (!fr) return;
+        // 手柄光标随整框旋转/倾斜
+        const cursorPart = { angle: fr.angle, skew: fr.skew || 0, flipH: false, flipV: false, w: fr.w, h: fr.h };
+        groupBoxEl.querySelectorAll('.handle').forEach(h => {
+            h.style.cursor = getHandleCursor(cursorPart, h.dataset.groupHandle);
+        });
+    }
+
+    /** 同步属性面板的位置/尺寸输入框（多选时显示整体包围盒） */
+    function syncPropGeometryInputs() {
+        const prim = parts.find(q => q.id === selectedId);
+        if (!prim) return;
+        const multi = selectedIds.size > 1;
+        const bb = multi ? calcBBox(getSelectedParts()) : null;
+        const vals = multi
+            ? { x: bb.x, y: bb.y, w: bb.w, h: bb.h }
+            : { x: prim.x, y: prim.y, w: prim.w, h: prim.h };
+        const active = document.activeElement;
+        ['x', 'y', 'w', 'h'].forEach(k => {
+            const el = document.getElementById('prop_' + k + '_' + prim.id);
+            if (el && el !== active) el.value = vals[k].toFixed(3);
+        });
+    }
+
     /** 渲染多选包围框与整体缩放手柄 */
     function renderGroupBox() {
         if (groupBoxEl) { groupBoxEl.remove(); groupBoxEl = null; }
         if (selectedIds.size <= 1 || isCropping || vertexEditId !== null) return;
-        const bb = getGroupBBox();
-        if (!bb || bb.w <= 0 || bb.h <= 0) return;
+        const fr = getGroupFrame();
+        if (!fr || fr.w <= 0 || fr.h <= 0) return;
         const box = document.createElement('div');
         box.className = 'group-box';
-        box.style.left = (bb.x * pxPerEm) + 'px';
-        box.style.top = (bb.y * pxPerEm) + 'px';
-        box.style.width = (bb.w * pxPerEm) + 'px';
-        box.style.height = (bb.h * pxPerEm) + 'px';
+        applyGroupFrameToEl(box, fr);
         ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'].forEach(h => {
             const handle = document.createElement('div');
             handle.className = 'handle ' + h;
@@ -3072,8 +3641,14 @@
             handle.addEventListener('mousedown', onGroupHandleMouseDown);
             box.appendChild(handle);
         });
+        const rotate = document.createElement('div');
+        rotate.className = 'group-rotate';
+        rotate.title = '拖动旋转整组（按住 Shift 按 15° 吸附）';
+        rotate.addEventListener('mousedown', onGroupRotateMouseDown);
+        box.appendChild(rotate);
         canvas.appendChild(box);
         groupBoxEl = box;
+        syncGroupBox(); // 统一设置手柄光标（含倾斜）
     }
 
     function startGroupDrag(e, type, handle, pressedId) {
@@ -3087,10 +3662,12 @@
             startX: e.clientX,
             startY: e.clientY,
             bbox: getGroupBBox(),
-            items: sel.map(p => ({ id: p.id, x: p.x, y: p.y, w: p.w, h: p.h }))
+            frame: getGroupFrame(), // 拖拽开始时的编辑框（含旋转角）
+            frameState: captureFrameState(), // 拖拽开始时的框旋转状态（撤销用）
+            items: sel.map(p => ({ id: p.id, x: p.x, y: p.y, w: p.w, h: p.h, angle: p.angle || 0 }))
         };
         canvas.classList.add('dragging');
-        canvas.style.cursor = type === 'move' ? 'move' : '';
+        canvas.style.cursor = type === 'move' ? 'move' : (type === 'rotate' ? 'grabbing' : '');
         e.stopPropagation();
         e.preventDefault();
     }
@@ -3099,6 +3676,107 @@
         if (isCropping) return;
         if (selectedIds.size <= 1) return;
         startGroupDrag(e, 'resize', e.target.dataset.groupHandle);
+    }
+
+    /** 拖动包围框顶部圆点：整组绕编辑框中心旋转 */
+    function onGroupRotateMouseDown(e) {
+        if (isCropping) return;
+        if (selectedIds.size <= 1) return;
+        startGroupDrag(e, 'rotate', null, null);
+        if (!groupDragState) return;
+        const center = getGroupFrameCenter() || (() => {
+            const b = groupDragState.bbox;
+            return { x: b.x + b.w / 2, y: b.y + b.h / 2 };
+        })();
+        const rect = canvas.getBoundingClientRect();
+        const cx = center.x * pxPerEm + rect.left;
+        const cy = center.y * pxPerEm + rect.top;
+        groupDragState.pivot = center; // 旋转支点（em），与编辑框中心一致
+        groupDragState.frameAngle = groupFrameAngle || 0;
+        groupDragState.centerScreen = { x: cx, y: cy };
+        groupDragState.startAngle = Math.atan2(e.clientY - cy, e.clientX - cx);
+    }
+
+    /** 整组绕支点旋转 delta 弧度 */
+    function rotateGroupBy(gs, deltaRad) {
+        const pivot = gs.pivot || { x: gs.bbox.x + gs.bbox.w / 2, y: gs.bbox.y + gs.bbox.h / 2 };
+        const cx = pivot.x;
+        const cy = pivot.y;
+        const cos = Math.cos(deltaRad), sin = Math.sin(deltaRad);
+        const deg = deltaRad * 180 / Math.PI;
+        gs.items.forEach(it => {
+            const p = parts.find(x => x.id === it.id);
+            if (!p) return;
+            const icx = it.x + it.w / 2, icy = it.y + it.h / 2;
+            const dx = icx - cx, dy = icy - cy;
+            p.x = cx + dx * cos - dy * sin - it.w / 2;
+            p.y = cy + dx * sin + dy * cos - it.h / 2;
+            p.w = it.w;
+            p.h = it.h;
+            p.angle = it.angle + deg;
+            updatePartElement(p);
+        });
+    }
+
+    /** 编辑框已旋转/倾斜时的缩放：把位移换算到框内坐标，按框内矩形缩放各部件 */
+    function resizeRotatedGroup(gs, dx, dy) {
+        const fr = gs.frame || getGroupFrame();
+        if (!fr || (!fr.angle && !fr.skew)) return;
+        // 屏幕位移 → 框内位移（M⁻¹ = SkewX(-S)·R(-A)）
+        const rad = -fr.angle * Math.PI / 180;
+        const cs = Math.cos(rad), sn = Math.sin(rad);
+        const tanS = Math.tan((fr.skew || 0) * Math.PI / 180);
+        const dxr = dx * cs - dy * sn;
+        const dyr = dx * sn + dy * cs;
+        const dxf = dxr - dyr * tanS;
+        const dyf = dyr;
+
+        let nl = -fr.w / 2, nt = -fr.h / 2, nw = fr.w, nh = fr.h;
+        const h = gs.handle || 'se';
+        if (h.includes('e')) nw = fr.w + dxf;
+        if (h.includes('w')) { nl = -fr.w / 2 + dxf; nw = fr.w - dxf; }
+        if (h.includes('s')) nh = fr.h + dyf;
+        if (h.includes('n')) { nt = -fr.h / 2 + dyf; nh = fr.h - dyf; }
+        if (lockAspectRatio) {
+            const ratio = fr.h / fr.w;
+            if (h.includes('e') || h.includes('w')) {
+                nh = nw * ratio;
+                if (h.includes('n')) nt = fr.h / 2 - nh;
+            } else {
+                nw = nh / ratio;
+                if (h.includes('w')) nl = fr.w / 2 - nw;
+            }
+        }
+        if (nw < 0.05) { nw = 0.05; if (h.includes('w')) nl = fr.w / 2 - 0.05; }
+        if (nh < 0.05) { nh = 0.05; if (h.includes('n')) nt = fr.h / 2 - 0.05; }
+
+        const sx = nw / fr.w, sy = nh / fr.h;
+        const ax = nl, ay = nt; // 框内锚点（相对框中心）
+        const C = { x: fr.x + fr.w / 2, y: fr.y + fr.h / 2 };
+        const cf = Math.cos(fr.angle * Math.PI / 180), sf = Math.sin(fr.angle * Math.PI / 180);
+
+        gs.items.forEach(it => {
+            const p = parts.find(x => x.id === it.id);
+            if (!p) return;
+            // 部件中心在框内坐标中的位置（M⁻¹ = SkewX(-S)·R(-A)）
+            const rx0 = (it.x + it.w / 2 - C.x) * cs - (it.y + it.h / 2 - C.y) * sn;
+            const ry0 = (it.x + it.w / 2 - C.x) * sn + (it.y + it.h / 2 - C.y) * cs;
+            const ux = rx0 - ry0 * tanS;
+            const uy = ry0;
+            const ux2 = ax + (ux - ax) * sx;
+            const uy2 = ay + (uy - ay) * sy;
+            // 框内坐标 → 画布（M = R(A)·SkewX(S)）
+            const kx = ux2 + uy2 * tanS, ky = uy2;
+            const ncx = C.x + (kx * cf - ky * sf);
+            const ncy = C.y + (kx * sf + ky * cf);
+            const w2 = Math.max(0.01, it.w * sx);
+            const h2 = Math.max(0.01, it.h * sy);
+            p.w = w2;
+            p.h = h2;
+            p.x = ncx - w2 / 2;
+            p.y = ncy - h2 / 2;
+            updatePartElement(p);
+        });
     }
 
     /** 多选整体拖拽的 mousemove 处理 */
@@ -3111,10 +3789,29 @@
         let dx = (e.clientX - gs.startX) / pxPerEm;
         let dy = (e.clientY - gs.startY) / pxPerEm;
 
-        if (gs.type === 'move') {
+        if (gs.type === 'rotate') {
+            let delta = Math.atan2(e.clientY - gs.centerScreen.y, e.clientX - gs.centerScreen.x) - gs.startAngle;
+            if (e.shiftKey) {
+                const snap = Math.PI / 12; // 15°
+                delta = Math.round(delta / snap) * snap;
+            }
+            // 编辑框与部件一同旋转
+            setGroupFrameAngle((gs.frameAngle || 0) + delta * 180 / Math.PI);
+            rotateGroupBy(gs, delta);
+            syncGroupBox();
+        } else if (gs.type === 'move') {
             if (!allowOverflow) {
-                dx = Math.max(-bb.x, Math.min(1 - (bb.x + bb.w), dx));
-                dy = Math.max(-bb.y, Math.min(1 - (bb.y + bb.h), dy));
+                // 以编辑框自身为活动边界：整组旋转/整组倾斜都不会改变框的本地宽高，
+                // 因此可移动的位置与范围稳定，不随旋转/倾斜漂移
+                const fr0 = gs.frame;
+                if (fr0) {
+                    const cx0 = fr0.x + fr0.w / 2, cy0 = fr0.y + fr0.h / 2;
+                    // 允许区间取 min(下界,0)/max(上界,0)：框已越界时只禁止继续外移，不产生跳变
+                    const loX = Math.min(fr0.w / 2 - cx0, 0), hiX = Math.max(1 - fr0.w / 2 - cx0, 0);
+                    const loY = Math.min(fr0.h / 2 - cy0, 0), hiY = Math.max(1 - fr0.h / 2 - cy0, 0);
+                    dx = Math.max(loX, Math.min(hiX, dx));
+                    dy = Math.max(loY, Math.min(hiY, dy));
+                }
             }
             gs.items.forEach(it => {
                 const p = parts.find(x => x.id === it.id);
@@ -3123,51 +3820,50 @@
                 p.y = it.y + dy;
                 updatePartElement(p);
             });
-            if (groupBoxEl) {
-                groupBoxEl.style.left = ((bb.x + dx) * pxPerEm) + 'px';
-                groupBoxEl.style.top = ((bb.y + dy) * pxPerEm) + 'px';
-            }
+            syncGroupBox();
+        } else if (groupFrameAngle || getSelectionSkew()) {
+            // 编辑框已旋转/倾斜：在“框内坐标”中缩放，使手柄方向与视觉一致
+            resizeRotatedGroup(gs, dx, dy);
+            syncGroupBox();
         } else {
-            let nx = bb.x, ny = bb.y, nw = bb.w, nh = bb.h;
+            // 缩放基准改用“显示框”：未整体旋转/倾斜时它与轴对齐包围盒完全一致，
+            // 而成员各自带旋转/倾斜时显示框才是手柄所在的那个矩形，避免手柄与缩放基准错位
+            const rf = gs.frame || bb;
+            let nx = rf.x, ny = rf.y, nw = rf.w, nh = rf.h;
             const h = gs.handle || 'se';
-            if (h.includes('e')) nw = bb.w + dx;
-            if (h.includes('w')) { nx = bb.x + dx; nw = bb.w - dx; }
-            if (h.includes('s')) nh = bb.h + dy;
-            if (h.includes('n')) { ny = bb.y + dy; nh = bb.h - dy; }
+            if (h.includes('e')) nw = rf.w + dx;
+            if (h.includes('w')) { nx = rf.x + dx; nw = rf.w - dx; }
+            if (h.includes('s')) nh = rf.h + dy;
+            if (h.includes('n')) { ny = rf.y + dy; nh = rf.h - dy; }
             if (lockAspectRatio) {
-                const ratio = bb.h / bb.w;
+                const ratio = rf.h / rf.w;
                 if (h.includes('e') || h.includes('w')) {
                     nh = nw * ratio;
-                    if (h.includes('n')) ny = bb.y + (bb.h - nh);
+                    if (h.includes('n')) ny = rf.y + (rf.h - nh);
                 } else {
                     nw = nh / ratio;
-                    if (h.includes('w')) nx = bb.x + (bb.w - nw);
+                    if (h.includes('w')) nx = rf.x + (rf.w - nw);
                 }
             }
-            if (nw < 0.05) { nw = 0.05; if (h.includes('w')) nx = bb.x + bb.w - 0.05; }
-            if (nh < 0.05) { nh = 0.05; if (h.includes('n')) ny = bb.y + bb.h - 0.05; }
+            if (nw < 0.05) { nw = 0.05; if (h.includes('w')) nx = rf.x + rf.w - 0.05; }
+            if (nh < 0.05) { nh = 0.05; if (h.includes('n')) ny = rf.y + rf.h - 0.05; }
             if (!allowOverflow) {
                 if (nx < 0) { nw += nx; nx = 0; }
                 if (ny < 0) { nh += ny; ny = 0; }
                 if (nx + nw > 1) nw = 1 - nx;
                 if (ny + nh > 1) nh = 1 - ny;
             }
-            const sx = nw / bb.w, sy = nh / bb.h;
+            const sx = nw / rf.w, sy = nh / rf.h;
             gs.items.forEach(it => {
                 const p = parts.find(x => x.id === it.id);
                 if (!p) return;
-                p.x = nx + (it.x - bb.x) * sx;
-                p.y = ny + (it.y - bb.y) * sy;
+                p.x = nx + (it.x - rf.x) * sx;
+                p.y = ny + (it.y - rf.y) * sy;
                 p.w = Math.max(0.01, it.w * sx);
                 p.h = Math.max(0.01, it.h * sy);
                 updatePartElement(p);
             });
-            if (groupBoxEl) {
-                groupBoxEl.style.left = (nx * pxPerEm) + 'px';
-                groupBoxEl.style.top = (ny * pxPerEm) + 'px';
-                groupBoxEl.style.width = (nw * pxPerEm) + 'px';
-                groupBoxEl.style.height = (nh * pxPerEm) + 'px';
-            }
+            syncGroupBox();
         }
         // 同步主选中部件的属性面板数值
         const prim = parts.find(x => x.id === selectedId);
@@ -3179,6 +3875,8 @@
                 document.getElementById('prop_w_' + prim.id).value = prim.w.toFixed(3);
                 document.getElementById('prop_h_' + prim.id).value = prim.h.toFixed(3);
             }
+            const ea = document.getElementById('prop_angle_' + prim.id);
+            if (ea) ea.value = +(prim.angle || 0).toFixed(2);
         }
         updatePreview();
     }
@@ -3285,14 +3983,22 @@
             if (gs.type === 'move' && !gs.moved) {
                 gs.items.forEach(it => {
                     const p = parts.find(x => x.id === it.id);
-                    if (p) { p.x = it.x; p.y = it.y; p.w = it.w; p.h = it.h; }
+                    if (p) {
+                        p.x = it.x; p.y = it.y; p.w = it.w; p.h = it.h;
+                        if (it.angle !== undefined) p.angle = it.angle;
+                    }
                 });
                 groupDragState = null;
                 canvas.classList.remove('dragging');
                 canvas.style.cursor = '';
                 if (gs.pressedId !== null) {
-                    selectedId = gs.pressedId;
-                    selectedIds = new Set();
+                    const pressed = parts.find(x => x.id === gs.pressedId);
+                    if (pressed && getPartGroupId(pressed) !== null) {
+                        selectGroup(getPartGroupId(pressed), gs.pressedId); // 编组成员：单击保持整组选中
+                    } else {
+                        selectedId = gs.pressedId;
+                        selectedIds = new Set();
+                    }
                 }
                 renderAll();
                 return;
@@ -3300,18 +4006,21 @@
             const after = [];
             gs.items.forEach(it => {
                 const p = parts.find(x => x.id === it.id);
-                if (p) after.push({ id: p.id, x: p.x, y: p.y, w: p.w, h: p.h });
+                if (p) after.push({ id: p.id, x: p.x, y: p.y, w: p.w, h: p.h, angle: p.angle || 0 });
             });
             const changed = after.some(a => {
                 const b = gs.items.find(it => it.id === a.id);
                 return !b || Math.abs(a.x - b.x) > EPS || Math.abs(a.y - b.y) > EPS ||
-                    Math.abs(a.w - b.w) > EPS || Math.abs(a.h - b.h) > EPS;
+                    Math.abs(a.w - b.w) > EPS || Math.abs(a.h - b.h) > EPS ||
+                    Math.abs((a.angle || 0) - (b.angle || 0)) > EPS;
             });
             groupDragState = null;
             canvas.classList.remove('dragging');
             canvas.style.cursor = '';
             if (changed) {
-                executeCommand(new BatchMoveResizeCommand(gs.items, after));
+                const fsAfter = captureFrameState();
+                const fsBefore = gs.frameState || fsAfter;
+                executeCommand(new BatchMoveResizeCommand(gs.items, after, fsBefore, fsAfter));
             }
             renderAll();
             return;
@@ -3468,6 +4177,19 @@
         });
     }
 
+    /** 层级顺序（上层优先）：内部 z 值越大越靠上；z 值相同时后添加的部件更靠上 */
+    function getLayerOrder() {
+        const idx = new Map(parts.map((p, i) => [p.id, i]));
+        return parts.slice().sort((a, b) => (b.z - a.z) || (idx.get(b.id) - idx.get(a.id)));
+    }
+
+    /** 部件 id → 界面显示的层号：1 = 最上层。内部 z 越大越靠上，故层号 = 内部 z 的反序名次 */
+    function getLayerNoMap() {
+        const map = new Map();
+        getLayerOrder().forEach((p, i) => map.set(p.id, i + 1));
+        return map;
+    }
+
     function renderAll() {
         canvas.innerHTML = '';
         const crossEl = document.createElement('div');
@@ -3475,6 +4197,8 @@
         canvas.appendChild(crossEl);
         partElements.clear();
         parts.sort((a, b) => a.z - b.z);
+        // 界面层号（1 = 最上层）：内部 z 越大越靠上，故层号取与内部 z 相反的名次
+        const layerNo = getLayerNoMap();
         parts.forEach(p => {
             if (p.crops && p.crops.length > 0) {
                 rebuildClipPath(p);
@@ -3547,7 +4271,7 @@
 
             // z 值标号
             const zBadge = document.createElement('div');
-            zBadge.textContent = p.z;
+            zBadge.textContent = layerNo.get(p.id);
             zBadge.style.cssText = 'position:absolute;top:2px;left:2px;font-size:10px;color:rgba(0,0,0,0.45);pointer-events:none;line-height:1;font-family:sans-serif;';
             el.appendChild(zBadge);
 
@@ -3582,15 +4306,20 @@
             partsList.innerHTML = '<div style="color:#888;padding:5px;">暂无部件</div>';
             return;
         }
-        parts.forEach(p => {
+        const layerNo = getLayerNoMap();
+        // 上层优先排列：层级序号 1 的部件排在列表最上面，与画布叠放次序一致
+        getLayerOrder().forEach(p => {
             const item = document.createElement('div');
             item.className = 'item' + (p.id === selectedId || selectedIds.has(p.id) ? ' selected' : '');
             const vecTag = p.type === 'vector' ? '📐 ' : '';
-            item.innerHTML = '<span>z=' + p.z + ' ' + vecTag + '"' + escapeHtml(p.text) + '" (' + p.x.toFixed(2) + ',' + p.y.toFixed(2) +
+            const grpTag = getPartGroupId(p) !== null ? '⧉ ' : '';
+            item.innerHTML = '<span>z=' + layerNo.get(p.id) + ' ' + vecTag + grpTag + '"' + escapeHtml(p.text) + '" (' + p.x.toFixed(2) + ',' + p.y.toFixed(2) +
                 ') ' + p.w.toFixed(2) + '×' + p.h.toFixed(2) + (p.crops && p.crops.length > 0 ? ' ✂️' : '') +
                 '</span><span class="del" data-id="' + p.id + '">×</span>';
             item.addEventListener('click', (e) => {
-                if (e.target.classList.contains('del')) deletePart(p.id);
+                if (e.target.classList.contains('del')) { deletePart(p.id); return; }
+                const gid = getPartGroupId(p);
+                if (gid !== null) { selectGroup(gid, p.id); renderAll(); }
                 else selectPart(p.id);
             });
             partsList.appendChild(item);
@@ -3598,6 +4327,7 @@
     }
 
     function selectPart(id) { selectedId = id;
+        syncGroupFrameToSelection([id]); // 选中集合变化时重置编辑框旋转角
         selectedIds = new Set(); // 单点选择清除多选状态
         // 退出顶点编辑时清除子路径缓存（下次进入重新解析）
         if (vertexEditId !== null) {
@@ -3607,6 +4337,68 @@
         vertexEditId = null;
         selectedVertex = null;
         renderAll(); }
+
+    // ============================================================
+    // 8.5 编组（多部件作为一个整体移动/变形）
+    // ============================================================
+    function getPartGroupId(p) {
+        return (p && p.groupId != null) ? p.groupId : null;
+    }
+
+    function getGroupMembers(gid) {
+        return parts.filter(p => getPartGroupId(p) === gid);
+    }
+
+    function getSelectedParts() {
+        if (selectedIds.size > 0) return parts.filter(p => selectedIds.has(p.id));
+        // 单选（单击）时 selectedIds 为空，需回退到主选中部件，
+        // 否则层级上移/下移、复原、解组等依赖选中集的面板功能会失效
+        return selectedId !== null ? parts.filter(p => p.id === selectedId) : [];
+    }
+
+    /** 选中整个编组（primaryId 为被点中的成员） */
+    function selectGroup(gid, primaryId) {
+        const members = getGroupMembers(gid);
+        if (members.length === 0) { selectedId = null; selectedIds = new Set(); resetGroupFrame(); return; }
+        syncGroupFrameToSelection(members.map(m => m.id));
+        selectedIds = new Set(members.map(m => m.id));
+        selectedId = members.some(m => m.id === primaryId) ? primaryId : members[members.length - 1].id;
+    }
+
+    function showTip(msg) {
+        if (!copyTip) return;
+        copyTip.textContent = msg;
+        copyTip.classList.add('show');
+        clearTimeout(showTip._timer);
+        showTip._timer = setTimeout(() => { copyTip.classList.remove('show'); }, 1500);
+    }
+
+    /** 编组：把当前选中的多个部件合并为一个编组 */
+    function groupSelectedParts() {
+        const sel = getSelectedParts();
+        if (sel.length < 2) { showTip('请先选中至少两个部件再编组'); return; }
+        const gid = nextGroupId++;
+        const before = sel.map(p => ({ id: p.id, groupId: getPartGroupId(p) }));
+        sel.forEach(p => { p.groupId = gid; });
+        groupFrameAngles.set(gid, groupFrameAngle || 0); // 新编组沿用当前编辑框角度
+        const after = sel.map(p => ({ id: p.id, groupId: gid }));
+        executeCommand(new GroupChangeCommand(before, after));
+        renderAll();
+    }
+
+    /** 解组：解除当前选中部件所属的编组 */
+    function ungroupSelectedParts() {
+        const sel = getSelectedParts().filter(p => getPartGroupId(p) !== null);
+        if (sel.length === 0) { showTip('选中的部件不在编组中'); return; }
+        const gids = new Set(sel.map(p => getPartGroupId(p)));
+        const before = sel.map(p => ({ id: p.id, groupId: getPartGroupId(p) }));
+        sel.forEach(p => { delete p.groupId; });
+        // 编组已完全解开的，清掉其框角度记录
+        gids.forEach(g => { if (getGroupMembers(g).length === 0) groupFrameAngles.delete(g); });
+        const after = sel.map(p => ({ id: p.id, groupId: null }));
+        executeCommand(new GroupChangeCommand(before, after));
+        renderAll();
+    }
 
     function toggleVertexEdit(id) {
         const p = parts.find(x => x.id === id);
@@ -3649,10 +4441,33 @@
         ).join('');
 
         const hasTransform = (Math.abs(p.angle || 0) > 0.001 || Math.abs(p.skew || 0) > 0.001 || p.flipH || p.flipV);
-        const cropDisabledAttr = hasTransform ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : '';
+        // 多选/编组：位置与尺寸显示为整体包围盒，编辑作用于全部选中部件
+        const multiSel = selectedIds.size > 1;
+        const selBB = multiSel ? (calcBBox(getSelectedParts()) || { x: p.x, y: p.y, w: p.w, h: p.h }) : null;
+        const geoVal = {
+            x: multiSel ? selBB.x : p.x,
+            y: multiSel ? selBB.y : p.y,
+            w: multiSel ? selBB.w : p.w,
+            h: multiSel ? selBB.h : p.h
+        };
+        const geoTip = multiSel ? '作用于全部选中部件的整体包围盒' : '';
+        const multiTip = multiSel ? '作用于全部选中部件' : '';
+        const rotateTip = multiSel ? '整组绕中心旋转' : '';
+        const skewTip = multiSel ? '整组绕编辑框中心倾斜（作用于整个框，不是逐部件各自倾斜）' : '';
+        // 编组/解组按钮：按当前状态只显示其中一个，避免状态歧义
+        const selPartsForBtn = getSelectedParts();
+        const selGids = new Set(selPartsForBtn.map(q => getPartGroupId(q)));
+        const inOneGroup = selPartsForBtn.length > 0 && selGids.size === 1 && !selGids.has(null);
+        const showUngroupBtn = inOneGroup || (selPartsForBtn.length === 1 && getPartGroupId(selPartsForBtn[0]) !== null);
+        const showGroupBtn = !showUngroupBtn && selPartsForBtn.length >= 2;
+        const geoInput = (key, clampExpr) => multiSel
+            ? `updateProp(${p.id}, '${key}', parseFloat(this.value)||0)`
+            : `updateProp(${p.id}, '${key}', ${clampExpr})`;
+        const cropDisabledAttr = (hasTransform || multiSel) ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : '';
         const cropBtnText = isCropping ? '裁剪模式' : '裁剪部件';
         const cropModeLabel = cropType === 'freehand' ? '自由绘制' : '矩形框选';
-        const cropHint = hasTransform ? '（此变换下无法裁剪）' : (isCropping ? '点击选中部件然后' + cropModeLabel + '裁剪' : '');
+        const cropHint = multiSel ? '（多选状态下无法裁剪，请先单选一个部件）'
+            : (hasTransform ? '（此变换下无法裁剪）' : (isCropping ? '点击选中部件然后' + cropModeLabel + '裁剪' : ''));
 
         const cropBtnHtml = `
                 <div style="margin-bottom:10px; display:flex; align-items:center; flex-wrap:wrap; gap:8px;">
@@ -3672,27 +4487,27 @@
                 <div style="display:flex; gap:30px; align-items:flex-start; flex-wrap:wrap;">
                     <div style="flex:0 0 auto; display:flex; flex-direction:column; gap:8px;">
                         <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
-                            <label style="width:70px; flex:0 0 auto;">文字：</label>
+                            <label style="width:70px; flex:0 0 auto;" title="${multiSel ? '批量设置全部选中部件的文字' : ''}">文字：</label>
                             <input type="text" id="prop_text_${p.id}" value="${escapeAttr(p.text)}" oninput="updateProp(${p.id}, 'text', this.value)" style="width:140px; box-sizing:border-box;">
                         </div>
                         <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
-                            <label style="width:70px; flex:0 0 auto;">X (em)：</label>
-                            <input type="number" step="0.01" id="prop_x_${p.id}" value="${p.x.toFixed(3)}" oninput="updateProp(${p.id}, 'x', clampX(parseFloat(this.value)||0, ${p.w}))" style="width:140px; box-sizing:border-box;">
+                            <label style="width:70px; flex:0 0 auto;" title="${geoTip}">X (em)：</label>
+                            <input type="number" step="0.01" id="prop_x_${p.id}" value="${geoVal.x.toFixed(3)}" oninput="${geoInput('x', `clampX(parseFloat(this.value)||0, ${p.w})`)}" style="width:140px; box-sizing:border-box;">
                         </div>
                         <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
-                            <label style="width:70px; flex:0 0 auto;">Y (em)：</label>
-                            <input type="number" step="0.01" id="prop_y_${p.id}" value="${p.y.toFixed(3)}" oninput="updateProp(${p.id}, 'y', clampY(parseFloat(this.value)||0, ${p.h}))" style="width:140px; box-sizing:border-box;">
+                            <label style="width:70px; flex:0 0 auto;" title="${geoTip}">Y (em)：</label>
+                            <input type="number" step="0.01" id="prop_y_${p.id}" value="${geoVal.y.toFixed(3)}" oninput="${geoInput('y', `clampY(parseFloat(this.value)||0, ${p.h})`)}" style="width:140px; box-sizing:border-box;">
                         </div>
                         <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
-                            <label style="width:70px; flex:0 0 auto;">宽 (em)：</label>
-                            <input type="number" step="0.01" id="prop_w_${p.id}" value="${p.w.toFixed(3)}" oninput="updateProp(${p.id}, 'w', clampW(parseFloat(this.value)||0.05, ${p.x}))" style="width:140px; box-sizing:border-box;">
+                            <label style="width:70px; flex:0 0 auto;" title="${geoTip}">宽 (em)：</label>
+                            <input type="number" step="0.01" id="prop_w_${p.id}" value="${geoVal.w.toFixed(3)}" oninput="${geoInput('w', `clampW(parseFloat(this.value)||0.05, ${p.x})`)}" style="width:140px; box-sizing:border-box;">
                         </div>
                         <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
-                            <label style="width:70px; flex:0 0 auto;">高 (em)：</label>
-                            <input type="number" step="0.01" id="prop_h_${p.id}" value="${p.h.toFixed(3)}" oninput="updateProp(${p.id}, 'h', clampH(parseFloat(this.value)||0.05, ${p.y}))" style="width:140px; box-sizing:border-box;">
+                            <label style="width:70px; flex:0 0 auto;" title="${geoTip}">高 (em)：</label>
+                            <input type="number" step="0.01" id="prop_h_${p.id}" value="${geoVal.h.toFixed(3)}" oninput="${geoInput('h', `clampH(parseFloat(this.value)||0.05, ${p.y})`)}" style="width:140px; box-sizing:border-box;">
                         </div>
                         <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
-                            <label style="width:70px; flex:0 0 auto;">粗细：</label>
+                            <label style="width:70px; flex:0 0 auto;" title="${multiTip}">粗细：</label>
                             <div class="font-custom-select weight-select" id="weightSelect_${p.id}">
                                 <div class="display" id="weightDisplay_${p.id}">
                                     <span class="selected-text">${p.fontWeight}${p.fontWeight === 400 ? ' (normal)' : ''}${p.fontWeight === 700 ? ' (bold)' : ''}</span>
@@ -3707,24 +4522,31 @@
                         </div>
                         <div style="display:grid; grid-template-columns:auto auto; gap:4px 6px;">
                             ${(() => {
-                                const vDisabled = !canVectorize(p);
-                                const title = vDisabled ? getCannotVectorizeReason(p) : '';
-                                return `<button id="vectorizeBtn_${p.id}" ${vDisabled ? 'disabled ' : ''}onclick="${!vDisabled ? `vectorizePart(${p.id})` : ''}" style="${vDisabled ? 'color:#ccc;cursor:not-allowed;' : ''}" title="${title}">矢量化</button>`;
+                                const vTargets = multiSel ? getSelectedParts().filter(q => q.type !== 'vector' && canVectorize(q)) : [];
+                                const vDisabled = multiSel ? vTargets.length === 0 : !canVectorize(p);
+                                const title = multiSel
+                                    ? (vDisabled ? '选中的部件都不满足矢量化条件' : `批量矢量化选中的 ${vTargets.length} 个部件`)
+                                    : (vDisabled ? getCannotVectorizeReason(p) : '');
+                                const vOnclick = vDisabled ? '' : (multiSel ? 'vectorizeSelectedParts()' : `vectorizePart(${p.id})`);
+                                return `<button id="vectorizeBtn_${p.id}" ${vDisabled ? 'disabled ' : ''}onclick="${vOnclick}" style="${vDisabled ? 'color:#ccc;cursor:not-allowed;' : ''}" title="${title}">矢量化</button>`;
                             })()}
                             ${(() => {
                                 const vHasTransform = Math.abs(p.angle||0)>0.001 || Math.abs(p.skew||0)>0.001 || p.flipH || p.flipV;
                                 const vHasCrops = p.crops && p.crops.length > 0;
-                                const vDisabled = p.type === 'vector' && (vHasTransform || vHasCrops);
-                                const vTitle = p.type !== 'vector' ? '' : (vHasTransform ? '存在旋转/倾斜/镜像' : (vHasCrops ? '存在裁剪区域' : ''));
+                                const vDisabled = multiSel || (p.type === 'vector' && (vHasTransform || vHasCrops));
+                                const vTitle = multiSel ? '多选状态下无法编辑顶点'
+                                    : (p.type !== 'vector' ? '' : (vHasTransform ? '存在旋转/倾斜/镜像' : (vHasCrops ? '存在裁剪区域' : '')));
                                 return `<button onclick="${p.type === 'vector' && !vDisabled ? `toggleVertexEdit(${p.id})` : 'return'}" style="${p.type === 'vector' && !vDisabled ? (vertexEditId===p.id ? 'background:#2196F3;color:#fff;border-color:#1976D2;' : '') : 'color:#ccc;cursor:not-allowed;'}" title="${vTitle}">编辑顶点</button>`;
                             })()}
-                            <button onclick="resetPart(${p.id})" style="color:#d4a017;">复原此部件</button>
+                            <button onclick="resetSelectedParts()" style="color:#d4a017;" title="${multiSel ? '复原全部选中部件' : '复原此部件'}">复原此部件</button>
+                            ${showGroupBtn ? `<button onclick="groupSelectedParts()" title="把选中的 ${selectedIds.size} 个部件合并为一个编组（Ctrl+G）">编组</button>` : ''}
+                            ${showUngroupBtn ? `<button onclick="ungroupSelectedParts()" title="解除选中部件所属的编组（Ctrl+Shift+G）">解组</button>` : ''}
                             <button onclick="if(selectedIds.size>0)deleteSelectedParts();else deletePart(${p.id})" style="color:red;">删除此部件</button>
                         </div>
                     </div>
                     <div style="flex:0 0 auto; display:flex; flex-direction:column; gap:8px;">
                         <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
-                            <label style="width:70px; flex:0 0 auto;">字体：</label>
+                            <label style="width:70px; flex:0 0 auto;" title="${multiTip}">字体：</label>
                             <div class="font-custom-select" id="fontSelect_${p.id}" style="${lockedFontFamily ? 'pointer-events:none;opacity:0.5;' : ''}">
                                 <div class="display" id="fontDisplay_${p.id}">
                                     <span class="selected-text">${escapeHtml(p.fontFamily)}</span>
@@ -3742,32 +4564,32 @@
                             <button type="button" id="fontLockBtn_${p.id}" onclick="toggleFontLock()" style="width:50px;font-size:12px;" title="锁定字体后，新添加/复原的部件自动使用该字体">${lockedFontFamily ? '解锁' : '锁定'}</button>
                         </div>
                         <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
-                            <label style="width:70px; flex:0 0 auto;">旋转 (deg)：</label>
+                            <label style="width:70px; flex:0 0 auto;" title="${rotateTip}">旋转 (deg)：</label>
                             <input type="number" step="1" id="prop_angle_${p.id}" value="${p.angle || 0}" oninput="updateProp(${p.id}, 'angle', parseFloat(this.value)||0)" style="width:140px; box-sizing:border-box;">
                         </div>
                         <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
-                            <label style="width:70px; flex:0 0 auto;">倾斜 (deg)：</label>
+                            <label style="width:70px; flex:0 0 auto;" title="${skewTip}">倾斜 (deg)：</label>
                             <input type="number" step="1" id="prop_skew_${p.id}" value="${p.skew || 0}" oninput="updateProp(${p.id}, 'skew', parseFloat(this.value)||0)" style="width:140px; box-sizing:border-box;">
                         </div>
                         <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
-                            <label style="width:70px; flex:0 0 auto;">透明度：</label>
+                            <label style="width:70px; flex:0 0 auto;" title="${multiTip}">透明度：</label>
                             <input type="number" step="0.01" min="0" max="1" id="prop_opacity_${p.id}" value="${p.opacity}" oninput="updateProp(${p.id}, 'opacity', Math.min(1,Math.max(0,parseFloat(this.value)||1)))" style="width:140px; box-sizing:border-box;">
                             <span id="opacityVal_${p.id}" style="font-size:11px;color:#888;width:28px;display:inline-block;">${Math.round(p.opacity*100)}%</span>
                         </div>
                         <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
-                            <label style="width:70px; flex:0 0 auto;">颜色：</label>
+                            <label style="width:70px; flex:0 0 auto;" title="${multiTip}">颜色：</label>
                             <input type="color" id="prop_color_${p.id}" value="${p.color || '#000000'}" oninput="updateProp(${p.id}, 'color', this.value)" style="box-sizing:border-box; height:32px; padding:2px; width:68px;">
                             <button type="button" onclick="resetPartColor(${p.id})" style="width:68px;font-size:12px;text-align:center;padding-left:0;padding-right:0;">跟随父级</button>
                         </div>
                         <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
-                            <label style="width:70px; flex:0 0 auto;">镜像：</label>
+                            <label style="width:70px; flex:0 0 auto;" title="${multiTip}">镜像：</label>
                             <button type="button" id="prop_flipH_${p.id}" onclick="updateProp(${p.id}, 'flipH', ${!p.flipH})" style="width:68px;${p.flipH ? 'background:#2196F3;color:#fff;border-color:#1976D2;' : ''}">⇔ 水平</button>
                             <button type="button" id="prop_flipV_${p.id}" onclick="updateProp(${p.id}, 'flipV', ${!p.flipV})" style="width:68px;${p.flipV ? 'background:#2196F3;color:#fff;border-color:#1976D2;' : ''}">⇕ 垂直</button>
                         </div>
                         <div style="display:flex; align-items:center; gap:4px; white-space:nowrap;">
-                            <label style="width:70px; flex:0 0 auto;">层级：</label>
-                            <button onclick="movePartZ(${p.id}, 1)" style="width:68px;">↑ 上移</button>
-                            <button onclick="movePartZ(${p.id}, -1)" style="width:68px;">↓ 下移</button>
+                            <label style="width:70px; flex:0 0 auto;" title="${multiTip} z 值越小越靠上（1 = 最上层）">层级：</label>
+                            <button onclick="moveSelectionZ(1)" style="width:68px;">↑ 上移</button>
+                            <button onclick="moveSelectionZ(-1)" style="width:68px;">↓ 下移</button>
                         </div>
                     </div>
                 </div>
@@ -3837,11 +4659,7 @@
                 });
             }
 
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.font-custom-select')) {
-                    document.querySelectorAll('.font-custom-select .dropdown').forEach(el => el.style.display = 'none');
-                }
-            });
+            // 关闭下拉的 document 级监听器已改为全局注册一次（见文件上部），此处不再重复注册，避免监听器累积
         }
 
         const btnCrop = document.getElementById('cropBtn');
@@ -3868,9 +4686,168 @@
     // ============================================================
     // 9. updateProp（支持撤销）
     // ============================================================
+    /** 同步属性面板中主选中部件的某个输入框显示 */
+    function syncPropInputForPrimary(key) {
+        const prim = parts.find(q => q.id === selectedId);
+        if (!prim) return;
+        const active = document.activeElement;
+        if (key === 'opacity') {
+            const ov = document.getElementById('opacityVal_' + prim.id);
+            if (ov) ov.textContent = Math.round((prim.opacity || 0) * 100) + '%';
+        } else if (key === 'color') {
+            const ci = document.getElementById('prop_color_' + prim.id);
+            if (ci && ci !== active) ci.value = prim.color || '#000000';
+        } else if (key === 'flipH' || key === 'flipV') {
+            updateFlipButtonStyle(prim);
+        } else if (key === 'fontFamily') {
+            const display = document.querySelector(`#fontSelect_${prim.id} .selected-text`);
+            if (display) display.textContent = prim.fontFamily;
+        }
+        const inputEl = document.getElementById('prop_' + key + '_' + prim.id);
+        if (inputEl && inputEl !== active && key !== 'flipH' && key !== 'flipV') {
+            inputEl.value = prim[key];
+        }
+    }
+
+    /** 多选/编组时：位置与尺寸按整体包围盒编辑 */
+    function applyGroupBBoxEdit(key, value, sel) {
+        const bb = calcBBox(sel);
+        if (!bb) return;
+        let nx = bb.x, ny = bb.y, nw = bb.w, nh = bb.h;
+        if (key === 'x') nx = clampX(value, bb.w);
+        else if (key === 'y') ny = clampY(value, bb.h);
+        else if (key === 'w') nw = clampW(value, bb.x);
+        else if (key === 'h') nh = clampH(value, bb.y);
+        else return;
+
+        if (Math.abs(nx - bb.x) < EPS && Math.abs(ny - bb.y) < EPS &&
+            Math.abs(nw - bb.w) < EPS && Math.abs(nh - bb.h) < EPS) return;
+
+        const before = sel.map(q => ({ id: q.id, x: q.x, y: q.y, w: q.w, h: q.h, angle: q.angle || 0 }));
+        const sx = nw / bb.w, sy = nh / bb.h;
+        sel.forEach(q => {
+            q.x = nx + (q.x - bb.x) * sx;
+            q.y = ny + (q.y - bb.y) * sy;
+            if (key === 'w') q.w = Math.max(0.01, q.w * sx);
+            if (key === 'h') q.h = Math.max(0.01, q.h * sy);
+            updatePartElement(q);
+        });
+        updatePreview();
+        syncGroupBox();
+        syncPropGeometryInputs();
+        const after = sel.map(q => ({ id: q.id, x: q.x, y: q.y, w: q.w, h: q.h, angle: q.angle || 0 }));
+        executeCommand(new BatchMoveResizeCommand(before, after));
+    }
+
+    /** 多选/编组时：整组绕编辑框中心旋转指定角度（度） */
+    function rotateSelectionByDelta(deltaDeg) {
+        const sel = getSelectedParts();
+        if (sel.length === 0) return;
+        const bb = calcBBox(sel);
+        if (!bb) return;
+        const frameBefore = captureFrameState();
+        const pivot = getGroupFrameCenter() || { x: bb.x + bb.w / 2, y: bb.y + bb.h / 2 };
+        const before = sel.map(q => ({ id: q.id, x: q.x, y: q.y, w: q.w, h: q.h, angle: q.angle || 0 }));
+        rotateGroupBy({ bbox: bb, pivot: pivot, items: before }, deltaDeg * Math.PI / 180);
+        setGroupFrameAngle((frameBefore.angle || 0) + deltaDeg);
+        updatePreview();
+        syncGroupBox();
+        syncPropGeometryInputs();
+        syncPropInputForPrimary('angle');
+        const after = sel.map(q => ({ id: q.id, x: q.x, y: q.y, w: q.w, h: q.h, angle: q.angle || 0 }));
+        executeCommand(new BatchMoveResizeCommand(before, after, frameBefore, captureFrameState()));
+    }
+
+    /** 多选/编组时属性面板的编辑：作用于全部选中部件 */
+    function updatePropForSelection(key, value) {
+        const sel = getSelectedParts();
+        if (sel.length === 0) return;
+
+        // 位置/尺寸：整体包围盒语义
+        if (key === 'x' || key === 'y' || key === 'w' || key === 'h') {
+            applyGroupBBoxEdit(key, value, sel);
+            return;
+        }
+
+        // 旋转：整组绕中心旋转差值
+        if (key === 'angle') {
+            const prim = parts.find(q => q.id === selectedId) || sel[sel.length - 1];
+            const delta = (parseFloat(value) || 0) - (prim.angle || 0);
+            if (Math.abs(delta) < EPS) return;
+            rotateSelectionByDelta(delta);
+            return;
+        }
+
+        // 倾斜：整组绕编辑框中心施加剪切（与“整组旋转”同一语义，不是逐部件各自倾斜）
+        if (key === 'skew') {
+            applyGroupSkew(parseFloat(value) || 0, sel);
+            return;
+        }
+
+        // 其余属性：批量设为同一值
+        if (key === 'fontWeight') value = parseInt(value) || 400;
+        else if (key === 'skew') value = parseFloat(value) || 0;
+        else if (key === 'flipH' || key === 'flipV') value = !!value;
+        else if (key === 'z') value = Math.max(1, parseInt(value) || 1);
+
+        if (!sel.some(q => q[key] !== value)) {
+            syncPropInputForPrimary(key);
+            return;
+        }
+
+        const before = sel.map(q => ({ id: q.id, value: q[key] }));
+        sel.forEach(q => {
+            q[key] = value;
+            if (key === 'text' || key === 'fontWeight' || key === 'fontFamily') remeasureInitW(q);
+            updatePartElement(q);
+        });
+        updatePreview();
+        syncGroupBox(); // 倾斜/镜像/文字等会改变渲染包围盒，需实时同步多选框
+        syncPropInputForPrimary(key);
+        const after = sel.map(q => ({ id: q.id, value: q[key] }));
+        executeCommand(new BatchPropCommand(key, before, after));
+    }
+
+    /**
+     * 多选/编组设置倾斜角：整组绕编辑框中心施加水平剪切 skewX(dS)，
+     * 即把倾斜作用在整个编辑框上（位置随剪切同步平移，内部相对布局保持为整体斜切），
+     * 而不是对框内每个部件各自原地倾斜。dS 由“整组当前倾斜角”算得（不一致时按 0 处理）。
+     */
+    function applyGroupSkew(value, sel) {
+        const fr = getGroupFrame();
+        if (!fr) return;
+        const cur = getSelectionSkew();
+        const dS = value - cur;
+        if (Math.abs(dS) < EPS) { syncPropInputForPrimary('skew'); return; }
+
+        const before = sel.map(q => ({ id: q.id, x: q.x, y: q.y, skew: q.skew || 0 }));
+        // 剪切角的位移增量必须用“正切之差”：tan 不满足角度相加，
+        // 若用 tan(dS) 累加，分多步改到同一角度会与一次到位的结果不一致（大角度下明显漂移）
+        const t = Math.tan(value * Math.PI / 180) - Math.tan(cur * Math.PI / 180);
+        const C = { x: fr.x + fr.w / 2, y: fr.y + fr.h / 2 }; // 剪切基点 = 编辑框中心
+        sel.forEach(q => {
+            const dy = q.y + q.h / 2 - C.y;
+            q.x += dy * t;     // 位置随整组剪切一起平移
+            q.skew = value;    // 字形倾斜量统一为目标值
+            updatePartElement(q);
+        });
+        updatePreview();
+        syncGroupBox();
+        syncPropGeometryInputs();
+        syncPropInputForPrimary('skew');
+        const after = sel.map(q => ({ id: q.id, x: q.x, y: q.y, skew: q.skew || 0 }));
+        executeCommand(new GroupSkewCommand(before, after));
+    }
+
     function updateProp(id, key, value) {
         const p = parts.find(x => x.id === id);
         if (!p) return;
+
+        // 多选/编组：属性面板作用于全部选中部件
+        if (selectedIds.size > 1 && selectedIds.has(id)) {
+            updatePropForSelection(key, value);
+            return;
+        }
 
         if ((key === 'angle' || key === 'skew' || key === 'flipH' || key === 'flipV') && isCropping) {
             exitCropMode();
@@ -4000,19 +4977,61 @@
         }
     }
 
-    function movePartZ(id, delta) {
-        const p = parts.find(x => x.id === id);
-        if (!p) return;
-        const targetZ = p.z + delta;
-        if (targetZ < 1 || targetZ > parts.length) return;
-        const other = parts.find(x => x.id !== id && x.z === targetZ);
-        if (other) {
-            other.z = p.z;
-            p.z = targetZ;
-            parts.sort((a, b) => a.z - b.z);
-            renderAll();
-            updatePreview();
+    /** 按给定的层级顺序（上层优先）重写全部部件的 z：重排后 z 稠密且唯一，并入撤销栈 */
+    function applyLayerOrder(newOrder) {
+        const before = [], after = [];
+        newOrder.forEach((p, i) => {
+            const nz = newOrder.length - i; // 越靠前（越上层）z 越大
+            if (p.z !== nz) before.push({ id: p.id, value: p.z });
+            p.z = nz;
+        });
+        if (before.length === 0) return false;
+        const changed = new Set(before.map(b => b.id));
+        newOrder.forEach(p => { if (changed.has(p.id)) after.push({ id: p.id, value: p.z }); });
+        parts.sort((a, b) => a.z - b.z);
+        renderAll();
+        updatePreview();
+        executeCommand(new BatchPropCommand('z', before, after));
+        return true;
+    }
+
+    /** 层级：多选/编组时整组上移/下移一层 */
+    function moveSelectionZ(delta) {
+        const sel = getSelectedParts();
+        if (sel.length === 0) return;
+        if (sel.length === 1) { movePartZ(sel[0].id, delta); return; }
+        if (!delta) return;
+
+        const ord = getLayerOrder(); // 上层优先
+        const selSet = new Set(sel.map(q => q.id));
+        // 在“上层优先”序列里让每个选中项与相邻空位换一层：
+        // 不用交换 z 数值，避免 z 有空缺或重复时交换失效（等于没反应）
+        if (delta > 0) {
+            for (let i = 1; i < ord.length; i++) {
+                if (selSet.has(ord[i].id) && !selSet.has(ord[i - 1].id)) {
+                    const t = ord[i - 1]; ord[i - 1] = ord[i]; ord[i] = t;
+                }
+            }
+        } else {
+            for (let i = ord.length - 2; i >= 0; i--) {
+                if (selSet.has(ord[i].id) && !selSet.has(ord[i + 1].id)) {
+                    const t = ord[i + 1]; ord[i + 1] = ord[i]; ord[i] = t;
+                }
+            }
         }
+        applyLayerOrder(ord);
+    }
+
+    /** 单个部件上移/下移一层：在层级顺序里与相邻部件换位后重排 z（可撤销，兼容 z 有空缺或重复） */
+    function movePartZ(id, delta) {
+        if (!delta) return;
+        const order = getLayerOrder(); // 上层优先
+        const i = order.findIndex(q => q.id === id);
+        if (i < 0) return;
+        const j = i - delta; // delta > 0（上移）→ 与更靠上的一位换位
+        if (j < 0 || j >= order.length) return;
+        const t = order[j]; order[j] = order[i]; order[i] = t;
+        applyLayerOrder(order);
     }
 
     // ============================================================
@@ -4873,6 +5892,21 @@
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT')
             return;
 
+        // Ctrl+G 编组 / Ctrl+Shift+G 解组
+        if (e.ctrlKey && (e.key === 'g' || e.key === 'G')) {
+            e.preventDefault();
+            if (e.shiftKey) ungroupSelectedParts();
+            else groupSelectedParts();
+            return;
+        }
+
+        // Ctrl+Y 重做（与 Ctrl+Shift+Z 等价，不依赖选中部件）
+        if (e.ctrlKey && (e.key === 'y' || e.key === 'Y')) {
+            e.preventDefault();
+            redo();
+            return;
+        }
+
         // Ctrl+Z 撤销 / Ctrl+Shift+Z 重做（不依赖选中部件）
         if (e.ctrlKey && (e.key === 'z' || e.key === 'Z')) {
             e.preventDefault();
@@ -4901,6 +5935,7 @@
             if (clipboardPart) {
                 const newPart = JSON.parse(JSON.stringify(clipboardPart));
                 newPart.id = nextId++;
+                delete newPart.groupId; // 粘贴出的副本不并入原编组
                 let newX = (newPart.x || 0) + 0.03;
                 let newY = (newPart.y || 0) + 0.03;
                 if (!allowOverflow) {
@@ -4950,46 +5985,85 @@
         }
 
         const step = e.shiftKey ? 0.05 : 0.01;
-        let handled = true;
-        let oldX = p.x,
-            oldY = p.y,
-            oldW = p.w,
-            oldH = p.h;
+        let dx = 0,
+            dy = 0;
         switch (e.key) {
             case 'ArrowLeft':
-                p.x = clampX(p.x - step, p.w);
+                dx = -step;
                 break;
             case 'ArrowRight':
-                p.x = clampX(p.x + step, p.w);
+                dx = step;
                 break;
             case 'ArrowUp':
-                p.y = clampY(p.y - step, p.h);
+                dy = -step;
                 break;
             case 'ArrowDown':
-                p.y = clampY(p.y + step, p.h);
+                dy = step;
                 break;
             default:
-                handled = false;
+                return;
         }
-        if (handled) {
-            e.preventDefault();
-            if (Math.abs(p.x - oldX) > EPS || Math.abs(p.y - oldY) > EPS ||
-                Math.abs(p.w - oldW) > EPS || Math.abs(p.h - oldH) > EPS) {
-                const cmd = new MoveResizeCommand(p.id, oldX, oldY, oldW, oldH, p.x, p.y, p.w, p.h);
-                executeCommand(cmd);
-            }
-            updatePartElement(p);
-            updatePreview();
-            if (selectedId === p.id) {
-                const id = p.id;
-                document.getElementById('prop_x_' + id).value = p.x.toFixed(3);
-                document.getElementById('prop_y_' + id).value = p.y.toFixed(3);
-                document.getElementById('prop_w_' + id).value = p.w.toFixed(3);
-                document.getElementById('prop_h_' + id).value = p.h.toFixed(3);
-                const angleInput = document.getElementById('prop_angle_' + id);
-                if (angleInput) angleInput.value = p.angle || 0;
+        e.preventDefault();
+
+        // 多选 / 编组：整体移动；单选：移动单个部件
+        const multi = selectedIds.size > 1;
+        const moving = multi ? getSelectedParts() : [p];
+        if (moving.length === 0) return;
+
+        if (multi) {
+            // 按整体包围盒限制在画布内
+            let l = Infinity, t = Infinity, r = -Infinity, b = -Infinity;
+            moving.forEach(q => {
+                l = Math.min(l, q.x);
+                t = Math.min(t, q.y);
+                r = Math.max(r, q.x + q.w);
+                b = Math.max(b, q.y + q.h);
+            });
+            if (!allowOverflow) {
+                dx = Math.max(-l, Math.min(1 - r, dx));
+                dy = Math.max(-t, Math.min(1 - b, dy));
             }
         }
+
+        const before = moving.map(q => ({ id: q.id, x: q.x, y: q.y, w: q.w, h: q.h, angle: q.angle || 0 }));
+        moving.forEach(q => {
+            if (multi) {
+                q.x += dx;
+                q.y += dy;
+            } else {
+                q.x = clampX(q.x + dx, q.w);
+                q.y = clampY(q.y + dy, q.h);
+            }
+        });
+
+        const moved = moving.some((q, i) => Math.abs(q.x - before[i].x) > EPS || Math.abs(q.y - before[i].y) > EPS);
+        if (moved) {
+            if (multi) {
+                const after = moving.map(q => ({ id: q.id, x: q.x, y: q.y, w: q.w, h: q.h, angle: q.angle || 0 }));
+                executeCommand(new BatchMoveResizeCommand(before, after));
+            } else {
+                const q = moving[0], b0 = before[0];
+                executeCommand(new MoveResizeCommand(q.id, b0.x, b0.y, b0.w, b0.h, q.x, q.y, q.w, q.h));
+            }
+        }
+        moving.forEach(q => updatePartElement(q));
+        updatePreview();
+
+        // 同步主选中部件的属性面板
+        const prim = parts.find(x => x.id === selectedId);
+        if (prim) {
+            const ex = document.getElementById('prop_x_' + prim.id);
+            if (ex) {
+                ex.value = prim.x.toFixed(3);
+                document.getElementById('prop_y_' + prim.id).value = prim.y.toFixed(3);
+                document.getElementById('prop_w_' + prim.id).value = prim.w.toFixed(3);
+                document.getElementById('prop_h_' + prim.id).value = prim.h.toFixed(3);
+                const angleInput = document.getElementById('prop_angle_' + prim.id);
+                if (angleInput) angleInput.value = prim.angle || 0;
+            }
+        }
+        // 多选包围框跟随
+        if (multi) syncGroupBox();
     });
 
     // ============================================================
